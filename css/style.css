@@ -791,3 +791,45 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   .word-chip { font-size: 17px; padding: 6px 12px; }
   .sentence-card { font-size: 17px; }
 }
+
+
+/* ---------- Banner Bé Học Tiếp Ngay ---------- */
+.continue-banner {
+  display: -webkit-flex; display: flex;
+  -webkit-align-items: center; align-items: center;
+  border-radius: 20px; padding: 10px 14px;
+  margin-bottom: 8px; cursor: pointer;
+  background: linear-gradient(135deg, rgba(255, 248, 220, 0.95), rgba(254, 230, 180, 0.95));
+  border: 3px solid #f59e0b;
+  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.25);
+  -webkit-animation: glow 2.2s ease-in-out infinite;
+  animation: glow 2.2s ease-in-out infinite;
+  transition: transform 0.15s;
+}
+.continue-banner:active {
+  transform: scale(0.98);
+}
+.cb-icon {
+  font-size: 32px; margin-right: 12px;
+  -webkit-flex-shrink: 0; flex-shrink: 0;
+}
+.cb-info {
+  -webkit-flex: 1; flex: 1; min-width: 0;
+}
+.cb-sub {
+  font-size: 11px; font-weight: 800; color: #b45309; letter-spacing: 0.5px;
+}
+.cb-title {
+  font-size: 17px; font-weight: 800; color: #78350f;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25;
+}
+.cb-btn {
+  padding: 8px 16px; border-radius: 14px;
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+  color: #fff; font-size: 15px; font-weight: 800;
+  box-shadow: 0 3px 0 #b45309; white-space: nowrap;
+  -webkit-flex-shrink: 0; flex-shrink: 0; margin-left: 8px;
+}
+.cb-btn:active {
+  transform: translateY(2px); box-shadow: 0 1px 0 #b45309;
+}

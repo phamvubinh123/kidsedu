@@ -198,6 +198,9 @@
     owned: ["hero"],
     progress: {},      // "math|count" -> { quiz: 2, memory: 0, balloon: 3 }
     passages: {},      // "t7" -> 3
+    lastSubj: "math",
+    lastUnitIdx: 0,
+    lastPassageIdx: 0,
     sound: true,
     bgm: true,         // Nhạc nền game
     autoRead: true,
@@ -348,6 +351,31 @@
       html += '<span class="' + (ts >= BADGES[i].need ? "" : "locked") + '">' + BADGES[i].icon + "</span>";
     }
     $("badgeStripItems").innerHTML = html;
+
+    // Cập nhật banner Bé Học Tiếp Ngay
+    var cbEl = $("continueBanner");
+    if (cbEl) {
+      if (state.lastSubj && typeof state.lastUnitIdx === "number") {
+        var lastS = subjectById(state.lastSubj);
+        var uList = UNITS[state.lastSubj];
+        if (uList && uList[state.lastUnitIdx]) {
+          var lastU = uList[state.lastUnitIdx];
+          $("cbIcon").innerHTML = lastU.icon || "🚀";
+          if (lastU.topic === "passages") {
+            var pList = typeof READING_PASSAGES !== "undefined" ? READING_PASSAGES : [];
+            var curP = pList[state.lastPassageIdx || 0];
+            $("cbTitle").innerHTML = "Tiếng Việt • " + (curP ? curP.week + ": " + curP.title : lastU.title);
+          } else {
+            $("cbTitle").innerHTML = lastS.name + " • " + lastU.title;
+          }
+          cbEl.style.display = "flex";
+        } else {
+          cbEl.style.display = "none";
+        }
+      } else {
+        cbEl.style.display = "none";
+      }
+    }
 
     var map = "";
     for (var s = 0; s < SUBJECTS.length; s++) {
@@ -540,6 +568,10 @@
         }
       }
     }
+    state.lastSubj = "viet";
+    state.lastUnitIdx = 4; // index của bài Luyện đọc đoạn văn
+    state.lastPassageIdx = curPassageIdx;
+    saveState();
     renderPassageScreen();
     showScreen("screenRead");
   }
@@ -741,6 +773,10 @@
     } else {
       game.list = qs.slice(0, curMode === "balloon" ? 6 : 8);
       game.max = game.list.length * 10;
+      state.lastSubj = curSubj;
+      state.lastUnitIdx = curUnitIdx;
+      state.lastMode = curMode;
+      saveState();
       showScreen("screenGame");
       nextQuestion();
     }
@@ -1132,7 +1168,10 @@
       '<div class="set-row"><span>🔊 Âm thanh & giọng đọc</span><button class="toggle' + (state.sound ? " on" : "") + '" data-key="sound"></button></div>' +
       '<div class="set-row"><span>🗣️ Tự động đọc câu hỏi</span><button class="toggle' + (state.autoRead ? " on" : "") + '" data-key="autoRead"></button></div>' +
       '<div class="set-row"><span>🔓 Mở khóa tất cả bài</span><button class="toggle' + (state.unlockAll ? " on" : "") + '" data-key="unlockAll"></button></div>' +
-      '<div class="set-row"><span>🗑️ Xóa toàn bộ tiến độ</span><button class="small-btn red" id="resetBtn">Xóa</button></div>';
+      '<div class="set-row"><span>📋 Sao lưu mã tiến độ</span><button class="small-btn" id="exportBtn">Lấy mã</button></div>' +
+      '<div class="set-row"><span>📥 Khôi phục từ mã</span><button class="small-btn" id="importBtn">Nhập mã</button></div>' +
+      '<div class="set-row"><span>🗑️ Xóa làm lại từ đầu</span><button class="small-btn red" id="resetBtn">Xóa</button></div>' +
+      '<div class="guide-item" style="margin-top:12px"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad:</b> Bấm nút Chia sẻ (hình vuông mũi tên lên trên Safari) -> chọn <b>Thêm vào Màn hình chính (Add to Home Screen)</b> để app ghim ra màn hình và luôn lưu tiến độ tự động vĩnh viễn!</div></div>';
     var toggles = $("infoBody").querySelectorAll(".toggle");
     for (var i = 0; i < toggles.length; i++) {
       onTap(toggles[i], function () {
@@ -1150,9 +1189,37 @@
         $("setName").innerHTML = esc(state.name);
       }
     });
+    onTap($("exportBtn"), function () {
+      Sound.click();
+      try {
+        var str = btoa(encodeURIComponent(JSON.stringify(state)));
+        window.prompt("Sao chép mã lưu tiến độ của bé (dùng để chuyển sang máy khác):", str);
+      } catch (e) {
+        window.alert("Không thể tạo mã lưu!");
+      }
+    });
+    onTap($("importBtn"), function () {
+      Sound.click();
+      var input = window.prompt("Dán mã lưu tiến độ vào đây để khôi phục:");
+      if (input && input.replace(/\s/g, "").length > 5) {
+        try {
+          var restored = JSON.parse(decodeURIComponent(atob(input.trim())));
+          for (var k in restored) {
+            if (restored.hasOwnProperty(k)) state[k] = restored[k];
+          }
+          saveState();
+          renderHome();
+          closeOverlay("infoOverlay");
+          Sound.fanfare();
+          window.alert("Khôi phục tiến độ học tập thành công!");
+        } catch (e) {
+          window.alert("Mã tiến độ không hợp lệ. Vui lòng kiểm tra lại!");
+        }
+      }
+    });
     onTap($("resetBtn"), function () {
       if (window.confirm("Xóa toàn bộ sao, xu và nhân vật đã mua?")) {
-        state.coins = 0; state.progress = {}; state.owned = ["hero"]; state.avatar = "hero";
+        state.coins = 0; state.progress = {}; state.passages = {}; state.owned = ["hero"]; state.avatar = "hero";
         saveState(); renderHome(); closeOverlay("infoOverlay");
       }
     });
@@ -1209,6 +1276,27 @@
     onTap($("btnReadFinish"), function () {
       finishPassageReading();
     });
+
+    var cbEl = $("continueBanner");
+    if (cbEl) {
+      onTap(cbEl, function () {
+        Sound.click();
+        if (!state.lastSubj) return;
+        curSubj = state.lastSubj;
+        curUnitIdx = typeof state.lastUnitIdx === "number" ? state.lastUnitIdx : 0;
+        var uList = UNITS[curSubj];
+        if (uList && uList[curUnitIdx]) {
+          var u = uList[curUnitIdx];
+          if (u.topic === "passages") {
+            openPassageReader(state.lastPassageIdx || 0);
+          } else {
+            renderMap();
+            showScreen("screenMap");
+            openModePicker();
+          }
+        }
+      });
+    }
 
     onTap($("settingsBtn"), function () { Sound.click(); openSettings(); });
     onTap($("profileBtn"), function () { Sound.click(); openShop(); });
