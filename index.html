@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bé Học Toán 1 - Kết Nối Tri Thức</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f0fdf4;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+    }
+    .header {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      padding: 12px 18px;
+      border-radius: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+    }
+    .score-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #f59e0b;
+    }
+    .pomo-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      padding: 6px 14px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+    .pomo-time {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f766e;
+      font-variant-numeric: tabular-nums;
+    }
+    .pomo-btn {
+      background: #0d9488;
+      color: white;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .topic-nav {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+    .topic-btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 10px 8px;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .topic-btn.active {
+      background: #22c55e;
+      color: #ffffff;
+      border-color: #16a34a;
+      box-shadow: 0 3px 8px rgba(34, 197, 94, 0.3);
+    }
+    .card {
+      width: 100%;
+      max-width: 680px;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 380px;
+      position: relative;
+    }
+    .lesson-tag {
+      font-size: 13px;
+      font-weight: 800;
+      color: #059669;
+      background: #d1fae5;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .question-prompt {
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      color: #0f172a;
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+    .visual-area {
+      min-height: 100px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-size: 40px;
+      background: #f8fafc;
+      padding: 14px 20px;
+      border-radius: 18px;
+      border: 2px dashed #e2e8f0;
+      width: 100%;
+    }
+    .math-formula {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #1e3a8a;
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .opt-btn {
+      background: #f1f5f9;
+      border: 3px solid #cbd5e1;
+      padding: 16px 12px;
+      border-radius: 18px;
+      font-size: 28px;
+      font-weight: 800;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.1s;
+    }
+    .opt-btn:active {
+      transform: scale(0.96);
+      background: #e2e8f0;
+    }
+    .opt-btn.correct {
+      background: #86efac !important;
+      border-color: #22c55e !important;
+      color: #065f46 !important;
+    }
+    .opt-btn.wrong {
+      background: #fca5a5 !important;
+      border-color: #ef4444 !important;
+      color: #7f1d1d !important;
+    }
+    .feedback-msg {
+      margin-top: 16px;
+      font-size: 18px;
+      font-weight: 800;
+      min-height: 28px;
+    }
+    .feedback-msg.correct { color: #16a34a; }
+    .feedback-msg.wrong { color: #dc2626; }
+    .footer-action {
+      margin-top: auto;
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 14px;
+    }
+    .next-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 17px;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      display: none;
+    }
+    .split-tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .split-top {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 800;
+    }
+    .split-branches {
+      display: flex;
+      gap: 36px;
+      position: relative;
+    }
+    .split-bottom {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      border: 2px solid #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="score-badge">
+      <span>⭐</span>
+      <span id="starCount">0</span>
+    </div>
+    <div class="pomo-bar">
+      <span>⏳</span>
+      <span class="pomo-time" id="pomoTimer">15:00</span>
+      <button class="pomo-btn" id="pomoBtn">Bắt đầu</button>
+    </div>
+  </div>
+
+  <div class="topic-nav">
+    <button class="topic-btn active" data-topic="all">Tất cả bài</button>
+    <button class="topic-btn" data-topic="count">Đếm số</button>
+    <button class="topic-btn" data-topic="compare">So sánh (&gt;,&lt;,=)</button>
+    <button class="topic-btn" data-topic="split">Tách/Gộp số</button>
+    <button class="topic-btn" data-topic="plus">Phép cộng (+)</button>
+    <button class="topic-btn" data-topic="minus">Phép trừ (-)</button>
+    <button class="topic-btn" data-topic="shapes">Hình khối</button>
+  </div>
+
+  <div class="card">
+    <div class="lesson-tag" id="lessonTag">BÀI TẬP SGK TOÁN 1</div>
+    <div class="question-prompt" id="questionPrompt">Đang nạp câu hỏi...</div>
+    <div class="visual-area" id="visualArea"></div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="feedback-msg" id="feedbackMsg"></div>
+    <div class="footer-action">
+      <button class="next-btn" id="nextBtn">Câu tiếp theo ➜</button>
+    </div>
+  </div>
+
+  <script>
+    // Audio synthesizer for iOS Safari compatibility
+    var AudioKit = {
+      ctx: null,
+      init: function() {
+        if (!this.ctx) {
+          var AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      playSuccess: function() {
+        this.init();
+        if (!this.ctx) return;
+        var now = this.ctx.currentTime;
+        var osc = this.ctx.createOscillator();
+        var gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      },
+      playWrong: function() {
+        this.init();
+        if (!this.ctx) return;
+        var now = this.ctx.currentTime;
+        var osc = this.ctx.createOscillator();
+        var gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+    };
+
+    // Bank of questions extracted directly from SGK Toan 1 - Ket Noi Tri Thuc
+    var rawQuestions = [
+      // Chủ đề 1: Đếm số & Nhận biết 0-10
+      {
+        topic: "count",
+        lesson: "Bài 1 & 2: Các số từ 0 đến 10",
+        prompt: "Bé đếm xem có bao nhiêu củ cà rốt?",
+        visualType: "icons",
+        visual: "🥕 🥕 🥕",
+        options: ["2", "3", "4", "5"],
+        answer: "3"
+      },
+      {
+        topic: "count",
+        lesson: "Bài 1 & 2: Các số từ 0 đến 10",
+        prompt: "Có bao nhiêu chú vịt con đang bơi?",
+        visualType: "icons",
+        visual: "🦆 🦆 🦆 🦆 🦆",
+        options: ["4", "5", "6", "7"],
+        answer: "5"
+      },
+      {
+        topic: "count",
+        lesson: "Bài 2: Các số 6, 7, 8, 9, 10",
+        prompt: "Đếm số ổ bánh mì trong giỏ:",
+        visualType: "icons",
+        visual: "🥖 🥖 🥖 🥖 🥖 🥖 🥖",
+        options: ["6", "7", "8", "9"],
+        answer: "7"
+      },
+      {
+        topic: "count",
+        lesson: "Bài 2: Các số 6, 7, 8, 9, 10",
+        prompt: "Đếm số chú ong chăm chỉ:",
+        visualType: "icons",
+        visual: "🐝 🐝 🐝 🐝 🐝 🐝 🐝 🐝",
+        options: ["7", "8", "9", "10"],
+        answer: "8"
+      },
+      {
+        topic: "count",
+        lesson: "Bài 2: Các số 6, 7, 8, 9, 10",
+        prompt: "Bé đếm xem có tất cả bao nhiêu quả táo?",
+        visualType: "icons",
+        visual: "🍎 🍎 🍎 🍎 🍎 🍎 🍎 🍎 🍎 🍎",
+        options: ["8", "9", "10", "7"],
+        answer: "10"
+      },
+
+      // So sánh số: Lớn hơn, bé hơn, bằng nhau
+      {
+        topic: "compare",
+        lesson: "Bài 4: So sánh số (> ; < ; =)",
+        prompt: "Điền dấu thích hợp vào chỗ trống: 5 ... 2",
+        visualType: "formula",
+        visual: "5 [ ? ] 2",
+        options: [">", "<", "="],
+        answer: ">"
+      },
+      {
+        topic: "compare",
+        lesson: "Bài 4: So sánh số (> ; < ; =)",
+        prompt: "Điền dấu thích hợp: 3 ... 5",
+        visualType: "formula",
+        visual: "3 [ ? ] 5",
+        options: [">", "<", "="],
+        answer: "<"
+      },
+      {
+        topic: "compare",
+        lesson: "Bài 4: So sánh số (> ; < ; =)",
+        prompt: "Điền dấu thích hợp: 4 ... 4",
+        visualType: "formula",
+        visual: "4 [ ? ] 4",
+        options: [">", "<", "="],
+        answer: "="
+      },
+      {
+        topic: "compare",
+        lesson: "Bài 4: So sánh số (> ; < ; =)",
+        prompt: "Số nào thích hợp để xe chạy: ? > 3",
+        visualType: "formula",
+        visual: "? > 3",
+        options: ["2", "3", "4", "1"],
+        answer: "4"
+      },
+      {
+        topic: "compare",
+        lesson: "Bài 4: So sánh số (> ; < ; =)",
+        prompt: "Số nào thích hợp vào ô trống: 6 < ?",
+        visualType: "formula",
+        visual: "6 < ?",
+        options: ["4", "5", "6", "8"],
+        answer: "8"
+      },
+      {
+        topic: "compare",
+        lesson: "Bài 4: So sánh số (> ; < ; =)",
+        prompt: "Số nào lớn nhất trong các số sau?",
+        visualType: "formula",
+        visual: "2 , 7 , 5 , 9",
+        options: ["2", "7", "5", "9"],
+        answer: "9"
+      },
+
+      // Mấy và mấy (Sơ đồ tách / gộp)
+      {
+        topic: "split",
+        lesson: "Bài 5: Mấy và mấy",
+        prompt: "3 và 2 được mấy?",
+        visualType: "formula",
+        visual: "3 và 2 được ?",
+        options: ["4", "5", "6", "7"],
+        answer: "5"
+      },
+      {
+        topic: "split",
+        lesson: "Bài 5: Mấy và mấy",
+        prompt: "5 gồm 1 và mấy?",
+        visualType: "split",
+        visualData: { top: "5", left: "1", right: "?" },
+        options: ["3", "4", "2", "5"],
+        answer: "4"
+      },
+      {
+        topic: "split",
+        lesson: "Bài 5: Mấy và mấy",
+        prompt: "6 gồm 3 và mấy?",
+        visualType: "split",
+        visualData: { top: "6", left: "3", right: "?" },
+        options: ["2", "3", "4", "5"],
+        answer: "3"
+      },
+      {
+        topic: "split",
+        lesson: "Bài 5: Mấy và mấy",
+        prompt: "7 gồm mấy và 2?",
+        visualType: "split",
+        visualData: { top: "7", left: "?", right: "2" },
+        options: ["4", "5", "6", "3"],
+        answer: "5"
+      },
+
+      // Phép cộng trong phạm vi 10
+      {
+        topic: "plus",
+        lesson: "Bài 10: Phép cộng trong phạm vi 10",
+        prompt: "Tính kết quả phép tính:",
+        visualType: "formula",
+        visual: "3 + 2 = ?",
+        options: ["4", "5", "6", "7"],
+        answer: "5"
+      },
+      {
+        topic: "plus",
+        lesson: "Bài 10: Phép cộng trong phạm vi 10",
+        prompt: "Tính kết quả phép tính:",
+        visualType: "formula",
+        visual: "6 + 1 = ?",
+        options: ["6", "7", "8", "9"],
+        answer: "7"
+      },
+      {
+        topic: "plus",
+        lesson: "Bài 10: Phép cộng có số 0",
+        prompt: "Số 0 trong phép cộng:",
+        visualType: "formula",
+        visual: "4 + 0 = ?",
+        options: ["0", "3", "4", "5"],
+        answer: "4"
+      },
+      {
+        topic: "plus",
+        lesson: "Bài 10: Điền số thích hợp",
+        prompt: "Tìm số thích hợp vào dấu hỏi chấm:",
+        visualType: "formula",
+        visual: "1 + ? = 2",
+        options: ["0", "1", "2", "3"],
+        answer: "1"
+      },
+      {
+        topic: "plus",
+        lesson: "Bài 10: Điền số thích hợp",
+        prompt: "Tìm số thích hợp:",
+        visualType: "formula",
+        visual: "3 + ? = 5",
+        options: ["1", "2", "3", "4"],
+        answer: "2"
+      },
+      {
+        topic: "plus",
+        lesson: "Bài 12: Bảng cộng phạm vi 10",
+        prompt: "Tính kết quả:",
+        visualType: "formula",
+        visual: "7 + 3 = ?",
+        options: ["8", "9", "10", "7"],
+        answer: "10"
+      },
+
+      // Phép trừ trong phạm vi 10
+      {
+        topic: "minus",
+        lesson: "Bài 11: Phép trừ trong phạm vi 10",
+        prompt: "Tính nhẩm kết quả:",
+        visualType: "formula",
+        visual: "6 - 1 = ?",
+        options: ["4", "5", "6", "3"],
+        answer: "5"
+      },
+      {
+        topic: "minus",
+        lesson: "Bài 11: Phép trừ trong phạm vi 10",
+        prompt: "Tính nhẩm kết quả:",
+        visualType: "formula",
+        visual: "5 - 2 = ?",
+        options: ["2", "3", "4", "1"],
+        answer: "3"
+      },
+      {
+        topic: "minus",
+        lesson: "Bài 11: Số 0 trong phép trừ",
+        prompt: "Tính kết quả:",
+        visualType: "formula",
+        visual: "5 - 0 = ?",
+        options: ["0", "4", "5", "6"],
+        answer: "5"
+      },
+      {
+        topic: "minus",
+        lesson: "Bài 11: Phép trừ hai số bằng nhau",
+        prompt: "Tính kết quả:",
+        visualType: "formula",
+        visual: "6 - 6 = ?",
+        options: ["0", "1", "6", "12"],
+        answer: "0"
+      },
+      {
+        topic: "minus",
+        lesson: "Bài 11: Điền số thích hợp",
+        prompt: "Tìm số còn thiếu:",
+        visualType: "formula",
+        visual: "7 - ? = 2",
+        options: ["3", "4", "5", "6"],
+        answer: "5"
+      },
+      {
+        topic: "minus",
+        lesson: "Bài 12: Bảng trừ phạm vi 10",
+        prompt: "Tính kết quả:",
+        visualType: "formula",
+        visual: "10 - 2 = ?",
+        options: ["7", "8", "9", "6"],
+        answer: "8"
+      },
+
+      // Hình phẳng & hình khối
+      {
+        topic: "shapes",
+        lesson: "Bài 7: Hình phẳng",
+        prompt: "Mặt đồng hồ tròn có dạng hình gì?",
+        visualType: "icons",
+        visual: "⏰ 🔵",
+        options: ["Hình tròn", "Hình vuông", "Hình tam giác", "Hình chữ nhật"],
+        answer: "Hình tròn"
+      },
+      {
+        topic: "shapes",
+        lesson: "Bài 7: Hình phẳng",
+        prompt: "Lá cờ lệnh trong thể thao thường có dạng hình gì?",
+        visualType: "icons",
+        visual: "🚩 🔺",
+        options: ["Hình tam giác", "Hình chữ nhật", "Hình vuông", "Hình tròn"],
+        answer: "Hình tam giác"
+      },
+      {
+        topic: "shapes",
+        lesson: "Bài 14: Khối lập phương & hộp chữ nhật",
+        prompt: "Con xúc xắc (xí ngầu) có dạng khối gì?",
+        visualType: "icons",
+        visual: "🎲 🧊",
+        options: ["Khối lập phương", "Khối hộp chữ nhật", "Hình tròn", "Khối trụ"],
+        answer: "Khối lập phương"
+      }
+    ];
+
+    // State management
+    var currentTopic = "all";
+    var filteredList = [];
+    var currentIndex = 0;
+    var stars = 0;
+    var answered = false;
+
+    var starCountEl = document.getElementById("starCount");
+    var lessonTagEl = document.getElementById("lessonTag");
+    var promptEl = document.getElementById("questionPrompt");
+    var visualAreaEl = document.getElementById("visualArea");
+    var optionsGridEl = document.getElementById("optionsGrid");
+    var feedbackMsgEl = document.getElementById("feedbackMsg");
+    var nextBtnEl = document.getElementById("nextBtn");
+    var topicBtns = document.querySelectorAll(".topic-btn");
+
+    function filterQuestions() {
+      if (currentTopic === "all") {
+        filteredList = rawQuestions.slice();
+      } else {
+        filteredList = rawQuestions.filter(function(q) {
+          return q.topic === currentTopic;
+        });
+      }
+      shuffle(filteredList);
+      currentIndex = 0;
+      loadQuestion();
+    }
+
+    function shuffle(arr) {
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+      }
+    }
+
+    function loadQuestion() {
+      answered = false;
+      feedbackMsgEl.innerText = "";
+      feedbackMsgEl.className = "feedback-msg";
+      nextBtnEl.style.display = "none";
+      optionsGridEl.innerHTML = "";
+      visualAreaEl.innerHTML = "";
+
+      if (filteredList.length === 0) {
+        promptEl.innerText = "Chưa có câu hỏi cho chủ đề này.";
+        return;
+      }
+
+      var q = filteredList[currentIndex];
+      lessonTagEl.innerText = q.lesson;
+      promptEl.innerText = q.prompt;
+
+      // Render Visual Area
+      if (q.visualType === "icons") {
+        visualAreaEl.innerText = q.visual;
+      } else if (q.visualType === "formula") {
+        var span = document.createElement("span");
+        span.className = "math-formula";
+        span.innerText = q.visual;
+        visualAreaEl.appendChild(span);
+      } else if (q.visualType === "split") {
+        var tree = document.createElement("div");
+        tree.className = "split-tree";
+        tree.innerHTML = 
+          '<div class="split-top">' + q.visualData.top + '</div>' +
+          '<div class="split-branches">' +
+            '<div class="split-bottom">' + q.visualData.left + '</div>' +
+            '<div class="split-bottom">' + q.visualData.right + '</div>' +
+          '</div>';
+        visualAreaEl.appendChild(tree);
+      }
+
+      // Render Options
+      var opts = q.options.slice();
+      for (var i = 0; i < opts.length; i++) {
+        var btn = document.createElement("button");
+        btn.className = "opt-btn";
+        btn.innerText = opts[i];
+        btn.setAttribute("data-val", opts[i]);
+        btn.onclick = function() {
+          handleSelect(this, q.answer);
+        };
+        optionsGridEl.appendChild(btn);
+      }
+    }
+
+    function handleSelect(selectedBtn, correctAnswer) {
+      if (answered) return;
+      answered = true;
+
+      var chosenVal = selectedBtn.getAttribute("data-val");
+      var allButtons = optionsGridEl.querySelectorAll(".opt-btn");
+
+      if (chosenVal === correctAnswer) {
+        selectedBtn.classList.add("correct");
+        feedbackMsgEl.innerText = "Giỏi lắm! Đúng rồi! 🎉";
+        feedbackMsgEl.className = "feedback-msg correct";
+        stars += 1;
+        starCountEl.innerText = stars;
+        AudioKit.playSuccess();
+      } else {
+        selectedBtn.classList.add("wrong");
+        feedbackMsgEl.innerText = "Chưa đúng rồi, thử lại nhé bé! 💪";
+        feedbackMsgEl.className = "feedback-msg wrong";
+        AudioKit.playWrong();
+
+        // Highlight correct button
+        for (var i = 0; i < allButtons.length; i++) {
+          if (allButtons[i].getAttribute("data-val") === correctAnswer) {
+            allButtons[i].classList.add("correct");
+          }
+        }
+      }
+      nextBtnEl.style.display = "inline-block";
+    }
+
+    nextBtnEl.onclick = function() {
+      currentIndex++;
+      if (currentIndex >= filteredList.length) {
+        currentIndex = 0;
+        shuffle(filteredList);
+      }
+      loadQuestion();
+    };
+
+    // Topic Selection
+    for (var i = 0; i < topicBtns.length; i++) {
+      topicBtns[i].onclick = function() {
+        for (var j = 0; j < topicBtns.length; j++) {
+          topicBtns[j].classList.remove("active");
+        }
+        this.classList.add("active");
+        currentTopic = this.getAttribute("data-topic");
+        filterQuestions();
+      };
+    }
+
+    // Pomodoro Timer (15 min study / 3 min break for 6-year-olds)
+    var pomoDuration = 15 * 60;
+    var pomoRemaining = pomoDuration;
+    var pomoRunning = false;
+    var pomoInterval = null;
+    var pomoBtn = document.getElementById("pomoBtn");
+    var pomoTimer = document.getElementById("pomoTimer");
+
+    function updatePomoDisplay() {
+      var m = Math.floor(pomoRemaining / 60);
+      var s = pomoRemaining % 60;
+      pomoTimer.innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+    }
+
+    pomoBtn.onclick = function() {
+      AudioKit.init();
+      if (!pomoRunning) {
+        pomoRunning = true;
+        pomoBtn.innerText = "Tạm dừng";
+        pomoInterval = setInterval(function() {
+          pomoRemaining--;
+          if (pomoRemaining <= 0) {
+            clearInterval(pomoInterval);
+            pomoRunning = false;
+            pomoBtn.innerText = "Nghỉ ngơi";
+            AudioKit.playSuccess();
+            alert("Hết 15 phút học rồi! Bé hãy đứng dậy uống nước và vận động nhé!");
+            pomoRemaining = 15 * 60;
+          }
+          updatePomoDisplay();
+        }, 1000);
+      } else {
+        pomoRunning = false;
+        clearInterval(pomoInterval);
+        pomoBtn.innerText = "Tiếp tục";
+      }
+    };
+
+    // Start App
+    filterQuestions();
+  </script>
+</body>
+</html>
