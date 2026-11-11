@@ -22,7 +22,8 @@ var UNITS = {
     { topic: "rhymes1", title: "Vần cơ bản", icon: "🎵" },
     { topic: "rhymes2", title: "Vần nâng cao", icon: "🎶" },
     { topic: "spelling", title: "Chính tả", icon: "✍️" },
-    { topic: "reading", title: "Đọc hiểu HK1", icon: "📖" }
+    { topic: "passages", title: "Luyện đọc đoạn văn", icon: "📖" },
+    { topic: "reading", title: "Đọc hiểu HK1", icon: "🏆" }
   ],
   eng: [
     { topic: "u1_4", title: "Unit 1 - 4", icon: "⚽" },
@@ -32,6 +33,108 @@ var UNITS = {
     { topic: "numbers_talk", title: "Numbers & Talk", icon: "🔢" }
   ]
 };
+
+
+var READING_PASSAGES = [
+  {
+    id: "t7",
+    week: "Tuần 7",
+    title: "Về quê thăm bà",
+    source: "SGK Tiếng Việt 1 - Ôn tập",
+    words: ["gắn bó", "chăm chỉ", "bến đỗ", "đầm ấm", "nhà sàn", "tre ngà"],
+    sentences: [
+      "Lá cờ đỏ thắm bên nhà sàn.",
+      "Bàn ghế nhà bé làm từ tre ngà.",
+      "Chú cún con mon men đến bên bé."
+    ],
+    paragraph: "Nghỉ lễ, mẹ cho Hà về quê thăm bà và bé Bin. Hà vừa về đến ngõ, bà và bé Bin đã ra đón. Bé Bin nhìn Hà, lon ton đến bên chị. Hà bế Bin và hôn lên má bé.",
+    reward: 15
+  },
+  {
+    id: "t5",
+    week: "Tuần 5",
+    title: "Quà của bà",
+    source: "SGK Tiếng Việt 1 - Bài 25",
+    words: ["khế ngọt", "thị thơm", "quà quê", "bà cháu", "bé bỏng", "san sẻ"],
+    sentences: [
+      "Bà cho bé giỏ khế ngọt.",
+      "Bé chia quà cho cả nhà.",
+      "Cả nhà vui vẻ ăn khế ngọt."
+    ],
+    paragraph: "Bà ở quê ra thăm bé. Bà cho bé bao nhiêu là quà quê. Nào là khế ngọt, thị thơm, nào là bánh đa giòn rụm. Bé sà vào lòng bà, cảm ơn bà ríu rít.",
+    reward: 15
+  },
+  {
+    id: "t10",
+    week: "Tuần 10",
+    title: "Đàn gà con",
+    source: "SGK Tiếng Việt 1 - Bài 45",
+    words: ["ríu rít", "mồi ngon", "tục tục", "vườn rau", "chăm chỉ", "xúm xít"],
+    sentences: [
+      "Gà mẹ dắt đàn con ra vườn tìm mồi.",
+      "Đàn con lông vàng óng như tơ.",
+      "Gà mẹ tục tục gọi con khi thấy giun."
+    ],
+    paragraph: "Buổi sớm, gà mẹ dắt đàn con ra vườn tìm mồi. Đàn con lon ton ríu rít chạy theo sau mẹ. Gặp mồi ngon, gà mẹ tục tục gọi con lại ăn. Cả đàn gà xúm xít quanh mẹ thật là vui vẻ.",
+    reward: 15
+  },
+  {
+    id: "t13",
+    week: "Tuần 13",
+    title: "Mùa thu quê em",
+    source: "SGK Tiếng Việt 1 - Bài 60",
+    words: ["trong xanh", "heo may", "xào xạc", "ngắm hoa", "dịu dàng", "thềm nhà"],
+    sentences: [
+      "Bầu trời mùa thu trong xanh cao vút.",
+      "Gió heo may thổi nhè nhẹ mát lành.",
+      "Lá vàng rơi xào xạc bên thềm nhà."
+    ],
+    paragraph: "Mùa thu sang, bầu trời ngày thêm trong xanh. Gió heo may nhè nhẹ thổi qua rặng cây. Lá vàng rơi xào xạc trên lối đi. Bé cùng mẹ ra công viên dạo chơi và ngắm những khóm hoa cúc vàng rực rỡ.",
+    reward: 15
+  },
+  {
+    id: "t15",
+    week: "Tuần 15",
+    title: "Ngày chủ nhật của bé",
+    source: "SGK Tiếng Việt 1 - Bài 70",
+    words: ["chủ nhật", "tưới cây", "nhặt rau", "quét nhà", "ấm cúng", "chung tay"],
+    sentences: [
+      "Chủ nhật, cả nhà cùng nhau làm việc.",
+      "Bố tưới cây cảnh trước hiên nhà.",
+      "Mẹ nấu bữa trưa thật ngon lành."
+    ],
+    paragraph: "Hôm nay là chủ nhật, cả nhà bé cùng chung tay làm việc nhà. Bố tưới những chậu hoa trước sân. Mẹ nấu những món ăn ngon. Chị Hà quét dọn nhà cửa, còn bé thì nhặt rau giúp mẹ. Cả nhà ngập tràn tiếng cười vui.",
+    reward: 15
+  },
+  {
+    id: "t17",
+    week: "Tuần 17",
+    title: "Chuyện bà kể",
+    source: "SGK Tiếng Việt 1 - Bài 80",
+    words: ["trầm ấm", "say sưa", "Hồ Gươm", "sự tích", "cây quất", "truyền thuyết"],
+    sentences: [
+      "Mỗi lần về quê, bé lại được nghe bà kể chuyện.",
+      "Bà kể chuyện hồ Hoàn Kiếm và sự tích cây xoài.",
+      "Giọng kể của bà trầm ấm yêu thương."
+    ],
+    paragraph: "Mỗi lần về quê, Hà lại được bà kể cho nghe nhiều câu chuyện hay. Nào là truyền thuyết về hồ Hoàn Kiếm, nào là sự tích cây quất, cây xoài. Giọng kể của bà trầm ấm. Hà ngồi bên bà, say sưa lắng nghe từng lời.",
+    reward: 15
+  },
+  {
+    id: "t18",
+    week: "Tuần 18",
+    title: "Mùa xuân đón Tết",
+    source: "SGK Tiếng Việt 1 - Ôn tập cuối HK1",
+    words: ["hoa đào", "lung linh", "áo mới", "chúc Tết", "ấm áp", "an lành"],
+    sentences: [
+      "Hoa đào trước ngõ nở rộ sắc hồng.",
+      "Mẹ may cho bé chiếc áo mới đón xuân.",
+      "Bé cùng bố mẹ đi chúc Tết ông bà."
+    ],
+    paragraph: "Tết đang đến gần, hoa đào trước ngõ cười tươi sáng hồng, hoa mai trong vườn lung linh cánh vàng. Mẹ may áo mới cho bé. Bé theo bố mẹ đi chúc Tết ông bà, mong một năm mới an lành và nhiều niềm vui.",
+    reward: 15
+  }
+];
 
 var QUESTION_BANK = {
       // ---------------- MÔN TOÁN 1 - TẬP 1 ----------------

@@ -33,6 +33,7 @@
         <div class="tb-level" id="kidLevel">Cấp 1 • Mầm Non Chăm Chỉ</div>
       </div>
       <div class="coin-pill"><span id="coinCount">0</span><i class="coin"></i></div>
+      <button class="icon-btn bgm-btn on" id="homeBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền">🎵</button>
       <button class="icon-btn" id="settingsBtn" aria-label="Cài đặt">⚙️</button>
     </div>
 
@@ -63,6 +64,7 @@
       <button class="back-btn" id="mapBackBtn" aria-label="Quay lại">‹</button>
       <div class="pill-white" id="mapSubjName">ĐẢO: TOÁN 1</div>
       <div class="pill-white"><span id="mapStars">0/0</span> ⭐</div>
+      <button class="icon-btn bgm-btn on" id="mapBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền" style="margin-left:6px">🎵</button>
     </div>
     <div class="scroll-paper">
       <div class="unit-path" id="unitPath"></div>
@@ -76,6 +78,7 @@
       <div class="hud-pill gold"><span class="hud-trophy">🏆</span>
         <div class="hud-bar"><div class="hud-bar-fill" id="hudBar"></div></div>
       </div>
+      <button class="icon-btn bgm-btn on" id="gameBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền" style="margin-right:6px">🎵</button>
       <button class="pause-btn" id="pauseBtn" aria-label="Tạm dừng">❚❚</button>
     </div>
 
@@ -96,6 +99,58 @@
     <div class="mascot-row">
       <div class="mascot-img" id="mascotImg"></div>
       <div class="bubble" id="mascotBubble">Cùng chơi nào!</div>
+    </div>
+  </section>
+
+  <!-- ================= MÀN HÌNH PHÒNG LUYỆN ĐỌC ================= -->
+  <section class="screen" id="screenRead">
+    <div class="read-topbar glass">
+      <button class="back-btn" id="readBackBtn" aria-label="Quay lại">‹</button>
+      <div class="read-title-box">
+        <div class="read-badge-tag" id="readWeekTag">Tuần 7</div>
+        <div class="read-lesson-name" id="readLessonTitle">Về quê thăm bà</div>
+      </div>
+      <button class="icon-btn bgm-btn on" id="readBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền">🎵</button>
+    </div>
+
+    <!-- Thanh chuyển bài / chọn tuần -->
+    <div class="week-carousel-wrap">
+      <div class="week-carousel" id="weekCarousel"></div>
+    </div>
+
+    <!-- Khung phiếu bài đọc -->
+    <div class="reading-sheet">
+      <div class="sheet-pin">📌</div>
+
+      <!-- Phần 1: Từ ngữ ứng dụng -->
+      <div class="read-section">
+        <div class="sec-label">🔤 1. TỪ NGỮ ỨNG DỤNG <small>(Chạm vào từ để nghe đọc)</small></div>
+        <div class="word-chip-grid" id="readWordChips"></div>
+      </div>
+
+      <!-- Phần 2: Câu ứng dụng -->
+      <div class="read-section">
+        <div class="sec-label">💬 2. CÂU ỨNG DỤNG <small>(Chạm vào câu để nghe)</small></div>
+        <div class="sentence-list" id="readSentences"></div>
+      </div>
+
+      <!-- Phần 3: Đoạn văn luyện đọc -->
+      <div class="read-section">
+        <div class="sec-label">📜 3. ĐOẠN VĂN LUYỆN ĐỌC <small>(Chạm vào từng từ để nghe)</small></div>
+        <div class="passage-paper" id="readParagraph"></div>
+      </div>
+
+      <!-- Thanh công cụ điều khiển đọc mẫu -->
+      <div class="read-controls">
+        <button class="btn-sample-read" id="btnPlayAll">🔊 Nghe đọc mẫu</button>
+        <button class="btn-sample-stop" id="btnStopRead" style="display:none">⏹ Dừng đọc</button>
+        <button class="btn-speed" id="btnToggleSpeed" title="Tốc độ đọc">🐢 Chậm</button>
+      </div>
+
+      <!-- Nút hoàn thành bài đọc to bự -->
+      <div class="read-finish-wrap">
+        <button class="btn-read-finish" id="btnReadFinish">⭐ BÉ ĐÃ ĐỌC XONG! ⭐</button>
+      </div>
     </div>
   </section>
 

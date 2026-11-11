@@ -10,6 +10,9 @@
   // ---------------------------------------------------------
   var Sound = {
     ctx: null,
+    bgmTimer: null,
+    bgmPlaying: false,
+    bgmStep: 0,
     init: function () {
       if (!this.ctx) {
         var AC = window.AudioContext || window.webkitAudioContext;
@@ -36,25 +39,107 @@
     click: function () { this.tone(880, "sine", 0, 0.07, 0.15, 1200); },
     flip: function () { this.tone(500, "triangle", 0, 0.12, 0.18, 900); },
     pop: function () { this.tone(320, "square", 0, 0.08, 0.15, 1400); this.tone(1600, "sine", 0.03, 0.08, 0.1); },
+    wordPop: function () {
+      this.tone(680, "sine", 0, 0.07, 0.2, 1200);
+      this.tone(1360, "triangle", 0.02, 0.06, 0.12);
+    },
     coin: function () { this.tone(988, "square", 0, 0.08, 0.12); this.tone(1319, "square", 0.08, 0.22, 0.12); },
     good: function () {
-      var n = [523.25, 659.25, 783.99, 1046.5];
-      for (var i = 0; i < n.length; i++) { this.tone(n[i], "triangle", i * 0.08, 0.2, 0.25); }
-      this.tone(2093, "sine", 0.32, 0.25, 0.08);
+      // Hợp âm chiến thắng tươi vui + hiệu ứng chuông gió lấp lánh (sparkles)
+      var n = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+      for (var i = 0; i < n.length; i++) {
+        this.tone(n[i], "triangle", i * 0.07, 0.22, 0.24);
+        this.tone(n[i] * 1.5, "sine", i * 0.07 + 0.02, 0.16, 0.08);
+      }
+      this.tone(2093.00, "sine", 0.35, 0.3, 0.18);
+      this.tone(2637.02, "sine", 0.42, 0.25, 0.14);
     },
-    bad: function () { this.tone(330, "sawtooth", 0, 0.15, 0.12, 250); this.tone(247, "sawtooth", 0.15, 0.25, 0.12, 180); },
+    bad: function () {
+      // Âm thanh hoạt hình vui nhộn boing-wobble nhẹ nhàng, không gây sợ
+      this.init();
+      if (!this.ctx || !state.sound) return;
+      var now = this.ctx.currentTime;
+      var osc = this.ctx.createOscillator();
+      var gain = this.ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(340, now);
+      osc.frequency.exponentialRampToValueAtTime(170, now + 0.28);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.32);
+      this.tone(220, "triangle", 0.15, 0.16, 0.14, 150);
+    },
     fanfare: function () {
-      var n = [523.25, 523.25, 659.25, 783.99, 659.25, 783.99, 1046.5];
-      var d = [0, 0.12, 0.24, 0.36, 0.52, 0.64, 0.8];
-      for (var i = 0; i < n.length; i++) { this.tone(n[i], "triangle", d[i], i === n.length - 1 ? 0.6 : 0.16, 0.25); this.tone(n[i] / 2, "sine", d[i], 0.16, 0.12); }
+      var n = [523.25, 523.25, 659.25, 783.99, 659.25, 783.99, 1046.50, 1318.51];
+      var d = [0, 0.11, 0.22, 0.33, 0.48, 0.60, 0.74, 0.95];
+      for (var i = 0; i < n.length; i++) {
+        this.tone(n[i], "triangle", d[i], i === n.length - 1 ? 0.7 : 0.16, 0.26);
+        this.tone(n[i] / 2, "sine", d[i], 0.18, 0.12);
+      }
     },
-    speak: function (text, lang) {
+    startBGM: function () {
+      if (!state.bgm || !state.sound || this.bgmPlaying) return;
+      this.init();
+      if (!this.ctx) return;
+      this.bgmPlaying = true;
+      var self = this;
+      // Giai điệu mộc mạc marimba cho trẻ em: vui tươi, êm dịu, không chói tai
+      var melody = [
+        523.25, 659.25, 783.99, 659.25,
+        880.00, 783.99, 659.25, 587.33,
+        523.25, 659.25, 783.99, 1046.50,
+        987.77, 783.99, 880.00, 783.99
+      ];
+      var bass = [
+        130.81, 0, 0, 0,
+        174.61, 0, 0, 0,
+        196.00, 0, 0, 0,
+        130.81, 0, 0, 0
+      ];
+      this.bgmStep = 0;
+      this.bgmTimer = setInterval(function () {
+        if (!state.bgm || !state.sound || !self.bgmPlaying) {
+          self.stopBGM();
+          return;
+        }
+        var m = melody[self.bgmStep % melody.length];
+        var b = bass[self.bgmStep % bass.length];
+        self.tone(m, "sine", 0, 0.22, 0.038);
+        self.tone(m * 2, "triangle", 0, 0.12, 0.015);
+        if (b > 0) {
+          self.tone(b, "triangle", 0, 0.32, 0.03);
+        }
+        self.bgmStep++;
+      }, 290);
+    },
+    stopBGM: function () {
+      this.bgmPlaying = false;
+      if (this.bgmTimer) {
+        clearInterval(this.bgmTimer);
+        this.bgmTimer = null;
+      }
+    },
+    toggleBGM: function () {
+      state.bgm = !state.bgm;
+      saveState();
+      updateBgmButtons();
+      if (state.bgm) {
+        this.startBGM();
+      } else {
+        this.stopBGM();
+      }
+    },
+    speak: function (text, lang, rate) {
       if (!state.sound || !("speechSynthesis" in window) || !text) return;
       try {
         window.speechSynthesis.cancel();
         var u = new SpeechSynthesisUtterance(text);
         u.lang = lang || "vi-VN";
-        u.rate = lang === "en-US" ? 0.8 : 0.95;
+        u.rate = rate || (lang === "en-US" ? 0.8 : 0.9);
         window.speechSynthesis.speak(u);
       } catch (e) {}
     },
@@ -112,7 +197,9 @@
     avatar: "hero",
     owned: ["hero"],
     progress: {},      // "math|count" -> { quiz: 2, memory: 0, balloon: 3 }
+    passages: {},      // "t7" -> 3
     sound: true,
+    bgm: true,         // Nhạc nền game
     autoRead: true,
     unlockAll: false
   };
@@ -136,6 +223,15 @@
 
   function unitKey(subj, topic) { return subj + "|" + topic; }
   function unitStars(subj, topic) {
+    if (topic === "passages") {
+      var count = 0;
+      if (state.passages) {
+        for (var k in state.passages) {
+          if (state.passages.hasOwnProperty(k) && state.passages[k] > 0) count++;
+        }
+      }
+      return count >= 5 ? 3 : count >= 3 ? 2 : count >= 1 ? 1 : 0;
+    }
     var p = state.progress[unitKey(subj, topic)];
     if (!p) return 0;
     var m = 0;
@@ -329,12 +425,27 @@
         }
         Sound.click();
         curUnitIdx = idx;
-        openModePicker();
+        var u = UNITS[curSubj][curUnitIdx];
+        if (u && u.topic === "passages") {
+          openPassageReader();
+        } else {
+          openModePicker();
+        }
       });
     }
   }
 
   function bestScoreText(subj, topic) {
+    if (topic === "passages") {
+      var count = 0;
+      if (state.passages) {
+        for (var k in state.passages) {
+          if (state.passages.hasOwnProperty(k) && state.passages[k] > 0) count++;
+        }
+      }
+      var totalP = typeof READING_PASSAGES !== "undefined" ? READING_PASSAGES.length : 7;
+      return count + "/" + totalP;
+    }
     var p = state.progress[unitKey(subj, topic)];
     var n = 0;
     if (p) { for (var k in p) if (p.hasOwnProperty(k) && p[k] > 0) n++; }
@@ -393,6 +504,216 @@
     var bank = QUESTION_BANK[subj] || [], out = [];
     for (var i = 0; i < bank.length; i++) if (bank[i].topic === topic) out.push(bank[i]);
     return out;
+  }
+
+
+  // ---------------------------------------------------------
+  // 8B. QUẢN LÝ BGM & PHÒNG LUYỆN ĐỌC ĐOẠN VĂN
+  // ---------------------------------------------------------
+  function updateBgmButtons() {
+    var btns = document.querySelectorAll(".bgm-btn");
+    for (var i = 0; i < btns.length; i++) {
+      if (state.bgm) {
+        btns[i].innerHTML = "🎵";
+        removeClass(btns[i], "off");
+        addClass(btns[i], "on");
+      } else {
+        btns[i].innerHTML = "🔇";
+        removeClass(btns[i], "on");
+        addClass(btns[i], "off");
+      }
+    }
+  }
+
+  var curPassageIdx = 0;
+  var readSpeed = 0.85; // 0.7: chậm, 0.85: vừa
+  var isReadingSample = false;
+
+  function openPassageReader(idx) {
+    if (typeof idx === "number") {
+      curPassageIdx = idx;
+    } else {
+      curPassageIdx = 0;
+      if (typeof READING_PASSAGES !== "undefined") {
+        for (var i = 0; i < READING_PASSAGES.length; i++) {
+          if (READING_PASSAGES[i].id === "t7") { curPassageIdx = i; break; }
+        }
+      }
+    }
+    renderPassageScreen();
+    showScreen("screenRead");
+  }
+
+  function renderPassageScreen() {
+    if (typeof READING_PASSAGES === "undefined" || READING_PASSAGES.length === 0) return;
+    if (curPassageIdx < 0) curPassageIdx = 0;
+    if (curPassageIdx >= READING_PASSAGES.length) curPassageIdx = READING_PASSAGES.length - 1;
+
+    var p = READING_PASSAGES[curPassageIdx];
+    $("readWeekTag").innerHTML = esc(p.week);
+    $("readLessonTitle").innerHTML = esc(p.title);
+
+    // 1. Carousel chọn tuần
+    var carHtml = "";
+    for (var i = 0; i < READING_PASSAGES.length; i++) {
+      var item = READING_PASSAGES[i];
+      var isDone = state.passages && state.passages[item.id] > 0;
+      var activeCls = i === curPassageIdx ? " active" : "";
+      carHtml += '<button class="week-tab' + activeCls + '" data-pidx="' + i + '">' +
+        esc(item.week) + (isDone ? " ⭐" : "") + "</button>";
+    }
+    $("weekCarousel").innerHTML = carHtml;
+    var wTabs = $("weekCarousel").querySelectorAll(".week-tab");
+    for (var j = 0; j < wTabs.length; j++) {
+      onTap(wTabs[j], function () {
+        Sound.click();
+        stopSampleReading();
+        curPassageIdx = parseInt(this.getAttribute("data-pidx"), 10);
+        renderPassageScreen();
+      });
+    }
+
+    // 2. Từ ngữ ứng dụng (chạm từ nào đọc từ đó)
+    var wordHtml = "";
+    for (var w = 0; w < p.words.length; w++) {
+      wordHtml += '<button class="word-chip" data-word="' + esc(p.words[w]) + '">' + esc(p.words[w]) + '</button>';
+    }
+    $("readWordChips").innerHTML = wordHtml;
+    var chips = $("readWordChips").querySelectorAll(".word-chip");
+    for (var c = 0; c < chips.length; c++) {
+      onTap(chips[c], function () {
+        var word = this.getAttribute("data-word");
+        Sound.wordPop();
+        addClass(this, "active");
+        var self = this;
+        setTimeout(function () { removeClass(self, "active"); }, 400);
+        Sound.speak(word, "vi-VN", readSpeed);
+      });
+    }
+
+    // 3. Câu ứng dụng
+    var sentHtml = "";
+    for (var s = 0; s < p.sentences.length; s++) {
+      var sText = p.sentences[s];
+      var wordsInS = sText.split(" ");
+      var wordsMarkup = "";
+      for (var sw = 0; sw < wordsInS.length; sw++) {
+        var cleanW = wordsInS[sw].replace(/[.,!?;:]/g, "");
+        wordsMarkup += '<span class="s-word" data-word="' + esc(cleanW) + '">' + esc(wordsInS[sw]) + '</span> ';
+      }
+      sentHtml += '<div class="sentence-card" id="sentCard_' + s + '">' +
+        '<button class="s-speaker" data-sidx="' + s + '" title="Nghe câu này">🔊</button>' +
+        '<div class="s-text">' + wordsMarkup + '</div>' +
+        '</div>';
+    }
+    $("readSentences").innerHTML = sentHtml;
+    var sSpeakers = $("readSentences").querySelectorAll(".s-speaker");
+    for (var sp = 0; sp < sSpeakers.length; sp++) {
+      onTap(sSpeakers[sp], function (e) {
+        e.stopPropagation();
+        var sidx = parseInt(this.getAttribute("data-sidx"), 10);
+        playSentence(sidx, p.sentences[sidx]);
+      });
+    }
+    var sWords = $("readSentences").querySelectorAll(".s-word");
+    for (var swi = 0; swi < sWords.length; swi++) {
+      onTap(sWords[swi], function () {
+        var word = this.getAttribute("data-word");
+        Sound.wordPop();
+        addClass(this, "speaking");
+        var self = this;
+        setTimeout(function () { removeClass(self, "speaking"); }, 350);
+        Sound.speak(word, "vi-VN", readSpeed);
+      });
+    }
+
+    // 4. Đoạn văn hoàn chỉnh (chạm bất kỳ chữ nào đọc chữ đó)
+    var pWords = p.paragraph.split(" ");
+    var pMarkup = "";
+    for (var pw = 0; pw < pWords.length; pw++) {
+      var cleanPW = pWords[pw].replace(/[.,!?;:"()]/g, "");
+      pMarkup += '<span class="p-word" data-word="' + esc(cleanPW) + '">' + esc(pWords[pw]) + '</span> ';
+    }
+    $("readParagraph").innerHTML = pMarkup;
+    var pwEls = $("readParagraph").querySelectorAll(".p-word");
+    for (var pwi = 0; pwi < pwEls.length; pwi++) {
+      onTap(pwEls[pwi], function () {
+        var word = this.getAttribute("data-word");
+        Sound.wordPop();
+        addClass(this, "speaking");
+        var self = this;
+        setTimeout(function () { removeClass(self, "speaking"); }, 350);
+        Sound.speak(word, "vi-VN", readSpeed);
+      });
+    }
+
+    stopSampleReading();
+  }
+
+  function playSentence(idx, text) {
+    Sound.click();
+    var card = $("sentCard_" + idx);
+    if (card) {
+      addClass(card, "speaking");
+      setTimeout(function () { removeClass(card, "speaking"); }, 3000);
+    }
+    Sound.speak(text, "vi-VN", readSpeed);
+  }
+
+  function startSampleReading() {
+    if (typeof READING_PASSAGES === "undefined") return;
+    var p = READING_PASSAGES[curPassageIdx];
+    if (!p) return;
+    Sound.click();
+    isReadingSample = true;
+    $("btnPlayAll").style.display = "none";
+    $("btnStopRead").style.display = "inline-block";
+
+    Sound.speak(p.paragraph, "vi-VN", readSpeed);
+
+    var wordCount = p.paragraph.split(" ").length;
+    var approxMs = (wordCount * 450) / readSpeed;
+    setTimeout(function () {
+      if (isReadingSample) stopSampleReading();
+    }, approxMs);
+  }
+
+  function stopSampleReading() {
+    isReadingSample = false;
+    Sound.stopSpeak();
+    if ($("btnPlayAll")) $("btnPlayAll").style.display = "inline-block";
+    if ($("btnStopRead")) $("btnStopRead").style.display = "none";
+  }
+
+  function finishPassageReading() {
+    if (typeof READING_PASSAGES === "undefined") return;
+    var p = READING_PASSAGES[curPassageIdx];
+    if (!p) return;
+    stopSampleReading();
+
+    Sound.fanfare();
+    confetti(30);
+
+    if (!state.passages) state.passages = {};
+    var isFirstTime = !state.passages[p.id];
+    state.passages[p.id] = 3;
+    var rewardCoins = isFirstTime ? p.reward : 5;
+    state.coins += rewardCoins;
+    saveState();
+    renderHome();
+
+    floatPoints("+" + rewardCoins + " 🪙", $("btnReadFinish"));
+    setTimeout(function () { Sound.coin(); }, 900);
+
+    $("infoTitle").innerHTML = "🎉 XUẤT SẮC LẮM!";
+    $("infoBody").innerHTML =
+      '<div style="text-align:center;padding:10px 0">' +
+      '<div style="font-size:54px;margin-bottom:8px">⭐ ⭐ ⭐</div>' +
+      '<div style="font-size:22px;font-weight:800;color:#15803d;margin-bottom:8px">Bé đã đọc xong bài ' + esc(p.week) + '!</div>' +
+      '<div style="font-size:17px;color:#4a3520;margin-bottom:12px">Bé đọc rất to, rõ ràng và truyền cảm.<br>Thưởng cho bé <b>+' + rewardCoins + ' xu vàng</b> nhé!</div>' +
+      '</div>';
+    openOverlay("infoOverlay");
+    renderPassageScreen();
   }
 
   function startGame() {
@@ -842,11 +1163,52 @@
   // 11. GẮN SỰ KIỆN
   // ---------------------------------------------------------
   function bindEvents() {
-    // Mở khóa âm thanh iOS ở lần chạm đầu tiên
-    document.addEventListener("touchstart", function unlock() {
+    // Mở khóa âm thanh iOS & tự động bật BGM ở lần chạm đầu tiên
+    function unlockAudio() {
       Sound.init();
-      document.removeEventListener("touchstart", unlock, false);
-    }, false);
+      if (state.bgm && !Sound.bgmPlaying) {
+        Sound.startBGM();
+      }
+      document.removeEventListener("touchstart", unlockAudio, false);
+      document.removeEventListener("click", unlockAudio, false);
+    }
+    document.addEventListener("touchstart", unlockAudio, false);
+    document.addEventListener("click", unlockAudio, false);
+
+    // Gắn sự kiện các nút BGM
+    var bgmBtns = document.querySelectorAll(".bgm-btn");
+    for (var b = 0; b < bgmBtns.length; b++) {
+      onTap(bgmBtns[b], function () {
+        Sound.toggleBGM();
+      });
+    }
+
+    // Sự kiện Phòng Luyện Đọc
+    onTap($("readBackBtn"), function () {
+      Sound.click();
+      stopSampleReading();
+      renderMap();
+      showScreen("screenMap");
+    });
+    onTap($("btnPlayAll"), function () {
+      startSampleReading();
+    });
+    onTap($("btnStopRead"), function () {
+      stopSampleReading();
+    });
+    onTap($("btnToggleSpeed"), function () {
+      Sound.click();
+      if (readSpeed >= 0.85) {
+        readSpeed = 0.7;
+        this.innerHTML = "🐢 Chậm";
+      } else {
+        readSpeed = 0.95;
+        this.innerHTML = "🐰 Vừa";
+      }
+    });
+    onTap($("btnReadFinish"), function () {
+      finishPassageReading();
+    });
 
     onTap($("settingsBtn"), function () { Sound.click(); openSettings(); });
     onTap($("profileBtn"), function () { Sound.click(); openShop(); });
@@ -914,6 +1276,7 @@
   // ---------------------------------------------------------
   loadState();
   bindEvents();
+  updateBgmButtons();
   renderHome();
 
   // Chế độ xem thử cho phụ huynh/kiểm thử: index.html#demo=map:math hoặc #demo=game:eng:0:balloon
