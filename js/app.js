@@ -46,39 +46,27 @@
     coin: function () { this.tone(988, "square", 0, 0.08, 0.12); this.tone(1319, "square", 0.08, 0.22, 0.12); },
     good: function () {
       // Hợp âm chiến thắng tươi vui + hiệu ứng chuông gió lấp lánh (sparkles)
-      var n = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+      var n = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
       for (var i = 0; i < n.length; i++) {
-        this.tone(n[i], "triangle", i * 0.07, 0.22, 0.24);
-        this.tone(n[i] * 1.5, "sine", i * 0.07 + 0.02, 0.16, 0.08);
+        this.tone(n[i], "triangle", i * 0.06, 0.22, 0.22);
+        this.tone(n[i] * 1.5, "sine", i * 0.06 + 0.02, 0.15, 0.09);
       }
-      this.tone(2093.00, "sine", 0.35, 0.3, 0.18);
-      this.tone(2637.02, "sine", 0.42, 0.25, 0.14);
+      this.tone(2093.00, "sine", 0.36, 0.35, 0.22);
+      this.tone(2637.02, "sine", 0.44, 0.28, 0.16);
     },
     bad: function () {
-      // Âm thanh hoạt hình vui nhộn boing-wobble nhẹ nhàng, không gây sợ
+      // Âm thanh hoạt hình lò xo boing-boing ngộ nghĩnh, vui tai, không gây nản chí
       this.init();
       if (!this.ctx || !state.sound) return;
-      var now = this.ctx.currentTime;
-      var osc = this.ctx.createOscillator();
-      var gain = this.ctx.createGain();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(340, now);
-      osc.frequency.exponentialRampToValueAtTime(170, now + 0.28);
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.18, now + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.32);
-      this.tone(220, "triangle", 0.15, 0.16, 0.14, 150);
+      this.tone(320, "triangle", 0, 0.14, 0.22, 540);
+      this.tone(220, "sine", 0.13, 0.16, 0.18, 140);
     },
     fanfare: function () {
-      var n = [523.25, 523.25, 659.25, 783.99, 659.25, 783.99, 1046.50, 1318.51];
-      var d = [0, 0.11, 0.22, 0.33, 0.48, 0.60, 0.74, 0.95];
+      var n = [523.25, 523.25, 659.25, 783.99, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+      var d = [0, 0.10, 0.20, 0.30, 0.42, 0.54, 0.68, 0.86, 1.10];
       for (var i = 0; i < n.length; i++) {
-        this.tone(n[i], "triangle", d[i], i === n.length - 1 ? 0.7 : 0.16, 0.26);
-        this.tone(n[i] / 2, "sine", d[i], 0.18, 0.12);
+        this.tone(n[i], "triangle", d[i], i === n.length - 1 ? 0.8 : 0.18, 0.26);
+        this.tone(n[i] / 2, "sine", d[i], 0.20, 0.14);
       }
     },
     startBGM: function () {
@@ -87,34 +75,59 @@
       if (!this.ctx) return;
       this.bgmPlaying = true;
       var self = this;
-      // Giai điệu mộc mạc marimba cho trẻ em: vui tươi, êm dịu, không chói tai
+
+      // GIAI ĐIỆU HOẠT HÌNH PHIÊU LƯU (32 nốt vui nhộn, rộn ràng, kích thích trí tò mò)
+      // Tông Đô Trưởng (C Major) trong trẻo, phong cách Nintendo / OVI Vương quốc trên mây
       var melody = [
-        523.25, 659.25, 783.99, 659.25,
-        880.00, 783.99, 659.25, 587.33,
-        523.25, 659.25, 783.99, 1046.50,
-        987.77, 783.99, 880.00, 783.99
+        // Câu 1: Rộn ràng mở màn
+        523.25, 659.25, 783.99, 1046.50, 987.77, 783.99, 880.00, 783.99,
+        // Câu 2: Nhún nhảy tinh nghịch
+        659.25, 783.99, 880.00, 1046.50, 987.77, 880.00, 783.99, 0,
+        // Câu 3: Cao trào bay bổng
+        880.00, 1046.50, 1174.66, 1046.50, 783.99, 659.25, 698.46, 783.99,
+        // Câu 4: Kết vòng tròn reo vui
+        880.00, 987.77, 1046.50, 783.99, 659.25, 587.33, 523.25, 0
       ];
+
+      // Âm bass nhún nhảy pizzicato (Walking Bassline giữ nhịp bước chân phiêu lưu)
       var bass = [
-        130.81, 0, 0, 0,
-        174.61, 0, 0, 0,
-        196.00, 0, 0, 0,
-        130.81, 0, 0, 0
+        130.81, 0, 196.00, 0, 130.81, 0, 164.81, 0,
+        174.61, 0, 220.00, 0, 196.00, 0, 146.83, 0,
+        110.00, 0, 164.81, 0, 130.81, 0, 196.00, 0,
+        174.61, 0, 196.00, 0, 130.81, 0, 261.63, 0
       ];
+
       this.bgmStep = 0;
       this.bgmTimer = setInterval(function () {
         if (!state.bgm || !state.sound || !self.bgmPlaying) {
           self.stopBGM();
           return;
         }
-        var m = melody[self.bgmStep % melody.length];
-        var b = bass[self.bgmStep % bass.length];
-        self.tone(m, "sine", 0, 0.22, 0.038);
-        self.tone(m * 2, "triangle", 0, 0.12, 0.015);
-        if (b > 0) {
-          self.tone(b, "triangle", 0, 0.32, 0.03);
+        var step = self.bgmStep % melody.length;
+        var m = melody[step];
+        var b = bass[step];
+
+        // 1. Tiếng đàn Marimba / Xylophone giai điệu chính (trong veo, staccato nảy)
+        if (m > 0) {
+          self.tone(m, "triangle", 0, 0.16, 0.055);
+          self.tone(m * 2, "sine", 0, 0.09, 0.025);
         }
+
+        // 2. Tiếng Bass nhún nhảy giữ nhịp
+        if (b > 0) {
+          self.tone(b, "triangle", 0, 0.22, 0.045);
+          self.tone(b * 2, "sine", 0, 0.12, 0.02);
+        }
+
+        // 3. Tiếng gõ gõ mộc / xúc xắc nhịp điệu (Percussive tick nhộn nhịp như tiếng bước chân)
+        if (step % 2 === 1) {
+          self.tone(1500, "triangle", 0, 0.025, 0.02, 350);
+        } else if (step % 4 === 0) {
+          self.tone(180, "triangle", 0, 0.04, 0.035, 70);
+        }
+
         self.bgmStep++;
-      }, 290);
+      }, 185); // 185ms = ~162 BPM (tiết tấu nhanh, vui, cực kỳ bắt tai)
     },
     stopBGM: function () {
       this.bgmPlaying = false;
@@ -138,8 +151,31 @@
       try {
         window.speechSynthesis.cancel();
         var u = new SpeechSynthesisUtterance(text);
-        u.lang = lang || "vi-VN";
-        u.rate = rate || (lang === "en-US" ? 0.8 : 0.9);
+        var targetLang = lang || "vi-VN";
+        u.lang = targetLang;
+        u.rate = rate || (targetLang === "en-US" ? 0.8 : 0.85);
+
+        // Tìm voice phù hợp nhất (đặc biệt quan trọng với vi-VN trên iOS/Android/Chrome)
+        if (typeof window.speechSynthesis.getVoices === "function") {
+          var voices = window.speechSynthesis.getVoices();
+          if (voices && voices.length > 0) {
+            var isVi = targetLang.indexOf("vi") === 0;
+            var isEn = targetLang.indexOf("en") === 0;
+            var matchedVoice = null;
+            for (var i = 0; i < voices.length; i++) {
+              var v = voices[i];
+              var vlang = (v.lang || "").toLowerCase().replace(/_/g, "-");
+              if (isVi && (vlang.indexOf("vi") === 0 || (v.name && v.name.toLowerCase().indexOf("vietnam") !== -1))) {
+                matchedVoice = v;
+                break;
+              } else if (isEn && (vlang === "en-us" || vlang.indexOf("en") === 0)) {
+                if (!matchedVoice || vlang === "en-us") matchedVoice = v;
+              }
+            }
+            if (matchedVoice) u.voice = matchedVoice;
+          }
+        }
+
         window.speechSynthesis.speak(u);
       } catch (e) {}
     },
@@ -860,7 +896,8 @@
       updateHud();
       floatPoints("+" + pts, btn);
       Sound.good();
-      if (game.lang === "en-US" && q.speakText) later(function () { Sound.speak(q.speakText, "en-US"); }, 450);
+      var toSpeak = q.speakText || (game.lang === "en-US" ? q.answer : null);
+      if (toSpeak) later(function () { Sound.speak(toSpeak, game.lang); }, 450);
       say(pick(PRAISE), "good");
       if (game.tries === 0 && Math.random() < 0.35) confetti(8);
       later(function () { game.idx++; nextQuestion(); }, 1500);
@@ -956,7 +993,8 @@
       updateHud();
       floatPoints("+" + pts, el);
       say(pick(PRAISE), "good");
-      if (game.lang === "en-US" && q.speakText) later(function () { Sound.speak(q.speakText, "en-US"); }, 500);
+      var toSpeak = q.speakText || (game.lang === "en-US" ? q.answer : null);
+      if (toSpeak) later(function () { Sound.speak(toSpeak, game.lang); }, 500);
       later(function () { game.idx++; nextQuestion(); }, 1600);
     } else {
       star.innerHTML = "💨";
@@ -974,7 +1012,7 @@
   function buildPairs(qs) {
     var pairs = [], usedA = {}, usedL = {};
     for (var i = 0; i < qs.length; i++) {
-      var q = qs[i], left = null, right = q.answer;
+      var q = qs[i], left = null, right = q.pairAnswer || q.answer;
       if (q.visualType === "word" || q.visualType === "eng") {
         left = String(q.visual).split(" ")[0];
       } else if (q.visualType === "formula") {
@@ -1042,7 +1080,9 @@
         floatPoints("+10", b);
         Sound.good();
         var p = game.pairs[parseInt(a.getAttribute("data-id"), 10)];
-        if (game.lang === "en-US") later(function () { Sound.speak(p.speak, "en-US"); }, 400);
+        if (p && p.speak) {
+          later(function () { Sound.speak(p.speak, game.lang); }, 400);
+        }
         say(pick(PRAISE), "good");
         game.flipped = []; game.locked = false;
         if (game.matched >= game.pairs.length) later(function () {
