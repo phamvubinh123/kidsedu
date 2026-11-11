@@ -1,2 +1,9 @@
+.git/
+node_modules/
+*.pdf
 Sources/
+dist/
+build/
 .DS_Store
+*.tmp
+*.log
