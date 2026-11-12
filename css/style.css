@@ -545,6 +545,11 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .guide-item .gi-ic { font-size: 36px; margin-right: 12px; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .guide-item b { color: #8a4b12; }
 .set-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; background: rgba(255, 255, 255, 0.8); border-radius: 16px; padding: 10px 14px; margin-bottom: 10px; font-weight: 800; }
+.set-section-title {
+  font-size: 14px; font-weight: 800; color: #2a5aa0;
+  margin: 16px 4px 8px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.set-section-title:first-child { margin-top: 2px; }
 .toggle { width: 62px; height: 34px; border-radius: 20px; background: #cfd8e3; position: relative; -webkit-flex-shrink: 0; flex-shrink: 0; -webkit-transition: background 0.2s; transition: background 0.2s; }
 .toggle:after { content: ""; position: absolute; top: 3px; left: 3px; width: 28px; height: 28px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); -webkit-transition: left 0.2s; transition: left 0.2s; }
 .toggle.on { background: #34c759; }

@@ -1807,16 +1807,7 @@
   }
 
   function openGuide() {
-    $("infoTitle").innerHTML = "❓ Hướng Dẫn";
-    $("infoBody").innerHTML =
-      '<div class="guide-item"><span class="gi-ic">🏝️</span><div>Chạm vào một <b>hòn đảo</b> (Toán, Tiếng Việt, Tiếng Anh) để vào bản đồ bài học.</div></div>' +
-      '<div class="guide-item"><span class="gi-ic">🔒</span><div>Mỗi bài đạt ít nhất <b>1 ⭐</b> sẽ mở khóa bài tiếp theo.</div></div>' +
-      '<div class="guide-item"><span class="gi-ic">📜</span><div><b>Phiến Đá Bí Ẩn:</b> chọn phiến đá có đáp án đúng. Sai lần đầu được chọn lại.</div></div>' +
-      '<div class="guide-item"><span class="gi-ic">🃏</span><div><b>Lật Thẻ Thần Kỳ:</b> lật 2 thẻ để ghép cặp hình với đáp án.</div></div>' +
-      '<div class="guide-item"><span class="gi-ic">🎈</span><div><b>Bóng Bay Tri Thức:</b> chạm quả bóng có đáp án đúng trước khi bóng bay mất.</div></div>' +
-      '<div class="guide-item"><span class="gi-ic">🔊</span><div>Bấm nút <b>loa</b> để nghe đọc câu hỏi (Tiếng Anh đọc chuẩn giọng bản xứ).</div></div>' +
-      '<div class="guide-item"><span class="gi-ic">🛒</span><div>Dùng <b>xu vàng</b> kiếm được để mua nhân vật mới trong Cửa hàng.</div></div>';
-    openOverlay("infoOverlay");
+    openSettings();
   }
 
   function openProfileModal() {
@@ -1858,25 +1849,49 @@
   }
 
   function openSettings() {
-    $("infoTitle").innerHTML = "⚙️ Cài Đặt (dành cho Bố Mẹ)";
-    $("infoBody").innerHTML =
-      '<div class="set-row"><span>👦 Hồ sơ đang học: <b id="setName">' + esc(state.name) + '</b></span><button class="small-btn" id="setProfileBtn">Đổi bé</button></div>' +
-      '<div class="set-row"><span>📊 Báo cáo học tập</span><button class="small-btn" id="setReportBtn">Xem</button></div>' +
-      '<div class="set-row"><span>☁️ Đồng bộ đám mây: <b id="setCloudStatus">' + (CloudSync.db ? 'Đã kết nối' : 'Lưu trên máy') + '</b></span><button class="small-btn" id="setCloudBtn">Xem</button></div>' +
-      '<div class="set-row"><span>🔊 Âm thanh & giọng đọc</span><button class="toggle' + (state.sound ? " on" : "") + '" data-key="sound"></button></div>' +
-      '<div class="set-row"><span>🗣️ Tự động đọc câu hỏi</span><button class="toggle' + (state.autoRead ? " on" : "") + '" data-key="autoRead"></button></div>' +
-      '<div class="set-row"><span>🔓 Mở khóa tất cả bài</span><button class="toggle' + (state.unlockAll ? " on" : "") + '" data-key="unlockAll"></button></div>' +
-      '<div class="set-row"><span>📋 Sao lưu mã tiến độ</span><button class="small-btn" id="exportBtn">Lấy mã</button></div>' +
-      '<div class="set-row"><span>📥 Khôi phục từ mã</span><button class="small-btn" id="importBtn">Nhập mã</button></div>' +
-      '<div class="set-row"><span>🗑️ Xóa làm lại từ đầu</span><button class="small-btn red" id="resetBtn">Xóa</button></div>' +
-      '<div class="guide-item" style="margin-top:12px"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Nếu máy phát âm tiếng Anh, hãy vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> và tải giọng Linh về máy. App cũng có chế độ tự động phát âm tiếng Việt chuẩn online khi kết nối Wi-Fi!</div></div>' +
-      '<div class="guide-item" style="margin-top:6px"><span class="gi-ic">📌</span><div><b>Ghim app ra màn hình:</b> Bấm nút Chia sẻ (hình vuông mũi tên lên trên Safari) ➜ chọn <b>Thêm vào MH chính (Add to Home Screen)</b> để chơi toàn màn hình và lưu bài vĩnh viễn.</div></div>';
+    $("infoTitle").innerHTML = "⚙️ Cài Đặt & Hướng Dẫn";
+    var html = "";
+
+    // 1. ÂM THANH & GIỌNG ĐỌC
+    html += '<div class="set-section-title">🎵 Âm Thanh & Nhạc Nền</div>';
+    html += '<div class="set-row"><span>🎵 Nhạc nền game (BGM)</span><button class="toggle' + (state.bgm ? " on" : "") + '" data-key="bgm"></button></div>';
+    html += '<div class="set-row"><span>🔊 Âm thanh & giọng đọc</span><button class="toggle' + (state.sound ? " on" : "") + '" data-key="sound"></button></div>';
+    html += '<div class="set-row"><span>🗣️ Tự động đọc câu hỏi</span><button class="toggle' + (state.autoRead ? " on" : "") + '" data-key="autoRead"></button></div>';
+
+    // 2. CÀI ĐẶT CHO PHỤ HUYNH
+    html += '<div class="set-section-title">👨‍👩‍👧 Cài Đặt Dành Cho Bố Mẹ</div>';
+    html += '<div class="set-row"><span>👦 Hồ sơ đang học: <b id="setName">' + esc(state.name) + '</b></span><button class="small-btn" id="setProfileBtn">Đổi bé</button></div>';
+    html += '<div class="set-row"><span>📊 Báo cáo tiến độ học</span><button class="small-btn" id="setReportBtn">Xem</button></div>';
+    html += '<div class="set-row"><span>☁️ Đồng bộ đám mây: <b id="setCloudStatus">' + (CloudSync.db ? 'Đã kết nối' : 'Lưu trên máy') + '</b></span><button class="small-btn" id="setCloudBtn">Xem</button></div>';
+    html += '<div class="set-row"><span>🔓 Mở khóa tất cả bài</span><button class="toggle' + (state.unlockAll ? " on" : "") + '" data-key="unlockAll"></button></div>';
+    html += '<div class="set-row"><span>📋 Sao lưu mã tiến độ</span><button class="small-btn" id="exportBtn">Lấy mã</button></div>';
+    html += '<div class="set-row"><span>📥 Khôi phục từ mã</span><button class="small-btn" id="importBtn">Nhập mã</button></div>';
+    html += '<div class="set-row"><span>🗑️ Xóa làm lại từ đầu</span><button class="small-btn red" id="resetBtn">Xóa</button></div>';
+
+    // 3. HƯỚNG DẪN CÁCH HỌC & CHƠI
+    html += '<div class="set-section-title">❓ Hướng Dẫn Cách Học & Chơi</div>';
+    html += '<div class="guide-item"><span class="gi-ic">🏝️</span><div>Chạm vào một <b>hòn đảo</b> (Toán, Tiếng Việt, Tiếng Anh) để vào bản đồ bài học.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🔒</span><div>Mỗi bài đạt ít nhất <b>1 ⭐</b> sẽ mở khóa bài tiếp theo.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">📜</span><div><b>Phiến Đá Bí Ẩn:</b> chọn phiến đá có đáp án đúng. Mỗi lần chọn chỉ có 1 cơ hội, cần suy nghĩ kỹ!</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🃏</span><div><b>Lật Thẻ Thần Kỳ:</b> lật 2 thẻ để ghép cặp hình số lượng và đáp án đi cùng nhau.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🎈</span><div><b>Bóng Bay Tri Thức:</b> chạm quả bóng có đáp án đúng trước khi bóng bay mất.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🔊</span><div>Bấm nút <b>loa</b> để nghe đọc câu hỏi (Tiếng Anh đọc chuẩn giọng bản xứ).</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🛒</span><div>Dùng <b>xu vàng</b> kiếm được khi học giỏi để mua nhân vật mới trong Cửa hàng.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Nếu máy phát âm tiếng Anh, hãy vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> và tải giọng Linh về máy.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">📌</span><div><b>Ghim app ra màn hình:</b> Bấm nút Chia sẻ trên Safari ➜ chọn <b>Thêm vào MH chính (Add to Home Screen)</b> để chơi toàn màn hình và lưu bài vĩnh viễn.</div></div>';
+
+    $("infoBody").innerHTML = html;
+
     var toggles = $("infoBody").querySelectorAll(".toggle");
     for (var i = 0; i < toggles.length; i++) {
       onTap(toggles[i], function () {
         var k = this.getAttribute("data-key");
         state[k] = !state[k];
         if (state[k]) addClass(this, "on"); else removeClass(this, "on");
+        if (k === "bgm") {
+          if (state.bgm) Sound.startBGM(); else Sound.stopBGM();
+          updateBgmButtons();
+        }
         saveState(); Sound.click();
       });
     }
@@ -2005,7 +2020,7 @@
       });
     }
 
-    onTap($("settingsBtn"), function () { Sound.click(); openSettings(); });
+    if ($("settingsBtn")) onTap($("settingsBtn"), function () { Sound.click(); openSettings(); });
     onTap($("profileBtn"), function () { openProfileModal(); });
     onTap($("homeAvatar"), function () { openProfileModal(); });
     if ($("topReportBtn")) onTap($("topReportBtn"), function () { openReport(); });
@@ -2035,7 +2050,7 @@
         if (n === "report") openReport();
         else if (n === "badges") openBadges();
         else if (n === "shop") openShop();
-        else if (n === "guide") openGuide();
+        else if (n === "guide" || n === "settings") openSettings();
       });
     }
 
