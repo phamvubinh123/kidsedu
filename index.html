@@ -28,10 +28,11 @@
   <section class="screen active" id="screenHome">
     <div class="topbar glass">
       <div class="tb-avatar" id="homeAvatar"></div>
-      <div class="tb-info" id="profileBtn">
-        <div class="tb-name">Chào <span id="kidName">BÉ YÊU</span></div>
+      <div class="tb-info" id="profileBtn" title="Chạm để đổi hồ sơ bé học">
+        <div class="tb-name">Chào <span id="kidName">HOÀNG LONG</span> <span class="tb-caret">▾</span></div>
         <div class="tb-level" id="kidLevel">Cấp 1 • Mầm Non Chăm Chỉ</div>
       </div>
+      <div class="sync-pill" id="syncPill" title="Trạng thái đồng bộ đám mây"><span id="syncDot" class="sync-dot"></span><span id="syncLabel">Đám mây</span></div>
       <div class="coin-pill"><span id="coinCount">0</span><i class="coin"></i></div>
       <button class="icon-btn bgm-btn on" id="homeBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền">🎵</button>
       <button class="icon-btn" id="settingsBtn" aria-label="Cài đặt">⚙️</button>
@@ -62,6 +63,7 @@
 
     <nav class="bottom-nav glass">
       <button class="nav-item active" data-nav="home"><span class="nav-ic home-ic">🏠</span><span>Trang chủ</span></button>
+      <button class="nav-item" data-nav="report"><span class="nav-ic">📊</span><span>Tiến độ</span></button>
       <button class="nav-item" data-nav="badges"><span class="nav-ic">🏅</span><span>Huy hiệu</span></button>
       <button class="nav-item" data-nav="shop"><span class="nav-ic">🛒</span><span>Cửa hàng</span></button>
       <button class="nav-item" data-nav="guide"><span class="nav-ic">❓</span><span>Hướng dẫn</span></button>
@@ -211,7 +213,37 @@
     </div>
   </div>
 
-  <script src="js/data.js?v=2"></script>
-  <script src="js/app.js?v=2"></script>
+  <!-- ================= MODAL BÁO CÁO HỌC TẬP (DASHBOARD) ================= -->
+  <div class="overlay" id="reportOverlay">
+    <div class="frost-panel tall">
+      <div class="panel-title">📊 Báo Cáo Học Tập Của Bé</div>
+      <div class="report-body" id="reportBody"></div>
+      <div class="panel-actions" style="margin-top:14px">
+        <button class="btn-green" data-close="reportOverlay">Đóng</button>
+      </div>
+      <button class="close-x" data-close="reportOverlay">✕</button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL CHỌN TÀI KHOẢN BÉ ================= -->
+  <div class="overlay" id="profileOverlay">
+    <div class="frost-panel tall">
+      <div class="panel-title">👦 Hồ Sơ Bé Học</div>
+      <div class="profile-cards" id="profileCards"></div>
+      <div class="panel-actions two" style="margin-top:14px">
+        <button class="btn-orange" id="addKidBtn">+ Thêm bé mới</button>
+        <button class="btn-green" data-close="profileOverlay">Đóng</button>
+      </div>
+      <button class="close-x" data-close="profileOverlay">✕</button>
+    </div>
+  </div>
+
+  <audio id="ttsAudio" preload="none" style="display:none"></audio>
+  <!-- Firebase SDK v8 (Tương thích 100% cú pháp ES5 cho iPadOS 12.5.8 đến iOS 18) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="js/firebase-config.js?v=2"></script>
+  <script src="js/data.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>

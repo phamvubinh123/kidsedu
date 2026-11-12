@@ -8,6 +8,169 @@
   // ---------------------------------------------------------
   // 1. ÂM THANH (Web Audio API) & GIỌNG ĐỌC
   // ---------------------------------------------------------
+  // Cache voice đã tìm được để không phải tìm lại nhiều lần
+  var cachedVoiceVi = null;
+  var cachedVoiceEn = null;
+  function findBestVoices() {
+    if (!("speechSynthesis" in window) || typeof window.speechSynthesis.getVoices !== "function") return;
+    try {
+      var voices = window.speechSynthesis.getVoices();
+      if (!voices || !voices.length) return;
+      var bestVi = null, bestEn = null;
+      for (var i = 0; i < voices.length; i++) {
+        var v = voices[i];
+        var vlang = (v.lang || "").toLowerCase().replace(/_/g, "-");
+        var vname = (v.name || "").toLowerCase();
+        if (vlang.indexOf("vi") === 0 || vname.indexOf("vietnam") !== -1 || vname.indexOf("tiếng việt") !== -1) {
+          if (!bestVi) {
+            bestVi = v;
+          } else {
+            var isBetter = (vname.indexOf("enhanced") !== -1 || vname.indexOf("premium") !== -1 || vname.indexOf("natural") !== -1 || vname.indexOf("google") !== -1);
+            if (isBetter) bestVi = v;
+          }
+        }
+        if (vlang === "en-us" || vlang.indexOf("en") === 0) {
+          if (!bestEn) {
+            bestEn = v;
+          } else {
+            var isBetterEn = (vlang === "en-us" && (vname.indexOf("enhanced") !== -1 || vname.indexOf("natural") !== -1 || vname.indexOf("google") !== -1 || vname.indexOf("samantha") !== -1));
+            if (isBetterEn) bestEn = v;
+          }
+        }
+      }
+      if (bestVi) cachedVoiceVi = bestVi;
+      if (bestEn) cachedVoiceEn = bestEn;
+    } catch (e) {}
+  }
+  if ("speechSynthesis" in window) {
+    findBestVoices();
+    if (typeof window.speechSynthesis.addEventListener === "function") {
+      window.speechSynthesis.addEventListener("voiceschanged", findBestVoices);
+    } else {
+      window.speechSynthesis.onvoiceschanged = findBestVoices;
+    }
+  }
+
+  // Trên iOS Safari, getVoices() thường trả về mảng rỗng cho tới khi có tương tác người dùng
+  if (typeof document !== "undefined" && document.addEventListener) {
+    document.addEventListener("touchstart", function () {
+      if (!cachedVoiceVi || !cachedVoiceEn) findBestVoices();
+    }, false);
+    document.addEventListener("click", function () {
+      if (!cachedVoiceVi || !cachedVoiceEn) findBestVoices();
+    }, false);
+  }
+
+  // Audio Fallback cho các thiết bị cũ không có voice tiếng Việt (như iPadOS 12 hoặc iOS 16 chưa tải giọng Linh)
+  function getTTSAudio() {
+    var a = $("ttsAudio");
+    if (!a) {
+      a = document.createElement("audio");
+      a.id = "ttsAudio";
+      a.style.display = "none";
+      document.body.appendChild(a);
+    }
+    return a;
+  }
+
+  function stopFallbackTTS() {
+    try {
+      var a = getTTSAudio();
+      if (a) {
+        a.pause();
+        a.currentTime = 0;
+      }
+    } catch (e) {}
+  }
+
+  function playFallbackTTS(text, lang) {
+    if (!text) return;
+    try {
+      var a = getTTSAudio();
+      stopFallbackTTS();
+      var t = encodeURIComponent(text);
+      var tl = lang || "vi";
+      // Google Translate TTS endpoint chuẩn hỗ trợ đầy đủ tiếng Việt cho thiết bị không có voice offline
+      a.src = "https://translate.google.com/translate_tts?ie=UTF-8&tl=" + tl + "&client=tw-ob&q=" + t;
+      var p = a.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(function () {});
+      }
+    } catch (e) {}
+  }
+
+  // Chuẩn hóa phát âm Tiếng Việt lớp 1 cho Web Speech API
+  function cleanVietnamesePhonetics(text) {
+    if (!text) return "";
+    var s = String(text).normalize ? String(text).normalize("NFC") : String(text);
+
+    // 1. Loại bỏ emoji / icon biểu tượng để TTS không đọc tên tiếng Anh
+    s = s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ");
+    s = s.replace(/[\u2600-\u27BF]/g, " ");
+
+    // 2. Nếu là chữ cái hoặc âm tiết đơn lẻ được yêu cầu phát âm:
+    var trimmed = s.trim();
+    var singleMap = {
+      "c": "cờ", "k": "ca", "q": "quy", "qu": "quờ",
+      "b": "bờ", "d": "dờ", "đ": "đờ", "g": "gờ",
+      "gh": "gờ kép", "h": "hờ", "l": "lờ", "m": "mờ",
+      "n": "nờ", "p": "pờ", "ph": "phờ", "r": "rờ",
+      "s": "sờ", "t": "tờ", "th": "thờ", "tr": "trờ",
+      "v": "vờ", "x": "xờ", "ch": "chờ", "kh": "khờ",
+      "nh": "nhờ", "ng": "ngờ", "ngh": "ngờ kép", "gi": "giê"
+    };
+    if (singleMap.hasOwnProperty(trimmed.toLowerCase())) {
+      return singleMap[trimmed.toLowerCase()];
+    }
+
+    // 3. Chuẩn hóa tên các âm chữ cái trong văn bản để TTS đọc đúng âm học vần lớp 1:
+    s = s.replace(/\bâm\s+['"‘“]?c['"’”]?/gi, "âm cờ");
+    s = s.replace(/\bâm\s+['"‘“]?k['"’”]?/gi, "âm cờ");
+    s = s.replace(/\bâm\s+['"‘“]?b['"’”]?/gi, "âm bờ");
+    s = s.replace(/\bâm\s+['"‘“]?d['"’”]?/gi, "âm dờ");
+    s = s.replace(/\bâm\s+['"‘“]?đ['"’”]?/gi, "âm đờ");
+    s = s.replace(/\bâm\s+['"‘“]?g['"’”]?/gi, "âm gờ");
+    s = s.replace(/\bâm\s+['"‘“]?gh['"’”]?/gi, "âm gờ");
+    s = s.replace(/\bâm\s+['"‘“]?h['"’”]?/gi, "âm hờ");
+    s = s.replace(/\bâm\s+['"‘“]?l['"’”]?/gi, "âm lờ");
+    s = s.replace(/\bâm\s+['"‘“]?m['"’”]?/gi, "âm mờ");
+    s = s.replace(/\bâm\s+['"‘“]?n['"’”]?/gi, "âm nờ");
+    s = s.replace(/\bâm\s+['"‘“]?p['"’”]?/gi, "âm pờ");
+    s = s.replace(/\bâm\s+['"‘“]?ph['"’”]?/gi, "âm phờ");
+    s = s.replace(/\bâm\s+['"‘“]?r['"’”]?/gi, "âm rờ");
+    s = s.replace(/\bâm\s+['"‘“]?s['"’”]?/gi, "âm sờ");
+    s = s.replace(/\bâm\s+['"‘“]?t['"’”]?/gi, "âm tờ");
+    s = s.replace(/\bâm\s+['"‘“]?th['"’”]?/gi, "âm thờ");
+    s = s.replace(/\bâm\s+['"‘“]?tr['"’”]?/gi, "âm trờ");
+    s = s.replace(/\bâm\s+['"‘“]?qu['"’”]?/gi, "âm quờ");
+    s = s.replace(/\bâm\s+['"‘“]?v['"’”]?/gi, "âm vờ");
+    s = s.replace(/\bâm\s+['"‘“]?x['"’”]?/gi, "âm xờ");
+    s = s.replace(/\bâm\s+['"‘“]?ch['"’”]?/gi, "âm chờ");
+    s = s.replace(/\bâm\s+['"‘“]?kh['"’”]?/gi, "âm khờ");
+    s = s.replace(/\bâm\s+['"‘“]?nh['"’”]?/gi, "âm nhờ");
+    s = s.replace(/\bâm\s+['"‘“]?ng['"’”]?/gi, "âm ngờ");
+    s = s.replace(/\bâm\s+['"‘“]?ngh['"’”]?/gi, "âm ngờ kép");
+
+    s = s.replace(/bắt đầu bằng\s+['"‘“]?ph['"’”]?/gi, "bắt đầu bằng âm phờ");
+    s = s.replace(/bắt đầu bằng\s+['"‘“]?kh['"’”]?/gi, "bắt đầu bằng âm khờ");
+    s = s.replace(/bắt đầu bằng\s+['"‘“]?ch['"’”]?/gi, "bắt đầu bằng âm chờ");
+    s = s.replace(/bắt đầu bằng\s+['"‘“]?nh['"’”]?/gi, "bắt đầu bằng âm nhờ");
+    s = s.replace(/bắt đầu bằng\s+['"‘“]?th['"’”]?/gi, "bắt đầu bằng âm thờ");
+    s = s.replace(/bắt đầu bằng\s+['"‘“]?tr['"’”]?/gi, "bắt đầu bằng âm trờ");
+    s = s.replace(/bắt đầu bằng\s+['"‘“]?ng['"’”]?/gi, "bắt đầu bằng âm ngờ");
+
+    s = s.replace(/['"‘“]?c['"’”]?\s+hay\s+['"‘“]?k['"’”]?/gi, "cờ hay ca");
+    s = s.replace(/['"‘“]?g['"’”]?\s+hay\s+['"‘“]?gh['"’”]?/gi, "gờ đơn hay gờ kép");
+    s = s.replace(/['"‘“]?ng['"’”]?\s+hay\s+['"‘“]?ngh['"’”]?/gi, "ngờ đơn hay ngờ kép");
+
+    // Xóa dấu nháy đơn, ngoặc vuông toán học, dấu chấm lửng
+    s = s.replace(/\[\s*\?\s*\]/g, "mấy");
+    s = s.replace(/\s*\.\.\.\s*/g, " ");
+    s = s.replace(/['"“”‘’]/g, " ");
+    s = s.replace(/\s{2,}/g, " ").trim();
+    return s;
+  }
+
   var Sound = {
     ctx: null,
     bgmTimer: null,
@@ -147,39 +310,63 @@
       }
     },
     speak: function (text, lang, rate) {
-      if (!state.sound || !("speechSynthesis" in window) || !text) return;
-      try {
-        window.speechSynthesis.cancel();
-        var u = new SpeechSynthesisUtterance(text);
-        var targetLang = lang || "vi-VN";
-        u.lang = targetLang;
-        u.rate = rate || (targetLang === "en-US" ? 0.8 : 0.85);
+      if (!state.sound || !text) return;
+      var targetLang = lang || "vi-VN";
+      var isVi = targetLang.indexOf("vi") === 0;
+      // Chuẩn hóa văn bản Unicode và phiên âm học vần tiếng Việt
+      var cleanText = isVi ? cleanVietnamesePhonetics(text) : (String(text).normalize ? String(text).normalize("NFC") : String(text));
 
-        // Tìm voice phù hợp nhất (đặc biệt quan trọng với vi-VN trên iOS/Android/Chrome)
-        if (typeof window.speechSynthesis.getVoices === "function") {
-          var voices = window.speechSynthesis.getVoices();
-          if (voices && voices.length > 0) {
-            var isVi = targetLang.indexOf("vi") === 0;
-            var isEn = targetLang.indexOf("en") === 0;
-            var matchedVoice = null;
-            for (var i = 0; i < voices.length; i++) {
-              var v = voices[i];
-              var vlang = (v.lang || "").toLowerCase().replace(/_/g, "-");
-              if (isVi && (vlang.indexOf("vi") === 0 || (v.name && v.name.toLowerCase().indexOf("vietnam") !== -1))) {
-                matchedVoice = v;
-                break;
-              } else if (isEn && (vlang === "en-us" || vlang.indexOf("en") === 0)) {
-                if (!matchedVoice || vlang === "en-us") matchedVoice = v;
-              }
-            }
-            if (matchedVoice) u.voice = matchedVoice;
-          }
+      // Kiểm tra xem thiết bị có voice tiếng Việt thực sự hay không
+      if (isVi) {
+        if (!cachedVoiceVi) findBestVoices();
+        // Nếu thiết bị không có voice tiếng Việt (như iPadOS 12.5.8 hoặc iOS 16 chưa tải giọng Linh):
+        // Dùng Fallback Audio (Google Vietnamese Voice) để bé nghe chuẩn, KHÔNG để giọng tiếng Anh Samantha đọc sai!
+        if (!cachedVoiceVi) {
+          playFallbackTTS(cleanText, "vi");
+          return;
+        }
+      }
+
+      if (!("speechSynthesis" in window)) {
+        if (isVi) playFallbackTTS(cleanText, "vi");
+        return;
+      }
+
+      try {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
+        stopFallbackTTS();
+
+        var u = new SpeechSynthesisUtterance(cleanText);
+        u.lang = targetLang;
+        // Tốc độ 0.92 giúp phát âm tiếng Việt tự nhiên nhất, tránh méo giọng hay giật cục
+        u.rate = rate || (targetLang === "en-US" ? 0.8 : 0.92);
+
+        // Gán voice tiếng Việt/tiếng Anh chuẩn
+        if (isVi) {
+          if (cachedVoiceVi) u.voice = cachedVoiceVi;
+        } else if (targetLang.indexOf("en") === 0) {
+          if (!cachedVoiceEn) findBestVoices();
+          if (cachedVoiceEn) u.voice = cachedVoiceEn;
         }
 
-        window.speechSynthesis.speak(u);
-      } catch (e) {}
+        // Timeout nhẹ 30ms để tránh bug Safari iOS WebKit drop utterance sau khi cancel
+        setTimeout(function () {
+          try { window.speechSynthesis.speak(u); } catch (e) {
+            if (isVi) playFallbackTTS(cleanText, "vi");
+          }
+        }, 30);
+      } catch (e) {
+        if (isVi) playFallbackTTS(cleanText, "vi");
+      }
     },
-    stopSpeak: function () { try { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch (e) {} }
+    stopSpeak: function () {
+      try {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+        stopFallbackTTS();
+      } catch (e) {}
+    }
   };
 
   // ---------------------------------------------------------
@@ -224,11 +411,19 @@
   var RETRY = ["Gần đúng rồi! Thử lại nhé 💪", "Ối, chưa đúng! Bé nghĩ thêm chút nha 🤔", "Cố lên! Chọn lại nào 😊"];
 
   // ---------------------------------------------------------
-  // 3. TRẠNG THÁI & LƯU TRỮ (localStorage)
+  // 3. TRẠNG THÁI, HỒ SƠ BÉ & ĐỒNG BỘ ĐÁM MÂY (Firebase)
   // ---------------------------------------------------------
-  var STORE_KEY = "vqtt_state_v1";
+  var OLD_STORE_KEY = "vqtt_state_v1";
+  var PROFILES_KEY = "vqtt_profiles_v1";
+  var ACTIVE_PROFILE_KEY = "vqtt_active_profile_v1";
+
+  var profiles = [
+    { id: "hoanglong", name: "HOÀNG LONG", avatar: "hero" }
+  ];
+  var currentProfileId = "hoanglong";
+
   var state = {
-    name: "BÉ YÊU",
+    name: "HOÀNG LONG",
     coins: 0,
     avatar: "hero",
     owned: ["hero"],
@@ -240,24 +435,251 @@
     sound: true,
     bgm: true,         // Nhạc nền game
     autoRead: true,
-    unlockAll: false
+    unlockAll: false,
+    updatedAt: 0
   };
 
-  function loadState() {
+  function profileStoreKey(pid) {
+    return "vqtt_state_" + (pid || currentProfileId);
+  }
+
+  function getProfileState(pid) {
+    if (pid === currentProfileId) return state;
     try {
-      var raw = localStorage.getItem(STORE_KEY);
-      if (raw) {
-        var s = JSON.parse(raw);
-        for (var k in s) { if (s.hasOwnProperty(k)) state[k] = s[k]; }
-      } else {
-        // Chuyển sao từ bản cũ sang xu
-        var oldStars = parseInt(localStorage.getItem("edu1_stars"), 10);
-        if (oldStars > 0) state.coins = oldStars;
+      var raw = localStorage.getItem(profileStoreKey(pid));
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return { name: pid, coins: 0, avatar: "hero", progress: {}, passages: {} };
+  }
+
+  function loadProfiles() {
+    try {
+      var rawP = localStorage.getItem(PROFILES_KEY);
+      if (rawP) {
+        var parsed = JSON.parse(rawP);
+        if (Array.isArray(parsed) && parsed.length > 0) profiles = parsed;
+      }
+      var act = localStorage.getItem(ACTIVE_PROFILE_KEY);
+      if (act) {
+        for (var i = 0; i < profiles.length; i++) {
+          if (profiles[i].id === act) { currentProfileId = act; break; }
+        }
       }
     } catch (e) {}
   }
+
+  function saveProfilesList() {
+    try { localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles)); } catch (e) {}
+    try { localStorage.setItem(ACTIVE_PROFILE_KEY, currentProfileId); } catch (e) {}
+    CloudSync.saveProfileList();
+  }
+
+  function loadState() {
+    loadProfiles();
+    try {
+      var key = profileStoreKey(currentProfileId);
+      var raw = localStorage.getItem(key);
+      if (!raw && currentProfileId === "hoanglong") {
+        // Tự động chuyển đổi tiến độ cũ sang tài khoản Hoàng Long để giữ nguyên điểm
+        raw = localStorage.getItem(OLD_STORE_KEY);
+      }
+      if (raw) {
+        var s = JSON.parse(raw);
+        for (var k in s) { if (s.hasOwnProperty(k)) state[k] = s[k]; }
+        if (!state.name || state.name === "BÉ YÊU") state.name = "HOÀNG LONG";
+      } else {
+        var oldStars = parseInt(localStorage.getItem("edu1_stars"), 10);
+        if (oldStars > 0) state.coins = oldStars;
+        state.name = "HOÀNG LONG";
+      }
+    } catch (e) {}
+  }
+
   function saveState() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+    state.updatedAt = Date.now();
+    try { localStorage.setItem(profileStoreKey(currentProfileId), JSON.stringify(state)); } catch (e) {}
+    // Tự động đẩy lên đám mây Firebase Realtime Database
+    CloudSync.saveProfile(currentProfileId, state);
+  }
+
+  function switchProfile(pid) {
+    if (!pid || pid === currentProfileId) return;
+    saveState();
+    currentProfileId = pid;
+    saveProfilesList();
+    // Đặt lại state mặc định trước khi nạp hồ sơ mới
+    state.name = pid.toUpperCase();
+    state.coins = 0;
+    state.avatar = "hero";
+    state.owned = ["hero"];
+    state.progress = {};
+    state.passages = {};
+    state.lastSubj = "math";
+    state.lastUnitIdx = 0;
+    state.lastPassageIdx = 0;
+    state.updatedAt = 0;
+    loadState();
+    Sound.good();
+    renderHome();
+    CloudSync.listenCurrentProfile();
+  }
+
+  function addNewProfile(rawName) {
+    if (!rawName) return;
+    var name = String(rawName).trim().toUpperCase();
+    if (!name.length) return;
+    var cleanId = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!cleanId.length) cleanId = "be" + Date.now().toString(36);
+    var baseId = cleanId;
+    var counter = 1;
+    while (true) {
+      var exists = false;
+      for (var i = 0; i < profiles.length; i++) {
+        if (profiles[i].id === cleanId) { exists = true; break; }
+      }
+      if (!exists) break;
+      cleanId = baseId + counter;
+      counter++;
+    }
+    profiles.push({ id: cleanId, name: name, avatar: "hero" });
+    saveProfilesList();
+    switchProfile(cleanId);
+  }
+
+  // Bộ máy đồng bộ đám mây Firebase
+  var CloudSync = {
+    db: null,
+    listenerRef: null,
+    init: function () {
+      if (typeof firebase === "undefined" || typeof FIREBASE_CONFIG === "undefined" || !FIREBASE_CONFIG.databaseURL) {
+        this.updatePill("offline", "Lưu máy");
+        return;
+      }
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+        this.db = firebase.database();
+        var self = this;
+        // Theo dõi trạng thái kết nối mạng thực tế của Firebase
+        this.db.ref(".info/connected").on("value", function (snap) {
+          if (snap.val() === true) {
+            self.updatePill("online", "Đám mây");
+          } else {
+            self.updatePill("offline", "Ngoại tuyến");
+          }
+        });
+        this.listenProfiles();
+        this.listenCurrentProfile();
+      } catch (e) {
+        this.updatePill("offline", "Lưu máy");
+      }
+    },
+    updatePill: function (status, label) {
+      var dot = $("syncDot"), lbl = $("syncLabel");
+      if (dot) dot.className = "sync-dot " + status;
+      if (lbl) lbl.innerHTML = label;
+    },
+    saveProfile: function (pid, data) {
+      if (!this.db || !pid) return;
+      var self = this;
+      this.updatePill("syncing", "Đang lưu...");
+      try {
+        var payload = {
+          id: pid,
+          name: data.name || "HOÀNG LONG",
+          coins: data.coins || 0,
+          avatar: data.avatar || "hero",
+          owned: data.owned || ["hero"],
+          progress: data.progress || {},
+          passages: data.passages || {},
+          lastSubj: data.lastSubj || "math",
+          lastUnitIdx: data.lastUnitIdx || 0,
+          lastPassageIdx: data.lastPassageIdx || 0,
+          updatedAt: data.updatedAt || Date.now()
+        };
+        this.db.ref("kidsedu/profiles/" + pid).set(payload, function (err) {
+          if (!err) {
+            self.updatePill("online", "Đám mây");
+          } else {
+            self.updatePill("offline", "Lưu máy");
+          }
+        });
+      } catch (e) {
+        self.updatePill("offline", "Lưu máy");
+      }
+    },
+    listenCurrentProfile: function () {
+      if (!this.db || !currentProfileId) return;
+      var self = this;
+      if (this.listenerRef) {
+        try { this.listenerRef.off(); } catch (e) {}
+      }
+      this.listenerRef = this.db.ref("kidsedu/profiles/" + currentProfileId);
+      this.listenerRef.on("value", function (snapshot) {
+        var val = snapshot.val();
+        if (val) {
+          if (val.updatedAt && val.updatedAt > (state.updatedAt || 0)) {
+            for (var k in val) {
+              if (val.hasOwnProperty(k) && k !== "id") state[k] = val[k];
+            }
+            try { localStorage.setItem(profileStoreKey(currentProfileId), JSON.stringify(state)); } catch (e) {}
+            renderHome();
+            self.updatePill("online", "Đám mây");
+          }
+        } else {
+          // Lần đầu kết nối: tự động đẩy tiến độ hiện tại lên Firebase để lưu trữ
+          self.saveProfile(currentProfileId, state);
+        }
+      });
+    },
+    listenProfiles: function () {
+      if (!this.db) return;
+      var self = this;
+      this.db.ref("kidsedu/profile_list").on("value", function (snapshot) {
+        var list = snapshot.val();
+        if (list && Array.isArray(list) && list.length > 0) {
+          profiles = list;
+          try { localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles)); } catch (e) {}
+        } else {
+          // Lần đầu: đẩy danh sách hồ sơ lên Firebase
+          self.saveProfileList();
+        }
+      });
+    },
+    saveProfileList: function () {
+      if (!this.db) return;
+      try { this.db.ref("kidsedu/profile_list").set(profiles); } catch (e) {}
+    }
+  };
+
+  function calcTotalStars(pState) {
+    if (!pState || !pState.progress) return 0;
+    var t = 0;
+    for (var s = 0; s < SUBJECTS.length; s++) {
+      var sid = SUBJECTS[s].id;
+      var units = UNITS[sid];
+      for (var u = 0; u < units.length; u++) {
+        var top = units[u].topic;
+        if (top === "passages") {
+          var count = 0;
+          if (pState.passages) {
+            for (var pk in pState.passages) {
+              if (pState.passages.hasOwnProperty(pk) && pState.passages[pk] > 0) count++;
+            }
+          }
+          t += count >= 5 ? 3 : count >= 3 ? 2 : count >= 1 ? 1 : 0;
+        } else {
+          var p = pState.progress[sid + "|" + top];
+          if (p) {
+            var m = 0;
+            for (var mk in p) { if (p.hasOwnProperty(mk) && p[mk] > m) m = p[mk]; }
+            t += m;
+          }
+        }
+      }
+    }
+    return t;
   }
 
   function unitKey(subj, topic) { return subj + "|" + topic; }
@@ -837,7 +1259,14 @@
     if (game.lang === "en-US") {
       Sound.speak(q.speakText || q.answer, "en-US");
     } else {
-      Sound.speak(q.prompt.replace(/\.\.\./g, " gì "), "vi-VN");
+      var textToSpeak = q.readPrompt || q.prompt;
+      if (q.visualType === "formula" && q.visual && /[+\-=]/.test(q.visual) && q.visual.indexOf("?") !== -1) {
+        var mathExpr = q.visual.replace(/\?/g, "mấy").replace(/\+/g, " cộng ").replace(/\-/g, " trừ ").replace(/=/g, " bằng ");
+        if (textToSpeak.indexOf("+") === -1 && textToSpeak.indexOf("-") === -1) {
+          textToSpeak = textToSpeak + ": " + mathExpr;
+        }
+      }
+      Sound.speak(textToSpeak, "vi-VN");
     }
   }
 
@@ -870,7 +1299,7 @@
 
   // ===== CHẾ ĐỘ 1: PHIẾN ĐÁ BÍ ẨN (trắc nghiệm) =====
   function renderQuiz(q) {
-    say(game.idx === 0 ? "Bé chọn phiến đá có đáp án đúng nhé!" : pick(["Câu tiếp theo nè!", "Cố lên bé ơi! 💪", "Bé làm được mà! 😊"]));
+    say(game.idx === 0 ? "Bé chọn phiến đá có đáp án đúng nhé! Mỗi câu chỉ được chọn 1 lần thôi nha! 🌟" : pick(["Câu tiếp theo nè!", "Suy nghĩ kỹ rồi hãy chọn nhé! 🧐", "Bé làm được mà! 😊"]));
     var opts = shuffle(q.options.slice());
     var html = '<div class="visual-card">' + visualHTML(q) + '</div><div class="stone-grid">';
     for (var i = 0; i < opts.length; i++) {
@@ -887,11 +1316,11 @@
 
   function answerQuiz(btn, q) {
     if (game.locked || hasClass(btn, "disabled")) return;
+    game.locked = true; // Chỉ 1 cơ hội duy nhất, khóa ngay lập tức!
     var val = btn.getAttribute("data-val");
     if (val === q.answer) {
-      game.locked = true;
       addClass(btn, "correct");
-      var pts = game.tries === 0 ? 10 : 5;
+      var pts = 10;
       game.score += pts;
       updateHud();
       floatPoints("+" + pts, btn);
@@ -899,29 +1328,38 @@
       var toSpeak = q.speakText || (game.lang === "en-US" ? q.answer : null);
       if (toSpeak) later(function () { Sound.speak(toSpeak, game.lang); }, 450);
       say(pick(PRAISE), "good");
-      if (game.tries === 0 && Math.random() < 0.35) confetti(8);
+      if (Math.random() < 0.35) confetti(8);
       later(function () { game.idx++; nextQuestion(); }, 1500);
     } else {
-      game.tries++;
+      // CHỌN SAI -> FAILED NGAY LẬP TỨC!
       addClass(btn, "wrong");
-      addClass(btn, "disabled");
       Sound.bad();
-      if (game.tries >= 2) {
-        game.locked = true;
-        var all = $("gameStage").querySelectorAll(".stone");
-        for (var i = 0; i < all.length; i++) if (all[i].getAttribute("data-val") === q.answer) addClass(all[i], "correct");
-        say("Đáp án đúng là: <b>" + esc(q.answer) + "</b>. Lần sau bé nhớ nhé! 😉", "bad");
-        later(function () { game.idx++; nextQuestion(); }, 2300);
-      } else {
-        say(pick(RETRY), "bad");
+      var all = $("gameStage").querySelectorAll(".stone");
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].getAttribute("data-val") === q.answer) {
+          addClass(all[i], "correct");
+        } else {
+          addClass(all[i], "disabled");
+        }
       }
+      var wrongMsg = pick([
+        "Tiếc quá, chưa đúng rồi! Đáp án đúng là: <b>" + esc(q.answer) + "</b>",
+        "Chưa đúng rồi nè! Đáp án đúng là: <b>" + esc(q.answer) + "</b>",
+        "Ối, sai mất rồi! Đáp án đúng là: <b>" + esc(q.answer) + "</b>. Lần sau bé chú ý nhé! 💪"
+      ]);
+      say(wrongMsg, "bad");
+      var toSpeakWrong = q.speakText || (game.lang === "en-US" ? q.answer : q.answer);
+      if (toSpeakWrong) {
+        later(function () { Sound.speak("Đáp án đúng là " + toSpeakWrong, game.lang); }, 500);
+      }
+      later(function () { game.idx++; nextQuestion(); }, 2500);
     }
   }
 
   // ===== CHẾ ĐỘ 2: BÓNG BAY TRI THỨC =====
   var BALLOON_COLORS = ["b-red", "b-blue", "b-green", "b-purple", "b-orange"];
   function renderBalloon(q) {
-    say(game.idx === 0 ? "Chạm vào quả bóng có đáp án đúng trước khi nó bay mất nhé! 🎈" : "Bóng đang bay lên kìa! Nhanh tay nào!");
+    say(game.idx === 0 ? "Chạm vào quả bóng đúng nhé! Chỉ được chọn 1 lần thôi! 🎈" : "Bóng đang bay lên kìa! Nhìn kỹ rồi chạm nhé!");
     var mini = "";
     if (q.visualType === "split") mini = q.visualData.top + " gồm " + q.visualData.left + " và " + q.visualData.right;
     else if (q.visualType === "word" || q.visualType === "eng") mini = q.visual + "  " + q.word;
@@ -956,24 +1394,23 @@
       })(b, delay, dur);
       onTap(b, function () { answerBalloon(this, q); });
     }
-    // Nếu bóng đúng bay mất mà bé chưa bắn -> cho bay lại 1 lần, rồi mới hiện đáp án
+    // Nếu bóng đúng bay mất mà bé chưa bắn -> FAILED ngay, không cho chọn lại!
     later(function () {
       if (game.locked) return;
-      game.tries++;
-      if (game.tries >= 2) {
-        game.locked = true;
-        say("Bóng bay mất rồi! Đáp án là: <b>" + esc(q.answer) + "</b> 😉", "bad");
-        Sound.bad();
-        later(function () { game.idx++; nextQuestion(); }, 2200);
-      } else {
-        say("Ôi bóng bay mất rồi! Thả lại lần nữa nhé 🎈", "bad");
-        later(function () { var t = game.tries; renderBalloon(q); game.tries = t; }, 900);
+      game.locked = true;
+      say("Bóng bay mất rồi! Đáp án đúng là: <b>" + esc(q.answer) + "</b> 😉", "bad");
+      Sound.bad();
+      var toSpeakEnd = q.speakText || (game.lang === "en-US" ? q.answer : q.answer);
+      if (toSpeakEnd) {
+        later(function () { Sound.speak("Đáp án đúng là " + toSpeakEnd, game.lang); }, 400);
       }
+      later(function () { game.idx++; nextQuestion(); }, 2400);
     }, correctEnd + 200);
   }
 
   function answerBalloon(el, q) {
     if (game.locked || hasClass(el, "popped")) return;
+    game.locked = true; // Chỉ 1 cơ hội duy nhất, khóa ngay lập tức!
     var val = el.getAttribute("data-val");
     var arena = $("arena");
     var r = el.getBoundingClientRect(), ar = arena.getBoundingClientRect();
@@ -982,13 +1419,12 @@
     star.style.left = (r.left - ar.left + r.width / 2 - 20) + "px";
     star.style.top = (r.top - ar.top + 20) + "px";
     if (val === q.answer) {
-      game.locked = true;
       star.innerHTML = "🌟";
       arena.appendChild(star);
       addClass(el, "ok");
       Sound.pop();
       later(function () { addClass(el, "popped"); Sound.good(); }, 150);
-      var pts = game.tries === 0 ? 10 : 5;
+      var pts = 10;
       game.score += pts;
       updateHud();
       floatPoints("+" + pts, el);
@@ -997,12 +1433,18 @@
       if (toSpeak) later(function () { Sound.speak(toSpeak, game.lang); }, 500);
       later(function () { game.idx++; nextQuestion(); }, 1600);
     } else {
+      // BẮN SAI BÓNG -> FAILED NGAY LẬP TỨC!
       star.innerHTML = "💨";
       arena.appendChild(star);
       addClass(el, "popped");
-      Sound.pop(); later(function () { Sound.bad(); }, 100);
-      game.tries = Math.max(game.tries, 1);
-      say(pick(RETRY), "bad");
+      Sound.pop();
+      later(function () { Sound.bad(); }, 100);
+      say("Chưa đúng rồi! Đáp án đúng là: <b>" + esc(q.answer) + "</b> 🎈", "bad");
+      var toSpeakWrong = q.speakText || (game.lang === "en-US" ? q.answer : q.answer);
+      if (toSpeakWrong) {
+        later(function () { Sound.speak("Đáp án đúng là " + toSpeakWrong, game.lang); }, 500);
+      }
+      later(function () { game.idx++; nextQuestion(); }, 2500);
     }
   }
 
@@ -1140,8 +1582,143 @@
   }
 
   // ---------------------------------------------------------
-  // 10. HUY HIỆU / CỬA HÀNG / HƯỚNG DẪN / CÀI ĐẶT
+  // 10. BÁO CÁO HỌC TẬP, HUY HIỆU, CỬA HÀNG, CÀI ĐẶT
   // ---------------------------------------------------------
+  function openReport() {
+    Sound.click();
+    var body = $("reportBody");
+    if (!body) return;
+
+    var ts = totalStars();
+    var maxS = maxTotalStars();
+    var mathS = subjectStars("math"), mathMax = UNITS.math.length * 3;
+    var vietS = subjectStars("viet"), vietMax = UNITS.viet.length * 3;
+    var engS = subjectStars("eng"), engMax = UNITS.eng.length * 3;
+
+    var mathPct = Math.round(mathS / mathMax * 100);
+    var vietPct = Math.round(vietS / vietMax * 100);
+    var engPct = Math.round(engS / engMax * 100);
+
+    // Thu thập danh sách bài cần ôn tập (0 hoặc 1 sao) và bài đã thành thạo (2 hoặc 3 sao)
+    var needWork = [];
+    var mastered = [];
+
+    for (var s = 0; s < SUBJECTS.length; s++) {
+      var subj = SUBJECTS[s];
+      var units = UNITS[subj.id];
+      for (var u = 0; u < units.length; u++) {
+        var unit = units[u];
+        var stars = unitStars(subj.id, unit.topic);
+        var itemData = {
+          subjId: subj.id,
+          subjName: subj.short,
+          unitIdx: u,
+          topic: unit.topic,
+          title: unit.title,
+          icon: unit.icon,
+          stars: stars
+        };
+        if (stars <= 1) {
+          needWork.push(itemData);
+        } else {
+          mastered.push(itemData);
+        }
+      }
+    }
+
+    var html = '<div class="report-summary-card">' +
+      '<div style="display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between">' +
+        '<div><b style="font-size:18px;color:#1e3a8a">👦 ' + esc(state.name) + '</b><div style="font-size:12px;color:#64748b;margin-top:2px">Học lực: ' + (ts >= 40 ? 'Xuất sắc 🌟' : ts >= 20 ? 'Khá tốt 👍' : 'Đang rèn luyện 🌱') + '</div></div>' +
+        '<div style="text-align:right"><b style="font-size:20px;color:#d97706">⭐ ' + ts + '/' + maxS + '</b><div style="font-size:11px;color:#64748b">Tổng số sao</div></div>' +
+      '</div>' +
+      '<div class="report-subj-grid">' +
+        '<div class="report-subj-box">' +
+          '<div class="report-subj-title">🏰 Toán 1</div>' +
+          '<div class="report-subj-stars">' + mathS + '/' + mathMax + ' ⭐</div>' +
+          '<div class="report-subj-bar"><div class="report-subj-fill" style="width:' + mathPct + '%"></div></div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:4px">' + mathPct + '%</div>' +
+        '</div>' +
+        '<div class="report-subj-box viet">' +
+          '<div class="report-subj-title">📚 T.Việt 1</div>' +
+          '<div class="report-subj-stars">' + vietS + '/' + vietMax + ' ⭐</div>' +
+          '<div class="report-subj-bar"><div class="report-subj-fill" style="width:' + vietPct + '%"></div></div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:4px">' + vietPct + '%</div>' +
+        '</div>' +
+        '<div class="report-subj-box eng">' +
+          '<div class="report-subj-title">🎈 T.Anh 1</div>' +
+          '<div class="report-subj-stars">' + engS + '/' + engMax + ' ⭐</div>' +
+          '<div class="report-subj-bar"><div class="report-subj-fill" style="width:' + engPct + '%"></div></div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:4px">' + engPct + '%</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+    // Phần 1: Cần ôn tập bổ sung
+    html += '<div class="report-section-title">⚠️ Phần Bé Cần Luyện Tập Thêm (' + needWork.length + ' bài)</div>';
+    if (needWork.length === 0) {
+      html += '<div style="background:#f0fdf4;padding:12px;border-radius:14px;color:#166534;font-size:13px;font-weight:700">🎉 Tuyệt vời! Bé đã nắm vững toàn bộ các bài học, không có bài nào dưới 2 sao!</div>';
+    } else {
+      html += '<div class="report-list">';
+      for (var nw = 0; nw < needWork.length; nw++) {
+        var it = needWork[nw];
+        var starStr = it.stars === 1 ? '⭐ (Cần củng cố)' : 'Chưa học / Chưa đạt';
+        html += '<div class="report-item warn">' +
+          '<div class="report-item-ic">' + it.icon + '</div>' +
+          '<div class="report-item-info">' +
+            '<div class="report-item-name">' + esc(it.title) + '</div>' +
+            '<div class="report-item-sub">[' + esc(it.subjName) + '] • ' + starStr + '</div>' +
+          '</div>' +
+          '<button class="report-item-btn" data-subj="' + it.subjId + '" data-idx="' + it.unitIdx + '">Ôn ngay ➜</button>' +
+        '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Phần 2: Đã thành thạo
+    if (mastered.length > 0) {
+      html += '<div class="report-section-title" style="margin-top:16px">🌟 Phần Bé Đã Thành Thạo (' + mastered.length + ' bài)</div>';
+      html += '<div class="report-list">';
+      for (var ms = 0; ms < mastered.length; ms++) {
+        var mItem = mastered[ms];
+        var mStarStr = mItem.stars === 3 ? '⭐⭐⭐ (Xuất sắc)' : '⭐⭐ (Khá tốt)';
+        html += '<div class="report-item good">' +
+          '<div class="report-item-ic">' + mItem.icon + '</div>' +
+          '<div class="report-item-info">' +
+            '<div class="report-item-name">' + esc(mItem.title) + '</div>' +
+            '<div class="report-item-sub">[' + esc(mItem.subjName) + '] • ' + mStarStr + '</div>' +
+          '</div>' +
+        '</div>';
+      }
+      html += '</div>';
+    }
+
+    body.innerHTML = html;
+
+    // Gắn sự kiện "Ôn ngay" từ dashboard
+    var actionBtns = body.querySelectorAll(".report-item-btn");
+    for (var b = 0; b < actionBtns.length; b++) {
+      onTap(actionBtns[b], function () {
+        var sId = this.getAttribute("data-subj");
+        var uIdx = parseInt(this.getAttribute("data-idx"), 10);
+        closeOverlay("reportOverlay");
+        curSubj = sId;
+        curUnitIdx = uIdx;
+        var uList = UNITS[curSubj];
+        if (uList && uList[curUnitIdx]) {
+          if (uList[curUnitIdx].topic === "passages") {
+            openPassageReader(0);
+          } else {
+            renderMap();
+            showScreen("screenMap");
+            openModePicker();
+          }
+        }
+      });
+    }
+
+    openOverlay("reportOverlay");
+  }
+
   function openBadges() {
     var ts = totalStars();
     var html = '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đã có <b>' + ts + "/" + maxTotalStars() + " ⭐</b></div><div class=\"grid-cards\">";
@@ -1201,17 +1778,58 @@
     openOverlay("infoOverlay");
   }
 
+  function openProfileModal() {
+    Sound.click();
+    renderProfileCards();
+    openOverlay("profileOverlay");
+  }
+
+  function renderProfileCards() {
+    var c = $("profileCards");
+    if (!c) return;
+    var html = "";
+    for (var i = 0; i < profiles.length; i++) {
+      var p = profiles[i];
+      var isActive = p.id === currentProfileId;
+      var pState = getProfileState(p.id);
+      var stars = calcTotalStars(pState);
+      var coins = pState.coins || 0;
+      var av = getAvatar(pState.avatar || p.avatar || "hero");
+      var avHTML = av.img ? '<img src="' + av.img + '">' : av.emoji;
+      html += '<div class="profile-card' + (isActive ? ' active' : '') + '" data-pid="' + esc(p.id) + '">' +
+        '<div class="profile-avatar">' + avHTML + '</div>' +
+        '<div class="profile-info">' +
+          '<div class="profile-name">' + esc(p.name) + '</div>' +
+          '<div class="profile-meta">⭐ ' + stars + ' sao • 🪙 ' + coins + ' xu</div>' +
+        '</div>' +
+        '<div class="profile-tag">' + (isActive ? 'Đang học ✅' : 'Chọn') + '</div>' +
+      '</div>';
+    }
+    c.innerHTML = html;
+    var cards = c.querySelectorAll(".profile-card");
+    for (var j = 0; j < cards.length; j++) {
+      onTap(cards[j], function () {
+        var pid = this.getAttribute("data-pid");
+        switchProfile(pid);
+        closeOverlay("profileOverlay");
+      });
+    }
+  }
+
   function openSettings() {
     $("infoTitle").innerHTML = "⚙️ Cài Đặt (dành cho Bố Mẹ)";
     $("infoBody").innerHTML =
-      '<div class="set-row"><span>👦 Tên bé: <b id="setName">' + esc(state.name) + '</b></span><button class="small-btn" id="renameBtn">Đổi tên</button></div>' +
+      '<div class="set-row"><span>👦 Hồ sơ đang học: <b id="setName">' + esc(state.name) + '</b></span><button class="small-btn" id="setProfileBtn">Đổi bé</button></div>' +
+      '<div class="set-row"><span>📊 Báo cáo học tập</span><button class="small-btn" id="setReportBtn">Xem</button></div>' +
+      '<div class="set-row"><span>☁️ Đồng bộ đám mây: <b id="setCloudStatus">' + (CloudSync.db ? 'Đã kết nối' : 'Lưu trên máy') + '</b></span><button class="small-btn" id="setCloudBtn">Xem</button></div>' +
       '<div class="set-row"><span>🔊 Âm thanh & giọng đọc</span><button class="toggle' + (state.sound ? " on" : "") + '" data-key="sound"></button></div>' +
       '<div class="set-row"><span>🗣️ Tự động đọc câu hỏi</span><button class="toggle' + (state.autoRead ? " on" : "") + '" data-key="autoRead"></button></div>' +
       '<div class="set-row"><span>🔓 Mở khóa tất cả bài</span><button class="toggle' + (state.unlockAll ? " on" : "") + '" data-key="unlockAll"></button></div>' +
       '<div class="set-row"><span>📋 Sao lưu mã tiến độ</span><button class="small-btn" id="exportBtn">Lấy mã</button></div>' +
       '<div class="set-row"><span>📥 Khôi phục từ mã</span><button class="small-btn" id="importBtn">Nhập mã</button></div>' +
       '<div class="set-row"><span>🗑️ Xóa làm lại từ đầu</span><button class="small-btn red" id="resetBtn">Xóa</button></div>' +
-      '<div class="guide-item" style="margin-top:12px"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad:</b> Bấm nút Chia sẻ (hình vuông mũi tên lên trên Safari) -> chọn <b>Thêm vào Màn hình chính (Add to Home Screen)</b> để app ghim ra màn hình và luôn lưu tiến độ tự động vĩnh viễn!</div></div>';
+      '<div class="guide-item" style="margin-top:12px"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Nếu máy phát âm tiếng Anh, hãy vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> và tải giọng Linh về máy. App cũng có chế độ tự động phát âm tiếng Việt chuẩn online khi kết nối Wi-Fi!</div></div>' +
+      '<div class="guide-item" style="margin-top:6px"><span class="gi-ic">📌</span><div><b>Ghim app ra màn hình:</b> Bấm nút Chia sẻ (hình vuông mũi tên lên trên Safari) ➜ chọn <b>Thêm vào MH chính (Add to Home Screen)</b> để chơi toàn màn hình và lưu bài vĩnh viễn.</div></div>';
     var toggles = $("infoBody").querySelectorAll(".toggle");
     for (var i = 0; i < toggles.length; i++) {
       onTap(toggles[i], function () {
@@ -1221,12 +1839,20 @@
         saveState(); Sound.click();
       });
     }
-    onTap($("renameBtn"), function () {
-      var n = window.prompt("Nhập tên của bé:", state.name);
-      if (n && n.replace(/\s/g, "").length) {
-        state.name = n.substring(0, 18).toUpperCase();
-        saveState(); renderHome();
-        $("setName").innerHTML = esc(state.name);
+    onTap($("setProfileBtn"), function () {
+      closeOverlay("infoOverlay");
+      openProfileModal();
+    });
+    onTap($("setReportBtn"), function () {
+      closeOverlay("infoOverlay");
+      openReport();
+    });
+    onTap($("setCloudBtn"), function () {
+      Sound.click();
+      if (CloudSync.db) {
+        window.alert("🟢 Đã kết nối Firebase thành công!\nMọi tiến độ của bé Hoàng Long và các bé khác sẽ tự động đồng bộ giữa iPad và iPhone.");
+      } else {
+        window.alert("💾 Trạng thái: Lưu cục bộ trên máy.\nĐể bật đồng bộ đám mây giữa các thiết bị, bạn hãy tạo Firebase Project miễn phí và điền vào file js/firebase-config.js nhé!");
       }
     });
     onTap($("exportBtn"), function () {
@@ -1339,8 +1965,24 @@
     }
 
     onTap($("settingsBtn"), function () { Sound.click(); openSettings(); });
-    onTap($("profileBtn"), function () { Sound.click(); openShop(); });
-    onTap($("homeAvatar"), function () { Sound.click(); openShop(); });
+    onTap($("profileBtn"), function () { openProfileModal(); });
+    onTap($("homeAvatar"), function () { openProfileModal(); });
+    onTap($("syncPill"), function () {
+      Sound.click();
+      if (CloudSync.db) {
+        window.alert("🟢 Trạng thái: Đã kết nối đám mây Firebase!\nMọi tiến độ của bé Hoàng Long và các bé khác sẽ tự động đồng bộ giữa iPad và iPhone.");
+      } else {
+        window.alert("💾 Trạng thái: Lưu trên máy.\nĐể đồng bộ dữ liệu giữa iPad và iPhone, bạn hãy tạo Firebase Project miễn phí và dán cấu hình vào file js/firebase-config.js nhé!");
+      }
+    });
+    onTap($("addKidBtn"), function () {
+      Sound.click();
+      var n = window.prompt("Nhập tên bé mới (ví dụ: Bảo An):");
+      if (n && n.replace(/\s/g, "").length) {
+        addNewProfile(n);
+        closeOverlay("profileOverlay");
+      }
+    });
     onTap($("badgeStrip"), function () { Sound.click(); openBadges(); });
 
     var navs = document.querySelectorAll(".nav-item");
@@ -1348,7 +1990,8 @@
       onTap(navs[i], function () {
         Sound.click();
         var n = this.getAttribute("data-nav");
-        if (n === "badges") openBadges();
+        if (n === "report") openReport();
+        else if (n === "badges") openBadges();
         else if (n === "shop") openShop();
         else if (n === "guide") openGuide();
       });
@@ -1363,7 +2006,7 @@
       onTap(closers[c], function () { Sound.click(); closeOverlay(this.getAttribute("data-close")); });
     }
     // Chạm ra ngoài panel để đóng (trừ kết quả & tạm dừng)
-    var ovs = ["modeOverlay", "infoOverlay"];
+    var ovs = ["modeOverlay", "infoOverlay", "profileOverlay", "reportOverlay"];
     for (var o = 0; o < ovs.length; o++) {
       (function (id) {
         onTap($(id), function (e) { if (e.target === $(id)) closeOverlay(id); });
@@ -1376,8 +2019,7 @@
       if (game.mode === "memory") { Sound.speak("Lật hai thẻ để tìm cặp đi cùng nhau", "vi-VN"); return; }
       var q = game.list[game.idx];
       if (!q) return;
-      if (game.lang === "en-US") Sound.speak(q.speakText || q.answer, "en-US");
-      else Sound.speak(q.prompt.replace(/\.\.\./g, " gì "), "vi-VN");
+      readPrompt(q);
     });
 
     onTap($("pauseBtn"), function () {
@@ -1406,6 +2048,7 @@
   bindEvents();
   updateBgmButtons();
   renderHome();
+  CloudSync.init();
 
   // Chế độ xem thử cho phụ huynh/kiểm thử: index.html#demo=map:math hoặc #demo=game:eng:0:balloon
   var demo = (location.hash.match(/demo=([^&]+)/) || [])[1];
