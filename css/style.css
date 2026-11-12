@@ -349,7 +349,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; -webkit-justify-content: space-around; justify-content: space-around;
   margin-bottom: 12px;
 }
-.mcard { width: 23%; padding-top: 28%; position: relative; margin-bottom: 10px; -webkit-perspective: 600px; perspective: 600px; cursor: pointer; }
+.mcard { width: 23%; padding-top: 28%; position: relative; margin-bottom: 10px; -webkit-perspective: 600px; perspective: 600px; cursor: pointer; box-sizing: border-box; }
 .memory-board.cols3 .mcard { width: 31%; padding-top: 34%; }
 .mcard-inner {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -362,17 +362,48 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   -webkit-backface-visibility: hidden; backface-visibility: hidden;
   display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
   text-align: center; padding: 4px; font-weight: 800;
+  overflow: hidden; box-sizing: border-box;
 }
 .mface.back {
   background: linear-gradient(160deg, #fff3cc, #f0d48f); border: 3px solid #b88a45; font-size: 34px; color: #c58a3a;
   box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.7), inset 0 -5px 0 rgba(160, 110, 40, 0.3), 0 4px 0 #8f6430;
 }
 .mface.front {
-  background: #fff; border: 3px solid #4a90e2; color: #1f4f9a; font-size: 22px; line-height: 1.1;
+  background: #fff; border: 3px solid #4a90e2; color: #1f4f9a; font-size: 19px; line-height: 1.15;
   -webkit-transform: rotateY(180deg); transform: rotateY(180deg); box-shadow: 0 4px 0 #2f6db5; word-break: break-word;
+  overflow: hidden;
 }
-.mface.front.emo { font-size: 34px; }
+.mface.front.short-txt { font-size: 26px; }
+.mface.front.emo { padding: 3px 2px; }
+.mface.front.emo-single { font-size: 34px; }
 .mcard.matched .mface.front { background: #e3ffe0; border-color: #2e9e3e; color: #145a20; box-shadow: 0 4px 0 #1f7a2c, 0 0 16px rgba(80, 220, 100, 0.8); }
+
+/* --- Lưới hiển thị Icon/Emoji gọn gàng trong thẻ Lật --- */
+.m-icon-grid {
+  display: -webkit-flex; display: flex;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  -webkit-justify-content: center; justify-content: center;
+  -webkit-align-items: center; align-items: center;
+  -webkit-align-content: center; align-content: center;
+  width: 100%; height: 100%; max-width: 100%; max-height: 100%;
+  box-sizing: border-box; overflow: hidden;
+}
+.m-icon-grid .m-ic {
+  display: -webkit-inline-flex; display: inline-flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  line-height: 1; user-select: none;
+}
+.m-icon-grid.c-2 .m-ic { font-size: 26px; width: 45%; margin: 2px 0; }
+.m-icon-grid.c-3 .m-ic { font-size: 22px; width: 30%; margin: 2px 0; }
+.m-icon-grid.c-4 .m-ic { font-size: 20px; width: 45%; margin: 2px 0; }
+.m-icon-grid.c-5 .m-ic { font-size: 17px; width: 30%; margin: 1px 0; }
+.m-icon-grid.c-6 .m-ic { font-size: 17px; width: 30%; margin: 1px 0; }
+.m-icon-grid.c-7 .m-ic { font-size: 14.5px; width: 23%; margin: 1px 0; }
+.m-icon-grid.c-8 .m-ic { font-size: 14.5px; width: 23%; margin: 1px 0; }
+.m-icon-grid.c-9 .m-ic { font-size: 13.5px; width: 29%; margin: 1px 0; }
+.m-icon-grid.c-10 .m-ic { font-size: 13px; width: 19%; margin: 1px 0; }
+.m-icon-grid.c-many .m-ic { font-size: 12px; width: 18%; margin: 1px 0; }
 
 /* --- Bóng bay --- */
 .balloon-arena {
@@ -545,8 +576,12 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   .unit-title { font-size: 16px; }
   .mc-name { font-size: 14px; }
   .mc-icon { font-size: 32px; }
-  .mface.front { font-size: 17px; }
-  .mface.front.emo { font-size: 28px; }
+  .mface.front { font-size: 16px; }
+  .mface.front.short-txt { font-size: 22px; }
+  .mface.front.emo-single { font-size: 28px; }
+  .m-icon-grid.c-7 .m-ic, .m-icon-grid.c-8 .m-ic { font-size: 13px; }
+  .m-icon-grid.c-9 .m-ic { font-size: 12px; }
+  .m-icon-grid.c-10 .m-ic { font-size: 11.5px; }
   .btn-green, .btn-orange { font-size: 21px; }
 }
 /* iPad ngang: hạn chế chiều cao đảo */

@@ -1451,6 +1451,45 @@
   // ===== CHẾ ĐỘ 3: LẬT THẺ THẦN KỲ =====
   function isEmojiOnly(s) { return !/[A-Za-z0-9À-ỹ]/.test(s); }
 
+  function extractEmojiList(s) {
+    var str = String(s || "").trim();
+    if (/[A-Za-z0-9À-ỹ]/.test(str)) return null;
+    var clean = str.replace(/[\s\r\n]+/g, "");
+    if (!clean) return null;
+    var icons = [];
+    for (var i = 0; i < clean.length; i++) {
+      var c = clean.charCodeAt(i);
+      if (c >= 0xD800 && c <= 0xDBFF && i + 1 < clean.length) {
+        icons.push(clean.charAt(i) + clean.charAt(i + 1));
+        i++;
+      } else {
+        icons.push(clean.charAt(i));
+      }
+    }
+    return icons.length > 0 ? icons : null;
+  }
+
+  function renderCardFront(text) {
+    var str = String(text != null ? text : "");
+    var icList = extractEmojiList(str);
+    if (icList && icList.length > 0) {
+      if (icList.length === 1) {
+        return '<div class="mface front emo emo-single">' + esc(icList[0]) + '</div>';
+      }
+      var count = icList.length;
+      var cClass = count <= 10 ? " c-" + count : " c-many";
+      var html = '<div class="mface front emo"><div class="m-icon-grid' + cClass + '">';
+      for (var m = 0; m < icList.length; m++) {
+        html += '<span class="m-ic">' + esc(icList[m]) + '</span>';
+      }
+      html += '</div></div>';
+      return html;
+    }
+    var isShort = str.length <= 4;
+    var cls = isShort ? " front short-txt" : " front";
+    return '<div class="mface' + cls + '">' + esc(str) + '</div>';
+  }
+
   function buildPairs(qs) {
     var pairs = [], usedA = {}, usedL = {};
     for (var i = 0; i < qs.length; i++) {
@@ -1461,8 +1500,11 @@
         var f = String(q.visual).replace(/\s*=\s*\?\s*$/, "");
         if (f.indexOf("?") === -1 && f.length <= 11 && /[+\-]/.test(f)) left = f;
       } else if (q.visualType === "icons") {
-        var v = String(q.visual).replace(/\n/g, "");
-        if (v.length <= 24 && /^\d+$/.test(q.answer)) left = v;
+        var v = String(q.visual).replace(/[\r\n]+/g, " ").trim();
+        if (/^\d+$/.test(String(q.answer).trim())) {
+          var icList = extractEmojiList(v);
+          if (icList && icList.length >= 1 && icList.length <= 10) left = v;
+        }
       } else if (q.visualType === "split") {
         if (q.visualData.left === "?") left = q.visualData.top + " = ? + " + q.visualData.right;
         else left = q.visualData.top + " = " + q.visualData.left + " + ?";
@@ -1493,9 +1535,8 @@
     var cols3 = cards.length <= 6 || cards.length === 9 ? " cols3" : "";
     var html = '<div class="memory-board' + cols3 + '">';
     for (var k = 0; k < cards.length; k++) {
-      var emo = isEmojiOnly(String(cards[k].text)) ? " emo" : "";
       html += '<div class="mcard" data-id="' + cards[k].id + '"><div class="mcard-inner">' +
-        '<div class="mface back">✦</div><div class="mface front' + emo + '">' + esc(cards[k].text) + "</div></div></div>";
+        '<div class="mface back">✦</div>' + renderCardFront(cards[k].text) + "</div></div>";
     }
     html += "</div>";
     $("gameStage").innerHTML = html;
@@ -1967,6 +2008,7 @@
     onTap($("settingsBtn"), function () { Sound.click(); openSettings(); });
     onTap($("profileBtn"), function () { openProfileModal(); });
     onTap($("homeAvatar"), function () { openProfileModal(); });
+    if ($("topReportBtn")) onTap($("topReportBtn"), function () { openReport(); });
     onTap($("syncPill"), function () {
       Sound.click();
       if (CloudSync.db) {
