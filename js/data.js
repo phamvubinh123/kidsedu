@@ -37,17 +37,59 @@ var UNITS = {
 
 var READING_PASSAGES = [
   {
-    id: "t7",
-    week: "Tuần 7",
-    title: "Về quê thăm bà",
-    source: "SGK Tiếng Việt 1 - Ôn tập",
-    words: ["gắn bó", "chăm chỉ", "bến đỗ", "đầm ấm", "nhà sàn", "tre ngà"],
+    id: "t1",
+    week: "Tuần 1",
+    title: "Bé và bà",
+    source: "SGK Tiếng Việt 1 - Bài 1 - 5",
+    words: ["ba ba", "bè cá", "bờ đê", "bé bế", "cá cờ", "cò bé"],
     sentences: [
-      "Lá cờ đỏ thắm bên nhà sàn.",
-      "Bàn ghế nhà bé làm từ tre ngà.",
-      "Chú cún con mon men đến bên bé."
+      "Bà bế bé đi bờ đê.",
+      "Bà có cá cờ và cà.",
+      "Bé ca ô a bên bà."
     ],
-    paragraph: "Nghỉ lễ, mẹ cho Hà về quê thăm bà và bé Bin. Hà vừa về đến ngõ, bà và bé Bin đã ra đón. Bé Bin nhìn Hà, lon ton đến bên chị. Hà bế Bin và hôn lên má bé.",
+    paragraph: "Bà bế bé ra bờ đê. Ở bờ đê có cò và có bè cá. Bà kể bé nghe về chú cò bé. Bé vỗ tay cười khà khà bên bà.",
+    reward: 15
+  },
+  {
+    id: "t2",
+    week: "Tuần 2",
+    title: "Đi học",
+    source: "SGK Tiếng Việt 1 - Bài 6 - 10",
+    words: ["đi bộ", "đồ cổ", "cô Hà", "hồ cá", "kì cọ", "lá cờ"],
+    sentences: [
+      "Bé đi bộ đến lớp cô Hà.",
+      "Cô Hà vẽ lá cờ đỏ.",
+      "Bờ hồ có cò đi mò cá."
+    ],
+    paragraph: "Sáng sớm, bé đi bộ đến lớp học. Cô Hà dạy bé đọc o, ô, ơ và vẽ lá cờ đỏ. Ra về, bé kể cho bà nghe về lớp học có cô Hà và các bạn nhỏ.",
+    reward: 15
+  },
+  {
+    id: "t3",
+    week: "Tuần 3",
+    title: "Mẹ và bé",
+    source: "SGK Tiếng Việt 1 - Bài 11 - 15",
+    words: ["mẹ và bé", "nơ đỏ", "tủ gỗ", "vẽ tranh", "xe đạp", "sư tử"],
+    sentences: [
+      "Mẹ mua cho bé chiếc nơ đỏ.",
+      "Bé ngồi bên tủ gỗ tập vẽ.",
+      "Bố sửa chiếc xe đạp cho bé."
+    ],
+    paragraph: "Chiều mát, mẹ dắt bé đi dạo phố. Mẹ mua cho bé chiếc nơ đỏ và hộp bút màu. Về nhà, bé ngồi bên bàn học vẽ bức tranh có mẹ, có bố và ngôi nhà nhỏ.",
+    reward: 15
+  },
+  {
+    id: "t4",
+    week: "Tuần 4",
+    title: "Nhà ở quê",
+    source: "SGK Tiếng Việt 1 - Bài 16 - 20",
+    words: ["nhà ngói", "khế chua", "chú thỏ", "phố cổ", "quả na", "tre xanh"],
+    sentences: [
+      "Nhà bà ở quê lợp ngói đỏ.",
+      "Sau nhà có cây khế và lũy tre xanh.",
+      "Chú thỏ trắng ăn cỏ bên hiên."
+    ],
+    paragraph: "Quê nội bé có ngôi nhà ngói đỏ rất đẹp. Trước sân có giàn hoa giấy nở rộ. Sau nhà có cây khế, cây na và bụi tre xanh rì rào trong gió.",
     reward: 15
   },
   {
@@ -65,6 +107,62 @@ var READING_PASSAGES = [
     reward: 15
   },
   {
+    id: "t6",
+    week: "Tuần 6",
+    title: "Khu vườn nhỏ",
+    source: "SGK Tiếng Việt 1 - Bài 26 - 30",
+    words: ["ghế gỗ", "kính râm", "ngõ nhỏ", "nghỉ hè", "quả thị", "gà gô"],
+    sentences: [
+      "Bố kê chiếc ghế gỗ dưới gốc cây.",
+      "Nghỉ hè, bé ra khu vườn nhỏ chơi.",
+      "Bé nghe tiếng gà gáy vang đầu ngõ."
+    ],
+    paragraph: "Khu vườn nhỏ của nhà bé thật mát mẻ. Bố kê chiếc ghế gỗ cạnh giàn mướp xanh. Mỗi sáng, bé ra vườn tưới cây và nghe tiếng chim hót ríu rít trên cành.",
+    reward: 15
+  },
+  {
+    id: "t7",
+    week: "Tuần 7",
+    title: "Về quê thăm bà",
+    source: "SGK Tiếng Việt 1 - Ôn tập",
+    words: ["gắn bó", "chăm chỉ", "bến đỗ", "đầm ấm", "nhà sàn", "tre ngà"],
+    sentences: [
+      "Lá cờ đỏ thắm bên nhà sàn.",
+      "Bàn ghế nhà bé làm từ tre ngà.",
+      "Chú cún con mon men đến bên bé."
+    ],
+    paragraph: "Nghỉ lễ, mẹ cho Hà về quê thăm bà và bé Bin. Hà vừa về đến ngõ, bà và bé Bin đã ra đón. Bé Bin nhìn Hà, lon ton đến bên chị. Hà bế Bin và hôn lên má bé.",
+    reward: 15
+  },
+  {
+    id: "t8",
+    week: "Tuần 8",
+    title: "Chú cún con",
+    source: "SGK Tiếng Việt 1 - Bài 35",
+    words: ["cún con", "lon ton", "bốn chân", "mũm mĩm", "hiền lành", "nhanh nhẹn"],
+    sentences: [
+      "Nhà bé nuôi một chú cún con mũm mĩm.",
+      "Cún con có bộ lông vàng óng mượt.",
+      "Đi học về, cún chạy lon ton ra đón bé."
+    ],
+    paragraph: "Chú cún con nhà bé rất ngoan và nhanh nhẹn. Cún có đôi mắt tròn xoe và cái đuôi vẫy tít mỗi khi thấy bé về. Bé rất yêu quý và hay cho cún ăn cơm.",
+    reward: 15
+  },
+  {
+    id: "t9",
+    week: "Tuần 9",
+    title: "Bữa cơm đầm ấm",
+    source: "SGK Tiếng Việt 1 - Bài 40",
+    words: ["bữa cơm", "đầm ấm", "tôm rang", "canh chua", "mâm cơm", "thơm ngon"],
+    sentences: [
+      "Mẹ nấu bữa cơm tối thật thơm ngon.",
+      "Trên mâm có món tôm rang và canh chua.",
+      "Cả nhà quây quần bên nhau rất đầm ấm."
+    ],
+    paragraph: "Buổi tối, mẹ nấu nhiều món ăn ngon cho cả gia đình. Bé giúp mẹ xếp bát đũa lên mâm cơm. Cả nhà vừa ăn vừa trò chuyện vui vẻ, không khí thật đầm ấm.",
+    reward: 15
+  },
+  {
     id: "t10",
     week: "Tuần 10",
     title: "Đàn gà con",
@@ -76,6 +174,34 @@ var READING_PASSAGES = [
       "Gà mẹ tục tục gọi con khi thấy giun."
     ],
     paragraph: "Buổi sớm, gà mẹ dắt đàn con ra vườn tìm mồi. Đàn con lon ton ríu rít chạy theo sau mẹ. Gặp mồi ngon, gà mẹ tục tục gọi con lại ăn. Cả đàn gà xúm xít quanh mẹ thật là vui vẻ.",
+    reward: 15
+  },
+  {
+    id: "t11",
+    week: "Tuần 11",
+    title: "Con mèo mướp",
+    source: "SGK Tiếng Việt 1 - Bài 50",
+    words: ["mèo mướp", "trèo cau", "leo trèo", "bắt chuột", "sưởi nắng", "ngái ngủ"],
+    sentences: [
+      "Chú mèo mướp nằm sưởi nắng ngoài sân.",
+      "Mèo mướp leo trèo rất giỏi và khéo léo.",
+      "Đêm đến, mèo rình bắt chuột bảo vệ kho lúa."
+    ],
+    paragraph: "Mèo mướp nhà bà có bộ lông vằn xám rất đẹp. Ban ngày, mèo hay nằm cuộn tròn sưởi nắng bên thềm. Nhờ có mèo mướp nhanh nhẹn mà lũ chuột không dám vào nhà.",
+    reward: 15
+  },
+  {
+    id: "t12",
+    week: "Tuần 12",
+    title: "Giờ ra chơi",
+    source: "SGK Tiếng Việt 1 - Bài 55",
+    words: ["ra chơi", "nhảy dây", "đá cầu", "bắt tay", "sân trường", "tiếng cười"],
+    sentences: [
+      "Tiếng trống vang lên báo hiệu giờ ra chơi.",
+      "Các bạn gái thích nhảy dây dưới tán bàng.",
+      "Các bạn trai rủ nhau đá cầu ngoài sân."
+    ],
+    paragraph: "Tùng! Tùng! Tùng! Giờ ra chơi đã đến. Sân trường rộn ràng tiếng nói cười. Nhóm thì nhảy dây, nhóm thì chơi đá cầu, đuổi bắt. Ai nấy đều vui tươi, khỏe khoắn.",
     reward: 15
   },
   {
@@ -93,6 +219,20 @@ var READING_PASSAGES = [
     reward: 15
   },
   {
+    id: "t14",
+    week: "Tuần 14",
+    title: "Lớp học sạch đẹp",
+    source: "SGK Tiếng Việt 1 - Bài 65",
+    words: ["sạch đẹp", "bàn ghế", "ngăn nắp", "chậu hoa", "tập viết", "chăm ngoan"],
+    sentences: [
+      "Lớp học của bé luôn sạch đẹp và gọn gàng.",
+      "Bàn ghế được xếp ngay ngắn thẳng hàng.",
+      "Trên bục giảng có lọ hoa tươi thắm."
+    ],
+    paragraph: "Sáng nào các bạn cũng đến lớp sớm để quét dọn và lau bảng. Sách vở trên bàn được xếp thật ngăn nắp. Bé rất thích ngồi trong lớp học sạch đẹp để nghe cô giảng bài.",
+    reward: 15
+  },
+  {
     id: "t15",
     week: "Tuần 15",
     title: "Ngày chủ nhật của bé",
@@ -104,6 +244,20 @@ var READING_PASSAGES = [
       "Mẹ nấu bữa trưa thật ngon lành."
     ],
     paragraph: "Hôm nay là chủ nhật, cả nhà bé cùng chung tay làm việc nhà. Bố tưới những chậu hoa trước sân. Mẹ nấu những món ăn ngon. Chị Hà quét dọn nhà cửa, còn bé thì nhặt rau giúp mẹ. Cả nhà ngập tràn tiếng cười vui.",
+    reward: 15
+  },
+  {
+    id: "t16",
+    week: "Tuần 16",
+    title: "Ước mơ của bé",
+    source: "SGK Tiếng Việt 1 - Bài 75",
+    words: ["ước mơ", "phi công", "bầu trời", "chiếc cánh", "tương lai", "vươn xa"],
+    sentences: [
+      "Bé ước mơ lớn lên sẽ làm phi công.",
+      "Bé muốn lái máy bay bay cao trên bầu trời.",
+      "Bé chăm chỉ học hành để thực hiện ước mơ."
+    ],
+    paragraph: "Mỗi khi nhìn thấy máy bay bay ngang bầu trời, bé lại thấy thật thích thú. Bé ước mơ mai sau trở thành phi công giỏi để đi khắp mọi miền đất nước. Vì thế, ngày nào bé cũng chăm chỉ đọc sách và làm toán.",
     reward: 15
   },
   {

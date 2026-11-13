@@ -483,12 +483,12 @@
   ];
 
   var BADGES = [
-    { icon: "🌱", name: "Mầm Non", need: 3 },
-    { icon: "🥉", name: "Huy Hiệu Đồng", need: 10 },
-    { icon: "🥈", name: "Huy Hiệu Bạc", need: 20 },
-    { icon: "🥇", name: "Huy Hiệu Vàng", need: 35 },
-    { icon: "🏆", name: "Cúp Vô Địch", need: 45 },
-    { icon: "👑", name: "Vua Tri Thức", need: 51 }
+    { icon: "🌱", name: "Mầm Non", need: 4 },
+    { icon: "🥉", name: "Huy Hiệu Đồng", need: 14 },
+    { icon: "🥈", name: "Huy Hiệu Bạc", need: 28 },
+    { icon: "🥇", name: "Huy Hiệu Vàng", need: 45 },
+    { icon: "🏆", name: "Cúp Vô Địch", need: 60 },
+    { icon: "👑", name: "Vua Tri Thức", need: 70 }
   ];
 
   var LEVELS = ["Mầm Non Chăm Chỉ", "Bé Ngoan Hiếu Học", "Ong Nhỏ Thông Thái", "Nhà Thám Hiểm Nhí", "Ngôi Sao Lớp 1", "Kiện Tướng Tri Thức", "Siêu Trí Tuệ Nhí"];
@@ -997,13 +997,13 @@
               if (pState.passages.hasOwnProperty(pk) && pState.passages[pk] > 0) count++;
             }
           }
-          t += count >= 5 ? 3 : count >= 3 ? 2 : count >= 1 ? 1 : 0;
+          t += count >= 12 ? 4 : count >= 7 ? 3 : count >= 3 ? 2 : count >= 1 ? 1 : 0;
         } else {
           var p = pState.progress[sid + "|" + top];
           if (p) {
-            var m = 0;
-            for (var mk in p) { if (p.hasOwnProperty(mk) && p[mk] > m) m = p[mk]; }
-            t += m;
+            for (var mi = 0; mi < MODES.length; mi++) {
+              if ((p[MODES[mi].id] || 0) >= 1) t++;
+            }
           }
         }
       }
@@ -1020,13 +1020,9 @@
           if (state.passages.hasOwnProperty(k) && state.passages[k] > 0) count++;
         }
       }
-      return count >= 5 ? 3 : count >= 3 ? 2 : count >= 1 ? 1 : 0;
+      return count >= 12 ? 4 : count >= 7 ? 3 : count >= 3 ? 2 : count >= 1 ? 1 : 0;
     }
-    var p = state.progress[unitKey(subj, topic)];
-    if (!p) return 0;
-    var m = 0;
-    for (var k in p) { if (p.hasOwnProperty(k) && p[k] > m) m = p[k]; }
-    return m;
+    return unitGamesDone(subj, topic);
   }
   function subjectStars(subj) {
     var units = UNITS[subj], t = 0;
@@ -1040,7 +1036,7 @@
   }
   function maxTotalStars() {
     var t = 0;
-    for (var i = 0; i < SUBJECTS.length; i++) t += UNITS[SUBJECTS[i].id].length * 3;
+    for (var i = 0; i < SUBJECTS.length; i++) t += UNITS[SUBJECTS[i].id].length * 4;
     return t;
   }
   function unitGamesDone(subj, topic) {
@@ -1054,6 +1050,8 @@
   }
   function isUnlocked(subj, idx) {
     if (state.unlockAll || idx === 0) return true;
+    var u = UNITS[subj][idx];
+    if (u && u.topic === "passages") return true;
     var prevTopic = UNITS[subj][idx - 1].topic;
     if (prevTopic === "passages") return unitStars(subj, prevTopic) >= 1;
     return unitGamesDone(subj, prevTopic) >= 3;
@@ -1199,7 +1197,7 @@
       map += '<div class="island" data-subj="' + sj.id + '">' +
         '<div class="island-pic"><div class="island-fallback">' + sj.emoji + '</div>' +
         '<img src="' + sj.img + '" alt="" onerror="this.style.display=\'none\'"></div>' +
-        '<div class="island-label">' + sj.name + '<small>⭐ ' + subjectStars(sj.id) + "/" + (UNITS[sj.id].length * 3) + "</small></div>" +
+        '<div class="island-label">' + sj.name + '<small>⭐ ' + subjectStars(sj.id) + "/" + (UNITS[sj.id].length * 4) + "</small></div>" +
         "</div>";
     }
     $("islandMap").innerHTML = map;
@@ -1275,7 +1273,7 @@
 
   function starsHTML(n) {
     var h = "";
-    for (var i = 0; i < 3; i++) h += '<span class="' + (i < n ? "" : "off") + '">⭐</span>';
+    for (var i = 0; i < 4; i++) h += '<span class="' + (i < n ? "" : "off") + '">⭐</span>';
     return h;
   }
 
@@ -1287,7 +1285,7 @@
     var sj = subjectById(curSubj);
     var units = UNITS[curSubj];
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
-    $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 3);
+    $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 4);
 
     var cards = document.querySelectorAll("#mapAccordion .map-card");
     for (var ci = 0; ci < cards.length; ci++) {
@@ -1325,7 +1323,7 @@
       var isBoss = (i === units.length - 1);
       var cls = "unit-node";
       if (!unlocked) cls += " locked";
-      else if (st >= 3) cls += " done perfect";
+      else if (st >= 4) cls += " done perfect";
       else if (st > 0) cls += " done";
       if (isBoss) cls += " is-boss";
       var isNext = false;
@@ -1368,6 +1366,7 @@
         curUnitIdx = idx;
         var u = UNITS[curSubj][curUnitIdx];
         if (u && u.topic === "passages") {
+          readReturnScreen = "screenMap";
           openPassageReader();
         } else {
           openModePicker();
@@ -1423,7 +1422,7 @@
       var sId = MAP_ORDER[mi];
       renderSingleIslandMap(sId, $(MAP_PATH_IDS[sId]));
       var stripEl = $(MAP_STRIP_STAR_IDS[sId]);
-      if (stripEl) stripEl.innerHTML = subjectStars(sId) + "/" + (UNITS[sId].length * 3) + " ⭐";
+      if (stripEl) stripEl.innerHTML = subjectStars(sId) + "/" + (UNITS[sId].length * 4) + " ⭐";
     }
     bindMapControlsOnce();
     slideToSubject(curSubj, !!instant);
@@ -1506,18 +1505,21 @@
   var curPassageIdx = 0;
   var readSpeed = 0.85; // 0.7: chậm, 0.85: vừa
   var isReadingSample = false;
+  var readReturnScreen = "screenHome";
+  var curWeekGroup = 0;
 
   function openPassageReader(idx) {
     if (typeof idx === "number") {
       curPassageIdx = idx;
+    } else if (typeof state.lastPassageIdx === "number" && state.lastPassageIdx >= 0) {
+      curPassageIdx = state.lastPassageIdx;
     } else {
       curPassageIdx = 0;
-      if (typeof READING_PASSAGES !== "undefined") {
-        for (var i = 0; i < READING_PASSAGES.length; i++) {
-          if (READING_PASSAGES[i].id === "t7") { curPassageIdx = i; break; }
-        }
-      }
     }
+    if (typeof READING_PASSAGES !== "undefined" && READING_PASSAGES.length > 0) {
+      if (curPassageIdx >= READING_PASSAGES.length) curPassageIdx = READING_PASSAGES.length - 1;
+    }
+    curWeekGroup = Math.floor(curPassageIdx / 6);
     state.lastSubj = "viet";
     state.lastUnitIdx = 4; // index của bài Luyện đọc đoạn văn
     state.lastPassageIdx = curPassageIdx;
@@ -1535,9 +1537,40 @@
     $("readWeekTag").innerHTML = esc(p.week);
     $("readLessonTitle").innerHTML = esc(p.title);
 
-    // 1. Carousel chọn tuần
+    // 1. Bộ lọc nhóm tuần (Tuần 1-6, 7-12, 13-18) + Carousel chọn tuần
+    var groupLabels = ["Tuần 1–6", "Tuần 7–12", "Tuần 13–18"];
+    var grpEl = $("weekGroupTabs");
+    if (grpEl) {
+      var grpHtml = "";
+      var numGroups = Math.ceil(READING_PASSAGES.length / 6);
+      if (curWeekGroup >= numGroups) curWeekGroup = 0;
+      for (var g = 0; g < numGroups; g++) {
+        var gLabel = groupLabels[g] || ("Tuần " + (g * 6 + 1) + "–" + Math.min(READING_PASSAGES.length, (g + 1) * 6));
+        grpHtml += '<button class="week-group-btn' + (g === curWeekGroup ? " active" : "") + '" data-wgrp="' + g + '">' + esc(gLabel) + '</button>';
+      }
+      grpEl.innerHTML = grpHtml;
+      var gBtns = grpEl.querySelectorAll(".week-group-btn");
+      for (var gb = 0; gb < gBtns.length; gb++) {
+        onTap(gBtns[gb], function () {
+          Sound.click();
+          stopSampleReading();
+          curWeekGroup = parseInt(this.getAttribute("data-wgrp"), 10) || 0;
+          var gStart = curWeekGroup * 6;
+          var gEnd = Math.min(READING_PASSAGES.length, gStart + 6);
+          if (curPassageIdx < gStart || curPassageIdx >= gEnd) {
+            curPassageIdx = gStart;
+            state.lastPassageIdx = curPassageIdx;
+            saveState();
+          }
+          renderPassageScreen();
+        });
+      }
+    }
+
+    var startIdx = curWeekGroup * 6;
+    var endIdx = Math.min(READING_PASSAGES.length, startIdx + 6);
     var carHtml = "";
-    for (var i = 0; i < READING_PASSAGES.length; i++) {
+    for (var i = startIdx; i < endIdx; i++) {
       var item = READING_PASSAGES[i];
       var isDone = state.passages && state.passages[item.id] > 0;
       var activeCls = i === curPassageIdx ? " active" : "";
@@ -1551,6 +1584,9 @@
         Sound.click();
         stopSampleReading();
         curPassageIdx = parseInt(this.getAttribute("data-pidx"), 10);
+        curWeekGroup = Math.floor(curPassageIdx / 6);
+        state.lastPassageIdx = curPassageIdx;
+        saveState();
         renderPassageScreen();
       });
     }
@@ -2303,22 +2339,18 @@
   // ---------------------------------------------------------
   // 10. BÁO CÁO HỌC TẬP, HUY HIỆU, CỬA HÀNG, CÀI ĐẶT
   // ---------------------------------------------------------
-  function openReport() {
-    Sound.click();
-    var body = $("reportBody");
-    if (!body) return;
-
+  function buildReportHTML() {
     var ts = totalStars();
     var maxS = maxTotalStars();
-    var mathS = subjectStars("math"), mathMax = UNITS.math.length * 3;
-    var vietS = subjectStars("viet"), vietMax = UNITS.viet.length * 3;
-    var engS = subjectStars("eng"), engMax = UNITS.eng.length * 3;
+    var mathS = subjectStars("math"), mathMax = UNITS.math.length * 4;
+    var vietS = subjectStars("viet"), vietMax = UNITS.viet.length * 4;
+    var engS = subjectStars("eng"), engMax = UNITS.eng.length * 4;
 
     var mathPct = Math.round(mathS / mathMax * 100);
     var vietPct = Math.round(vietS / vietMax * 100);
     var engPct = Math.round(engS / engMax * 100);
 
-    // Thu thập danh sách bài cần ôn tập (0 hoặc 1 sao) và bài đã thành thạo (2 hoặc 3 sao)
+    // Thu thập danh sách bài cần ôn tập (0-2 sao) và bài đã thành thạo (3-4 sao)
     var needWork = [];
     var mastered = [];
 
@@ -2337,7 +2369,7 @@
           icon: unit.icon,
           stars: stars
         };
-        if (stars <= 1) {
+        if (stars <= 2) {
           needWork.push(itemData);
         } else {
           mastered.push(itemData);
@@ -2347,7 +2379,7 @@
 
     var html = '<div class="report-summary-card">' +
       '<div style="display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between">' +
-        '<div><b style="font-size:18px;color:#1e3a8a">👦 ' + esc(state.name) + '</b><div style="font-size:12px;color:#64748b;margin-top:2px">Học lực: ' + (ts >= 40 ? 'Xuất sắc 🌟' : ts >= 20 ? 'Khá tốt 👍' : 'Đang rèn luyện 🌱') + '</div></div>' +
+        '<div><b style="font-size:18px;color:#1e3a8a">👦 ' + esc(state.name) + '</b><div style="font-size:12px;color:#64748b;margin-top:2px">Học lực: ' + (ts >= 55 ? 'Xuất sắc 🌟' : ts >= 28 ? 'Khá tốt 👍' : 'Đang rèn luyện 🌱') + '</div></div>' +
         '<div style="text-align:right"><b style="font-size:20px;color:#d97706">⭐ ' + ts + '/' + maxS + '</b><div style="font-size:11px;color:#64748b">Tổng số sao</div></div>' +
       '</div>' +
       '<div class="report-subj-grid">' +
@@ -2375,12 +2407,12 @@
     // Phần 1: Cần ôn tập bổ sung
     html += '<div class="report-section-title">⚠️ Phần Bé Cần Luyện Tập Thêm (' + needWork.length + ' bài)</div>';
     if (needWork.length === 0) {
-      html += '<div style="background:#f0fdf4;padding:12px;border-radius:14px;color:#166534;font-size:13px;font-weight:700">🎉 Tuyệt vời! Bé đã nắm vững toàn bộ các bài học, không có bài nào dưới 2 sao!</div>';
+      html += '<div style="background:#f0fdf4;padding:12px;border-radius:14px;color:#166534;font-size:13px;font-weight:700">🎉 Tuyệt vời! Bé đã nắm vững toàn bộ các bài học, không có bài nào dưới 3 sao!</div>';
     } else {
       html += '<div class="report-list">';
       for (var nw = 0; nw < needWork.length; nw++) {
         var it = needWork[nw];
-        var starStr = it.stars === 1 ? '⭐ (Cần củng cố)' : 'Chưa học / Chưa đạt';
+        var starStr = it.stars > 0 ? (it.stars + '/4 ⭐ (Cần củng cố)') : 'Chưa học / Chưa đạt';
         html += '<div class="report-item warn">' +
           '<div class="report-item-ic">' + it.icon + '</div>' +
           '<div class="report-item-info">' +
@@ -2399,7 +2431,7 @@
       html += '<div class="report-list">';
       for (var ms = 0; ms < mastered.length; ms++) {
         var mItem = mastered[ms];
-        var mStarStr = mItem.stars === 3 ? '⭐⭐⭐ (Xuất sắc)' : '⭐⭐ (Khá tốt)';
+        var mStarStr = mItem.stars >= 4 ? '⭐⭐⭐⭐ (Xuất sắc)' : '⭐⭐⭐ (Khá tốt)';
         html += '<div class="report-item good">' +
           '<div class="report-item-ic">' + mItem.icon + '</div>' +
           '<div class="report-item-info">' +
@@ -2411,12 +2443,47 @@
       html += '</div>';
     }
 
-    body.innerHTML = html;
+    return html;
+  }
 
-    // Gắn sự kiện "Ôn ngay" từ dashboard
+  function renderBadgesHTML() {
+    var ts = totalStars();
+    var html = '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đã có <b>' + ts + "/" + maxTotalStars() + " ⭐</b></div><div class=\"grid-cards\">";
+    for (var i = 0; i < BADGES.length; i++) {
+      var b = BADGES[i], ok = ts >= b.need;
+      html += '<div class="badge-card' + (ok ? "" : " locked") + '"><div class="badge-ic">' + b.icon + '</div><div class="badge-name">' + b.name + '</div><div class="badge-req">' + (ok ? "Đã đạt ✅" : "Cần " + b.need + " ⭐") + "</div></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  var curAchieveTab = "report";
+  function openAchievements(tab) {
+    if (tab === "report" || tab === "badges") curAchieveTab = tab;
+    var body = $("reportBody");
+    if (!body) return;
+
+    var tabsHtml = '<div class="shop-tabs" style="margin-bottom:14px">' +
+      '<button class="shop-tab' + (curAchieveTab === "report" ? " active" : "") + '" data-atab="report">📊 Tiến độ</button>' +
+      '<button class="shop-tab' + (curAchieveTab === "badges" ? " active" : "") + '" data-atab="badges">🏅 Huy hiệu</button>' +
+    '</div>';
+
+    var contentHtml = curAchieveTab === "badges" ? renderBadgesHTML() : buildReportHTML();
+    body.innerHTML = tabsHtml + contentHtml;
+
+    var tabBtns = body.querySelectorAll("[data-atab]");
+    for (var t = 0; t < tabBtns.length; t++) {
+      onTap(tabBtns[t], function () {
+        Sound.click();
+        openAchievements(this.getAttribute("data-atab"));
+      });
+    }
+
+    // Gắn sự kiện "Ôn ngay" từ tab Tiến độ
     var actionBtns = body.querySelectorAll(".report-item-btn");
     for (var b = 0; b < actionBtns.length; b++) {
       onTap(actionBtns[b], function () {
+        Sound.click();
         var sId = this.getAttribute("data-subj");
         var uIdx = parseInt(this.getAttribute("data-idx"), 10);
         closeOverlay("reportOverlay");
@@ -2425,7 +2492,8 @@
         var uList = UNITS[curSubj];
         if (uList && uList[curUnitIdx]) {
           if (uList[curUnitIdx].topic === "passages") {
-            openPassageReader(0);
+            readReturnScreen = "screenMap";
+            openPassageReader();
           } else {
             renderMap();
             showScreen("screenMap");
@@ -2438,17 +2506,14 @@
     openOverlay("reportOverlay");
   }
 
+  function openReport() {
+    Sound.click();
+    openAchievements("report");
+  }
+
   function openBadges() {
-    var ts = totalStars();
-    var html = '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đã có <b>' + ts + "/" + maxTotalStars() + " ⭐</b></div><div class=\"grid-cards\">";
-    for (var i = 0; i < BADGES.length; i++) {
-      var b = BADGES[i], ok = ts >= b.need;
-      html += '<div class="badge-card' + (ok ? "" : " locked") + '"><div class="badge-ic">' + b.icon + '</div><div class="badge-name">' + b.name + '</div><div class="badge-req">' + (ok ? "Đã đạt ✅" : "Cần " + b.need + " ⭐") + "</div></div>";
-    }
-    html += "</div>";
-    $("infoTitle").innerHTML = "🏅 Bộ Sưu Tập Huy Hiệu";
-    $("infoBody").innerHTML = html;
-    openOverlay("infoOverlay");
+    Sound.click();
+    openAchievements("badges");
   }
 
   function openDailyQuestModal() {
@@ -2804,7 +2869,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v37 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Bộ quà thật kèm hình minh họa (Xem TV / Chơi game 30\', Kem Merino, Xe, Đồng hồ) & 12 Hiệp Sĩ.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v38 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Tách riêng tab Luyện đọc Tiếng Việt đủ 18 tuần HK1, mở khóa tự do, gộp tab Thành tích & hệ thống 4 sao tương ứng 4 chế độ chơi.</div></div>';
 
     $("infoBody").innerHTML = html;
 
@@ -2937,8 +3002,13 @@
     onTap($("readBackBtn"), function () {
       Sound.click();
       stopSampleReading();
-      renderMap();
-      showScreen("screenMap");
+      if (readReturnScreen === "screenMap") {
+        renderMap();
+        showScreen("screenMap");
+      } else {
+        renderHome();
+        showScreen("screenHome");
+      }
     });
     onTap($("btnPlayAll"), function () {
       startSampleReading();
@@ -2990,7 +3060,9 @@
       onTap(navs[i], function () {
         Sound.click();
         var n = this.getAttribute("data-nav");
-        if (n === "report") openReport();
+        if (n === "read") { readReturnScreen = "screenHome"; openPassageReader(); }
+        else if (n === "achieve") openAchievements("report");
+        else if (n === "report") openReport();
         else if (n === "badges") openBadges();
         else if (n === "shop") openShop();
         else if (n === "guide" || n === "settings") openSettings();

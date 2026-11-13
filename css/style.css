@@ -892,7 +892,19 @@ body.in-subscreen .cloud-layer { display: none; }
   margin-top: 2px;
 }
 
-/* --- Thanh chọn tuần (Carousel) --- */
+/* --- Thanh chọn cụm tuần & tuần --- */
+.week-group-tabs {
+  display: -webkit-flex; display: flex; margin-bottom: 8px;
+}
+.week-group-btn {
+  -webkit-flex: 1; flex: 1; margin: 0 3px; padding: 7px 6px; border-radius: 14px;
+  background: rgba(255, 255, 255, 0.85); border: 2px solid #ffffff;
+  color: #334155; font-size: 13px; font-weight: 800; text-align: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+.week-group-btn.active {
+  background: #1e3a8a; color: #ffffff; border-color: #1e40af;
+}
 .week-carousel-wrap {
   width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
   padding-bottom: 8px; margin-bottom: 10px;
