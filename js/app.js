@@ -278,25 +278,33 @@
       this.bgmPlaying = true;
       var self = this;
 
-      // GIAI ĐIỆU HOẠT HÌNH PHIÊU LƯU (32 nốt vui nhộn, rộn ràng, kích thích trí tò mò)
-      // Tông Đô Trưởng (C Major) trong trẻo, phong cách Nintendo / OVI Vương quốc trên mây
-      var melody = [
-        // Câu 1: Rộn ràng mở màn
-        523.25, 659.25, 783.99, 1046.50, 987.77, 783.99, 880.00, 783.99,
-        // Câu 2: Nhún nhảy tinh nghịch
-        659.25, 783.99, 880.00, 1046.50, 987.77, 880.00, 783.99, 0,
-        // Câu 3: Cao trào bay bổng
-        880.00, 1046.50, 1174.66, 1046.50, 783.99, 659.25, 698.46, 783.99,
-        // Câu 4: Kết vòng tròn reo vui
-        880.00, 987.77, 1046.50, 783.99, 659.25, 587.33, 523.25, 0
+      // NHẠC NỀN CHILL BOSSA / ACOUSTIC ÊM DỊU (~107 BPM, Cmaj7 - Am7 - Fmaj7 - G6)
+      // Giai điệu piano/guitar nhẹ nhàng, thư giãn giúp bé tập trung học lâu không bị chói tai
+      var lead = [
+        // Cmaj7
+        659.25, 0, 783.99, 987.77, 0, 783.99, 659.25, 523.25,
+        // Am7
+        587.33, 0, 659.25, 783.99, 0, 659.25, 523.25, 440.00,
+        // Fmaj7
+        523.25, 0, 659.25, 880.00, 0, 783.99, 659.25, 523.25,
+        // G6 -> G7
+        587.33, 0, 659.25, 783.99, 659.25, 587.33, 493.88, 0
       ];
 
-      // Âm bass nhún nhảy pizzicato (Walking Bassline giữ nhịp bước chân phiêu lưu)
+      // Đệm guitar rải hợp âm êm dịu
+      var arp = [
+        329.63, 392.00, 493.88, 392.00, 329.63, 392.00, 493.88, 392.00,
+        261.63, 329.63, 392.00, 329.63, 261.63, 329.63, 392.00, 329.63,
+        261.63, 349.23, 440.00, 349.23, 261.63, 349.23, 440.00, 349.23,
+        293.66, 392.00, 493.88, 392.00, 293.66, 349.23, 392.00, 349.23
+      ];
+
+      // Bass bossa-nova ấm áp
       var bass = [
-        130.81, 0, 196.00, 0, 130.81, 0, 164.81, 0,
-        174.61, 0, 220.00, 0, 196.00, 0, 146.83, 0,
-        110.00, 0, 164.81, 0, 130.81, 0, 196.00, 0,
-        174.61, 0, 196.00, 0, 130.81, 0, 261.63, 0
+        130.81, 0, 0, 196.00, 130.81, 0, 196.00, 0,
+        110.00, 0, 0, 164.81, 110.00, 0, 164.81, 0,
+        87.31,  0, 0, 130.81, 87.31,  0, 130.81, 0,
+        98.00,  0, 0, 146.83, 98.00,  0, 146.83, 0
       ];
 
       this.bgmStep = 0;
@@ -305,31 +313,34 @@
           self.stopBGM();
           return;
         }
-        var step = self.bgmStep % melody.length;
-        var m = melody[step];
+        var step = self.bgmStep % lead.length;
+        var l = lead[step];
+        var a = arp[step];
         var b = bass[step];
 
-        // 1. Tiếng đàn Marimba / Xylophone giai điệu chính (trong veo, staccato nảy)
-        if (m > 0) {
-          self.tone(m, "triangle", 0, 0.16, 0.055);
-          self.tone(m * 2, "sine", 0, 0.09, 0.025);
+        // 1. Giai điệu chính mềm mại (sine ấm + hài âm nhẹ)
+        if (l > 0) {
+          self.tone(l, "sine", 0, 0.42, 0.045);
+          self.tone(l * 2, "sine", 0.01, 0.20, 0.012);
         }
 
-        // 2. Tiếng Bass nhún nhảy giữ nhịp
+        // 2. Hợp âm rải kiểu guitar/kalimba êm dịu
+        if (a > 0) {
+          self.tone(a, "triangle", 0, 0.28, 0.022);
+        }
+
+        // 3. Tiếng bass bossa-nova ấm
         if (b > 0) {
-          self.tone(b, "triangle", 0, 0.22, 0.045);
-          self.tone(b * 2, "sine", 0, 0.12, 0.02);
+          self.tone(b, "sine", 0, 0.36, 0.052);
         }
 
-        // 3. Tiếng gõ gõ mộc / xúc xắc nhịp điệu (Percussive tick nhộn nhịp như tiếng bước chân)
-        if (step % 2 === 1) {
-          self.tone(1500, "triangle", 0, 0.025, 0.02, 350);
-        } else if (step % 4 === 0) {
-          self.tone(180, "triangle", 0, 0.04, 0.035, 70);
+        // 4. Nhịp gõ gỗ nhẹ (soft clave) ở phách 1 và 4
+        if (step % 8 === 0 || step % 8 === 3) {
+          self.tone(420, "sine", 0, 0.03, 0.014, 240);
         }
 
         self.bgmStep++;
-      }, 185); // 185ms = ~162 BPM (tiết tấu nhanh, vui, cực kỳ bắt tai)
+      }, 280); // 280ms = ~107 BPM êm dịu, thư giãn
     },
     stopBGM: function () {
       this.bgmPlaying = false;
@@ -2118,29 +2129,25 @@
 
     // 2. CÀI ĐẶT CHO PHỤ HUYNH
     html += '<div class="set-section-title">👨‍👩‍👧 Cài Đặt Dành Cho Bố Mẹ</div>';
-    html += '<div class="set-row"><span>👦 Hồ sơ đang học: <b id="setName">' + esc(state.name) + '</b></span><button class="small-btn" id="setProfileBtn">Đổi bé</button></div>';
-    html += '<div class="set-row"><span>📊 Báo cáo tiến độ học</span><button class="small-btn" id="setReportBtn">Xem</button></div>';
     html += '<div class="set-row"><span>☁️ Đồng bộ đám mây: <b id="setCloudStatus">' + (CloudSync.db ? 'Đã kết nối' : 'Lưu trên máy') + '</b></span><button class="small-btn" id="setCloudBtn">Xem</button></div>';
     html += '<div class="set-row"><span>🔓 Mở khóa tất cả bài</span><button class="toggle' + (state.unlockAll ? " on" : "") + '" data-key="unlockAll"></button></div>';
     html += '<div class="set-row"><span>📋 Sao lưu mã tiến độ</span><button class="small-btn" id="exportBtn">Lấy mã</button></div>';
     html += '<div class="set-row"><span>📥 Khôi phục từ mã</span><button class="small-btn" id="importBtn">Nhập mã</button></div>';
     html += '<div class="set-row"><span>🗑️ Xóa làm lại từ đầu</span><button class="small-btn red" id="resetBtn">Xóa</button></div>';
 
-    // 3. HƯỚNG DẪN CÁCH HỌC & CHƠI
-    html += '<div class="set-section-title">❓ Hướng Dẫn Cách Học & Chơi</div>';
-    html += '<div class="guide-item"><span class="gi-ic">🏝️</span><div>Chạm vào một <b>hòn đảo</b> (Toán, Tiếng Việt, Tiếng Anh) để vào bản đồ bài học.</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">🔒</span><div>Mỗi bài đạt ít nhất <b>1 ⭐</b> sẽ mở khóa bài tiếp theo.</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">📜</span><div><b>Phiến Đá Bí Ẩn:</b> chọn phiến đá có đáp án đúng. Mỗi lần chọn chỉ có 1 cơ hội, cần suy nghĩ kỹ!</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">🃏</span><div><b>Lật Thẻ Thần Kỳ:</b> lật 2 thẻ để ghép cặp hình số lượng và đáp án đi cùng nhau.</div></div>';
+    // 3. HƯỚNG DẪN (Gom gọn vào 1 mục, bấm Xem kỹ để mở chi tiết)
+    html += '<div class="set-section-title">❓ Hướng Dẫn & Thông Tin</div>';
+    html += '<div class="set-row"><span>📖 Hướng dẫn cách học & mẹo iPad</span><button class="small-btn" id="toggleGuideBtn">Xem kỹ</button></div>';
+    html += '<div id="guideDetailBox" style="display:none; margin-top:8px;">';
+    html += '<div class="guide-item"><span class="gi-ic">🏝️</span><div>Chạm vào một <b>hòn đảo</b> (Toán, Tiếng Việt, Tiếng Anh) để vào bản đồ bài học. Mỗi bài đạt ít nhất <b>1 ⭐</b> sẽ mở khóa bài tiếp theo.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">📜</span><div><b>Phiến Đá Bí Ẩn:</b> chạm từng hình để đếm (bài đếm số) rồi chọn phiến đá đáp án đúng.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🧩</span><div><b>Ghép Đôi Nhanh & Lật Thẻ:</b> chạm ghép cặp hình/câu hỏi và đáp án đi cùng nhau.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">🎈</span><div><b>Bóng Bay Tri Thức:</b> chạm quả bóng có đáp án đúng trước khi bóng bay mất.</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">🔊</span><div>Bấm nút <b>loa</b> để nghe đọc câu hỏi (Tiếng Anh đọc chuẩn giọng bản xứ).</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">🛒</span><div>Dùng <b>xu vàng</b> kiếm được khi học giỏi để mua nhân vật mới trong Cửa hàng.</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Nếu máy phát âm tiếng Anh, hãy vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> và tải giọng Linh về máy.</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">📌</span><div><b>Ghim app ra màn hình:</b> Bấm nút Chia sẻ trên Safari ➜ chọn <b>Thêm vào MH chính (Add to Home Screen)</b> để chơi toàn màn hình và lưu bài vĩnh viễn.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🔊</span><div>Bấm nút <b>loa</b> để nghe đọc câu hỏi; dùng <b>xu vàng</b> để mua nhân vật mới trong Cửa hàng.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
+    html += '</div>';
 
-    html += '<div class="guide-sec">4. ℹ️ Giới Thiệu & Phiên Bản (About)</div>';
-    html += '<div class="guide-item"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v12 (13/11/2026) · <b>Bộ SGK:</b> Kết Nối Tri Thức 2026</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">✨</span><div><b>Cập nhật mới nhất (v12):</b> Sửa lỗi thanh cuộn đè góc bo & nút đóng popup trên Web, sửa lỗi đổi hồ sơ bé vẫn hiển thị tên bé cũ.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v13 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Cài đặt gọn nhẹ, nhạc nền êm dịu chill bossa.</div></div>';
 
     $("infoBody").innerHTML = html;
 
@@ -2157,13 +2164,13 @@
         saveState(); Sound.click();
       });
     }
-    onTap($("setProfileBtn"), function () {
-      closeOverlay("infoOverlay");
-      openProfileModal();
-    });
-    onTap($("setReportBtn"), function () {
-      closeOverlay("infoOverlay");
-      openReport();
+    onTap($("toggleGuideBtn"), function () {
+      Sound.click();
+      var box = $("guideDetailBox");
+      if (!box) return;
+      var open = box.style.display !== "none";
+      box.style.display = open ? "none" : "block";
+      this.innerHTML = open ? "Xem kỹ" : "Thu gọn";
     });
     onTap($("setCloudBtn"), function () {
       Sound.click();
