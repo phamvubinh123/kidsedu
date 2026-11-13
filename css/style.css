@@ -141,14 +141,14 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 
 /* ---------- Bản đồ đảo ---------- */
-.island-map { position: relative; margin-top: 6px; }
+.island-map { position: relative; margin-top: 4px; }
 .island {
-  position: relative; width: 52%; max-width: 196px; cursor: pointer; display: block;
+  position: relative; width: 24.5vh; max-width: 58vw; cursor: pointer; display: block;
   -webkit-animation: bob 4.5s ease-in-out infinite; animation: bob 4.5s ease-in-out infinite;
 }
 .island:nth-child(1) { margin-left: 0; }
-.island:nth-child(2) { margin-left: auto; margin-right: 0; margin-top: -28%; -webkit-animation-delay: -1.5s; animation-delay: -1.5s; }
-.island:nth-child(3) { margin: -18% 0 0 10%; -webkit-animation-delay: -3s; animation-delay: -3s; }
+.island:nth-child(2) { margin-left: auto; margin-right: 0; margin-top: -8.5vh; -webkit-animation-delay: -1.5s; animation-delay: -1.5s; }
+.island:nth-child(3) { margin: -5.5vh 0 0 8%; -webkit-animation-delay: -3s; animation-delay: -3s; }
 .island:active .island-pic { -webkit-transform: scale(0.95); transform: scale(0.95); }
 .island-pic {
   width: 100%; padding-top: 100%; position: relative; border-radius: 50%;
@@ -233,27 +233,39 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 .map-accordion {
   position: relative; width: calc(100% + 28px); margin: 4px -14px 0; overflow: hidden;
+  padding: 6px 0 14px;
 }
+.map-sizer { width: calc(100% - 64px); margin: 0 auto; pointer-events: none; visibility: hidden; }
+.map-sizer-inner { width: 100%; height: 0; padding-bottom: 155%; }
 .map-card {
-  position: relative; overflow: hidden; border-radius: 22px;
+  position: absolute; top: 6px; left: 50%;
+  width: calc(100% - 64px); margin-left: calc(-50% + 32px);
+  overflow: hidden; border-radius: 22px;
   background: #7bc8f6;
-  border: 3px solid rgba(255, 255, 255, 0.92);
+  border: 4px solid rgba(255, 255, 255, 0.92);
   box-shadow: 0 10px 26px rgba(20, 60, 120, 0.22);
   cursor: pointer;
-  -webkit-transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1), right 0.45s cubic-bezier(0.22, 1, 0.36, 1), width 0.45s cubic-bezier(0.22, 1, 0.36, 1), top 0.45s, bottom 0.45s, box-shadow 0.35s;
-  transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1), right 0.45s cubic-bezier(0.22, 1, 0.36, 1), width 0.45s cubic-bezier(0.22, 1, 0.36, 1), top 0.45s, bottom 0.45s, box-shadow 0.35s;
+  -webkit-transform-origin: center center; transform-origin: center center;
+  -webkit-transition: -webkit-transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
+  will-change: transform, opacity;
 }
 .map-card.no-anim { -webkit-transition: none !important; transition: none !important; }
 .map-card.pos-active {
-  position: relative; width: calc(100% - 64px); margin: 0 auto;
-  border-width: 4px; cursor: default; z-index: 3;
+  -webkit-transform: translate3d(0, 0, 0) scale(1);
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1; z-index: 3; cursor: default;
   box-shadow: 0 14px 32px rgba(20, 60, 120, 0.28);
 }
 .map-card.pos-prev {
-  position: absolute; top: 18px; bottom: 18px; width: 48px; left: -22px; z-index: 2;
+  -webkit-transform: translate3d(-97%, 0, 0) scale(0.92);
+  transform: translate3d(-97%, 0, 0) scale(0.92);
+  opacity: 0.96; z-index: 2;
 }
 .map-card.pos-next {
-  position: absolute; top: 18px; bottom: 18px; width: 48px; right: -22px; z-index: 2;
+  -webkit-transform: translate3d(97%, 0, 0) scale(0.92);
+  transform: translate3d(97%, 0, 0) scale(0.92);
+  opacity: 0.96; z-index: 2;
 }
 .map-card-bg {
   position: absolute; top: 0; right: 0; bottom: 0; left: 0;
@@ -267,20 +279,20 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .map-card.pos-active .map-card-bg { opacity: 0; -webkit-filter: none; filter: none; pointer-events: none; }
 
 .map-card .unit-path {
-  position: absolute; top: 0; left: 0; width: 100%; opacity: 0; pointer-events: none;
-  -webkit-transition: opacity 0.32s ease; transition: opacity 0.32s ease;
+  position: relative; opacity: 0; pointer-events: none;
+  -webkit-transition: opacity 0.28s ease; transition: opacity 0.28s ease;
 }
 .map-card.pos-active .unit-path {
-  position: relative; opacity: 1; pointer-events: auto;
+  opacity: 1; pointer-events: auto;
 }
 
 .map-card-strip {
-  position: absolute; left: 0; right: 0; bottom: 14px; z-index: 3;
+  position: absolute; bottom: 14px; z-index: 3;
   text-align: center; padding: 0 2px;
   -webkit-transition: opacity 0.22s; transition: opacity 0.22s;
 }
-.map-card.pos-prev .map-card-strip { padding-left: 18px; }
-.map-card.pos-next .map-card-strip { padding-right: 18px; }
+.map-card.pos-prev .map-card-strip { right: 4px; left: auto; }
+.map-card.pos-next .map-card-strip { left: 4px; right: auto; }
 .map-card.pos-active .map-card-strip { opacity: 0; pointer-events: none; }
 .map-card:not(.pos-active):hover .map-card-bg { -webkit-filter: grayscale(10%) brightness(0.95); filter: grayscale(10%) brightness(0.95); }
 .map-strip-circle {
@@ -793,30 +805,26 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 
   /* Bản đồ Đảo Kho Báu trên iPad / Web */
   .map-accordion {
-    max-width: 840px;
+    max-width: 860px;
     width: 100%;
     margin: 4px auto 0;
   }
-  .map-card.pos-active {
+  .map-sizer { width: 660px; }
+  .map-sizer-inner { padding-bottom: 133.333%; }
+  .map-card {
     width: 660px;
-    margin: 0 auto;
+    margin-left: -330px;
   }
   .map-card.pos-prev {
-    top: 26px;
-    bottom: 26px;
-    width: 76px;
-    left: 4px;
+    -webkit-transform: translate3d(-640px, 0, 0) scale(0.92);
+    transform: translate3d(-640px, 0, 0) scale(0.92);
   }
   .map-card.pos-next {
-    top: 26px;
-    bottom: 26px;
-    width: 76px;
-    right: 4px;
+    -webkit-transform: translate3d(640px, 0, 0) scale(0.92);
+    transform: translate3d(640px, 0, 0) scale(0.92);
   }
-  .map-card.pos-prev .map-card-strip,
-  .map-card.pos-next .map-card-strip {
-    padding: 0 4px;
-  }
+  .map-card.pos-prev .map-card-strip { right: 14px; left: auto; padding: 0; width: 68px; }
+  .map-card.pos-next .map-card-strip { left: 14px; right: auto; padding: 0; width: 68px; }
   .map-strip-circle {
     width: 48px;
     height: 48px;

@@ -2359,7 +2359,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v32 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Bỏ nút Chơi ngay, 4 thẻ chế độ đều nhau và chạm 1 lần để vào chơi luôn.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v33 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Chuyển động carousel GPU mượt 60fps không giật, 3 đảo ngoài tự co giãn to rõ theo màn hình.</div></div>';
 
     $("infoBody").innerHTML = html;
 
