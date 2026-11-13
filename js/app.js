@@ -2370,7 +2370,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v25 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Gom 3 đảo vừa khung hình mobile, map cao thoáng hơn, chặng khóa chỉ hiện ổ khóa, đường nối bo theo lối gạch.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v26 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — 3 đảo màn hình chính to rõ, dàn đều cân đối trong 1 khung hình mobile.</div></div>';
 
     $("infoBody").innerHTML = html;
 

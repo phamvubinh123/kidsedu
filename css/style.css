@@ -141,14 +141,14 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 
 /* ---------- Bản đồ đảo ---------- */
-.island-map { position: relative; margin-top: 4px; }
+.island-map { position: relative; margin-top: 6px; }
 .island {
-  position: relative; width: 47%; max-width: 205px; cursor: pointer; display: block;
+  position: relative; width: 52%; max-width: 196px; cursor: pointer; display: block;
   -webkit-animation: bob 4.5s ease-in-out infinite; animation: bob 4.5s ease-in-out infinite;
 }
-.island:nth-child(1) { margin-left: 3%; }
-.island:nth-child(2) { margin-left: auto; margin-right: 3%; margin-top: -32%; -webkit-animation-delay: -1.5s; animation-delay: -1.5s; }
-.island:nth-child(3) { margin: -18% auto 0; -webkit-animation-delay: -3s; animation-delay: -3s; }
+.island:nth-child(1) { margin-left: 0; }
+.island:nth-child(2) { margin-left: auto; margin-right: 0; margin-top: -28%; -webkit-animation-delay: -1.5s; animation-delay: -1.5s; }
+.island:nth-child(3) { margin: -18% 0 0 10%; -webkit-animation-delay: -3s; animation-delay: -3s; }
 .island:active .island-pic { -webkit-transform: scale(0.95); transform: scale(0.95); }
 .island-pic {
   width: 100%; padding-top: 100%; position: relative; border-radius: 50%;
@@ -165,7 +165,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   white-space: nowrap; padding: 2px 12px 3px; border-radius: 16px;
   background: rgba(255, 255, 255, 0.94); border: 2px solid #fff;
   box-shadow: 0 4px 12px rgba(30, 90, 160, 0.25);
-  font-size: 14px; font-weight: 800; color: #2a5aa0; text-align: center; line-height: 1.15;
+  font-size: 15px; font-weight: 800; color: #2a5aa0; text-align: center; line-height: 1.15;
 }
 .island-label small { display: block; font-size: 11px; color: #e08a00; }
 
