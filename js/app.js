@@ -870,9 +870,20 @@
     for (var i = 0; i < SUBJECTS.length; i++) t += UNITS[SUBJECTS[i].id].length * 3;
     return t;
   }
+  function unitGamesDone(subj, topic) {
+    var p = state.progress[unitKey(subj, topic)];
+    if (!p) return 0;
+    var done = 0;
+    for (var i = 0; i < MODES.length; i++) {
+      if ((p[MODES[i].id] || 0) >= 1) done++;
+    }
+    return done;
+  }
   function isUnlocked(subj, idx) {
     if (state.unlockAll || idx === 0) return true;
-    return unitStars(subj, UNITS[subj][idx - 1].topic) >= 1;
+    var prevTopic = UNITS[subj][idx - 1].topic;
+    if (prevTopic === "passages") return unitStars(subj, prevTopic) >= 1;
+    return unitGamesDone(subj, prevTopic) >= 3;
   }
   function getAvatar(id) {
     for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i].id === id) return AVATARS[i];
@@ -1156,7 +1167,13 @@
         if (!isUnlocked(curSubj, idx)) {
           Sound.bad();
           addClass(this, "shake-it");
-          showToastBubble("Bé cần đạt ít nhất 1 ⭐ ở bài trước để mở khóa bài này nhé!");
+          var prevUnit = UNITS[curSubj][idx - 1];
+          if (prevUnit && prevUnit.topic === "passages") {
+            showToastBubble("Bé cần đọc ít nhất 1 bài ở chặng trước để mở khóa chặng này nhé!");
+          } else {
+            var doneCnt = prevUnit ? unitGamesDone(curSubj, prevUnit.topic) : 0;
+            showToastBubble("Bé cần hoàn thành 3/4 trò chơi ở chặng trước (" + doneCnt + "/3) để mở khóa nhé!");
+          }
           return;
         }
         Sound.click();
@@ -2335,7 +2352,7 @@
     html += '<div class="set-section-title">❓ Hướng Dẫn & Thông Tin</div>';
     html += '<div class="set-row"><span>📖 Hướng dẫn cách học & mẹo iPad</span><button class="small-btn" id="toggleGuideBtn">Xem kỹ</button></div>';
     html += '<div id="guideDetailBox" style="display:none; margin-top:8px;">';
-    html += '<div class="guide-item"><span class="gi-ic">🏝️</span><div>Chạm vào một <b>hòn đảo</b> (Toán, Tiếng Việt, Tiếng Anh) để vào bản đồ bài học. Mỗi bài đạt ít nhất <b>1 ⭐</b> sẽ mở khóa bài tiếp theo.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🏝️</span><div>Chạm vào một <b>hòn đảo</b> (Toán, Tiếng Việt, Tiếng Anh) để vào bản đồ bài học. Mỗi chặng cần hoàn thành ít nhất <b>3/4 trò chơi</b> để mở khóa chặng tiếp theo.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">📜</span><div><b>Phiến Đá Bí Ẩn:</b> chạm từng hình để đếm (bài đếm số) rồi chọn phiến đá đáp án đúng.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">🧩</span><div><b>Ghép Đôi Nhanh & Lật Thẻ:</b> chạm ghép cặp hình/câu hỏi và đáp án đi cùng nhau.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">🎈</span><div><b>Bóng Bay Tri Thức:</b> chạm quả bóng có đáp án đúng trước khi bóng bay mất.</div></div>';
@@ -2343,7 +2360,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v30 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Sửa màu sao vàng/đen trong bảng chọn chế độ chơi và căn lại chặng 5 Đảo Toán Học.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v31 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Luật mở khóa mới: hoàn thành ít nhất 3/4 trò chơi ở chặng trước để mở chặng tiếp theo.</div></div>';
 
     $("infoBody").innerHTML = html;
 
