@@ -344,6 +344,17 @@
     },
     speak: function (text, lang, rate) {
       if (!state.sound || !text) return;
+      this.init();
+
+      // Ưu tiên phát giọng lồng tiếng thật 100% offline từ core_sprite.mp3 nếu có sẵn
+      if (this.spriteBuffer && typeof AUDIO_SPRITE_CONFIG !== "undefined" && AUDIO_SPRITE_CONFIG.phraseMap) {
+        var normKey = String(text).replace(/\s+/g, " ").trim().toLowerCase();
+        var cueId = AUDIO_SPRITE_CONFIG.phraseMap[normKey];
+        if (cueId && this.playCue(cueId)) {
+          return;
+        }
+      }
+
       var targetLang = lang || "vi-VN";
       var isVi = targetLang.indexOf("vi") === 0;
       var fbLang = isVi ? "vi" : "en";
@@ -428,6 +439,7 @@
     },
     stopSpeak: function () {
       try {
+        this.stopCue();
         if ("speechSynthesis" in window) window.speechSynthesis.cancel();
         stopFallbackTTS();
       } catch (e) {}
@@ -1045,21 +1057,34 @@
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
     $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 3);
 
+    var pathEl = $("unitPath");
+    pathEl.className = "unit-path unit-path--" + curSubj;
+
     var pts = getMapPoints(units.length);
-    var d = "";
+    var highestUnlocked = 0;
+    for (var uIdx = 0; uIdx < units.length; uIdx++) {
+      if (isUnlocked(curSubj, uIdx)) highestUnlocked = uIdx;
+    }
+
+    var dAll = "";
+    var dDone = "";
     if (pts.length >= 2) {
-      d = "M " + (pts[0].x * 3) + " " + (pts[0].y * 4);
+      dAll = "M " + (pts[0].x * 3) + " " + (pts[0].y * 4);
+      if (highestUnlocked > 0) dDone = dAll;
       for (var p = 1; p < pts.length; p++) {
         var x0 = pts[p - 1].x * 3, y0 = pts[p - 1].y * 4;
         var x1 = pts[p].x * 3, y1 = pts[p].y * 4;
         var midY = Math.round((y0 + y1) / 2);
-        d += " C " + x0 + " " + midY + ", " + x1 + " " + midY + ", " + x1 + " " + y1;
+        var seg = " C " + x0 + " " + midY + ", " + x1 + " " + midY + ", " + x1 + " " + y1;
+        dAll += seg;
+        if (p <= highestUnlocked) dDone += seg;
       }
     }
 
     var html = '<svg class="map-trail-svg" viewBox="0 0 300 400" preserveAspectRatio="none">' +
-      (d ? '<path d="' + d + '" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="6.5" stroke-linecap="round"></path>' +
-           '<path d="' + d + '" fill="none" stroke="#ef4444" stroke-width="3.6" stroke-dasharray="8 6" stroke-linecap="round"></path>' : '') +
+      (dAll ? '<path d="' + dAll + '" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="7.5" stroke-linecap="round"></path>' +
+              '<path d="' + dAll + '" fill="none" stroke="#ef4444" stroke-width="3.6" stroke-dasharray="8 6" stroke-linecap="round"></path>' : '') +
+      (dDone ? '<path d="' + dDone + '" fill="none" stroke="#f59e0b" stroke-width="4.5" stroke-linecap="round"></path>' : '') +
       '</svg>';
 
     var nextMarked = false;
@@ -1067,16 +1092,30 @@
       var u = units[i];
       var unlocked = isUnlocked(curSubj, i);
       var st = unitStars(curSubj, u.topic);
+      var isBoss = (i === units.length - 1);
       var cls = "unit-node";
       if (!unlocked) cls += " locked";
-      if (unlocked && st === 0 && !nextMarked) { cls += " next"; nextMarked = true; }
+      else if (st >= 3) cls += " done perfect";
+      else if (st > 0) cls += " done";
+      if (isBoss) cls += " is-boss";
+      var isNext = false;
+      if (unlocked && st === 0 && !nextMarked) {
+        cls += " next";
+        nextMarked = true;
+        isNext = true;
+      }
       html += '<div class="' + cls + '" data-idx="' + i + '" style="left:' + pts[i].x + '%;top:' + pts[i].y + '%;">' +
-        '<div class="unit-circle">' + (unlocked ? u.icon : "🔒") + '</div>' +
+        (isNext ? '<div class="unit-here-tag">🚩 CHƠI NGAY</div>' : '') +
+        '<div class="unit-circle">' +
+          '<span class="unit-num">' + (i + 1) + '</span>' +
+          (isBoss ? '<span class="unit-boss-crown">👑</span>' : '') +
+          (unlocked ? u.icon : "🔒") +
+        '</div>' +
         '<div class="unit-stars">' + starsHTML(st) + '</div>' +
-        '<div class="unit-pill">' + (i + 1) + '. ' + esc(u.title) + '</div>' +
+        '<div class="unit-pill">' + esc(u.title) + '</div>' +
         '</div>';
     }
-    $("unitPath").innerHTML = html;
+    pathEl.innerHTML = html;
     var nodes = $("unitPath").querySelectorAll(".unit-node");
     for (var k = 0; k < nodes.length; k++) {
       onTap(nodes[k], function () {
