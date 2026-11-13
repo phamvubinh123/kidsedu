@@ -1024,9 +1024,9 @@
     math: [
       { x: 60, y: 30 },
       { x: 24, y: 36, via: [[46, 29], [31, 31]] },
-      { x: 38, y: 44.5, via: [[20, 41], [27, 44]] },
-      { x: 75, y: 45.5, via: [[51, 44.5], [64, 42]] },
-      { x: 64, y: 56.5, via: [[83, 50], [77, 55]] },
+      { x: 38, y: 45.5 },
+      { x: 75, y: 45.5 },
+      { x: 62, y: 60.5 },
       { x: 25, y: 63, via: [[46, 58], [30, 59]] },
       { x: 51, y: 74, via: [[23, 68], [34, 72]] }
     ],
@@ -1277,7 +1277,9 @@
   }
   function starsMini(n) {
     var h = "";
-    for (var i = 0; i < 3; i++) h += i < n ? "★" : "☆";
+    for (var i = 0; i < 3; i++) {
+      h += '<span class="' + (i < n ? "st-on" : "st-off") + '">★</span>';
+    }
     return h;
   }
 
@@ -2341,7 +2343,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v29 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Gom tiêu đề đảo và tổng sao thành 1 thanh pill gọn đẹp.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v30 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Sửa màu sao vàng/đen trong bảng chọn chế độ chơi và căn lại chặng 5 Đảo Toán Học.</div></div>';
 
     $("infoBody").innerHTML = html;
 
