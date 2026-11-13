@@ -1008,43 +1008,29 @@
     return SUBJECTS[0];
   }
 
+  var MAP_POINTS_7 = [
+    { x: 38, y: 20 }, { x: 53, y: 31 }, { x: 67, y: 44 },
+    { x: 56, y: 57 }, { x: 39, y: 69 }, { x: 46, y: 80 }, { x: 52, y: 90 }
+  ];
+
+  function getMapPoints(count) {
+    if (count === 5) return [MAP_POINTS_7[0], MAP_POINTS_7[1], MAP_POINTS_7[2], MAP_POINTS_7[4], MAP_POINTS_7[6]];
+    if (count === 6) return [MAP_POINTS_7[0], MAP_POINTS_7[1], MAP_POINTS_7[2], MAP_POINTS_7[3], MAP_POINTS_7[4], MAP_POINTS_7[6]];
+    if (count <= 7) return MAP_POINTS_7.slice(0, count);
+    var out = [];
+    for (var i = 0; i < count; i++) {
+      var t = i / (count - 1);
+      var y = Math.round(18 + t * 72);
+      var x = Math.round(50 + Math.sin(t * Math.PI * 2.2) * 16);
+      out.push({ x: x, y: y });
+    }
+    return out;
+  }
+
   function openSubject(subj) {
     curSubj = subj;
     renderMap();
     showScreen("screenMap");
-    setTimeout(drawMapTrail, 60);
-  }
-
-  function drawMapTrail() {
-    var pathEl = $("unitPath");
-    var svg = $("mapTrailSvg");
-    if (!pathEl || !svg) return;
-    var nodes = pathEl.querySelectorAll(".unit-node");
-    if (!nodes || nodes.length < 2) { svg.innerHTML = ""; return; }
-    var w = pathEl.offsetWidth || 600;
-    var h = pathEl.offsetHeight || 600;
-    svg.setAttribute("viewBox", "0 0 " + w + " " + h);
-    svg.setAttribute("width", String(w));
-    svg.setAttribute("height", String(h));
-
-    var pts = [];
-    for (var i = 0; i < nodes.length; i++) {
-      var n = nodes[i];
-      var sign = n.querySelector(".unit-sign") || n;
-      var cx = n.offsetLeft + (n.offsetWidth / 2);
-      var cy = n.offsetTop + sign.offsetTop + (sign.offsetHeight / 2);
-      pts.push({ x: Math.round(cx), y: Math.round(cy) });
-    }
-
-    var d = "M " + pts[0].x + " " + pts[0].y;
-    for (var j = 1; j < pts.length; j++) {
-      var p0 = pts[j - 1], p1 = pts[j];
-      var midY = Math.round((p0.y + p1.y) / 2);
-      d += " C " + p0.x + " " + midY + ", " + p1.x + " " + midY + ", " + p1.x + " " + p1.y;
-    }
-    svg.innerHTML =
-      '<path d="' + d + '" fill="none" stroke="rgba(255,248,225,0.85)" stroke-width="14" stroke-linecap="round"></path>' +
-      '<path d="' + d + '" fill="none" stroke="#b5793b" stroke-width="6" stroke-dasharray="12 10" stroke-linecap="round"></path>';
   }
 
   function starsHTML(n) {
@@ -1058,27 +1044,39 @@
     var units = UNITS[curSubj];
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
     $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 3);
-    var html = '<svg class="map-trail-svg" id="mapTrailSvg"></svg>', nextMarked = false;
-    var decos = ["🌲", "🧭", "⛺", "🌴", "⛵", "🚩"];
+
+    var pts = getMapPoints(units.length);
+    var d = "";
+    if (pts.length >= 2) {
+      d = "M " + (pts[0].x * 3) + " " + (pts[0].y * 4);
+      for (var p = 1; p < pts.length; p++) {
+        var x0 = pts[p - 1].x * 3, y0 = pts[p - 1].y * 4;
+        var x1 = pts[p].x * 3, y1 = pts[p].y * 4;
+        var midY = Math.round((y0 + y1) / 2);
+        d += " C " + x0 + " " + midY + ", " + x1 + " " + midY + ", " + x1 + " " + y1;
+      }
+    }
+
+    var html = '<svg class="map-trail-svg" viewBox="0 0 300 400" preserveAspectRatio="none">' +
+      (d ? '<path d="' + d + '" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="6.5" stroke-linecap="round"></path>' +
+           '<path d="' + d + '" fill="none" stroke="#ef4444" stroke-width="3.6" stroke-dasharray="8 6" stroke-linecap="round"></path>' : '') +
+      '</svg>';
+
+    var nextMarked = false;
     for (var i = 0; i < units.length; i++) {
       var u = units[i];
       var unlocked = isUnlocked(curSubj, i);
       var st = unitStars(curSubj, u.topic);
-      var cls = "unit-node step-" + (i % 6) + " " + (i % 2 === 0 ? "left" : "right");
+      var cls = "unit-node";
       if (!unlocked) cls += " locked";
       if (unlocked && st === 0 && !nextMarked) { cls += " next"; nextMarked = true; }
-      html += '<div class="' + cls + '" data-idx="' + i + '">' +
-        '<span class="map-deco ' + (i % 2 === 0 ? "r" : "l") + '">' + decos[i % decos.length] + '</span>' +
-        '<div class="unit-stars">' + starsHTML(st) + "</div>" +
-        '<div class="unit-no">BÀI ' + (i + 1) + "</div>" +
-        '<div class="unit-sign"><div class="unit-trophy">🏆 ' + bestScoreText(curSubj, u.topic) + '</div>' +
-        '<div class="unit-title"><span class="unit-icon">' + u.icon + "</span>" + u.title + "</div></div>" +
-        '<div class="mini-island"><div class="mi-top"></div><div class="mi-rock"></div><div class="mi-cloud l"></div><div class="mi-cloud r"></div></div>' +
-        (unlocked ? "" : '<div class="unit-lock">🔒</div>') +
-        "</div>";
+      html += '<div class="' + cls + '" data-idx="' + i + '" style="left:' + pts[i].x + '%;top:' + pts[i].y + '%;">' +
+        '<div class="unit-circle">' + (unlocked ? u.icon : "🔒") + '</div>' +
+        '<div class="unit-stars">' + starsHTML(st) + '</div>' +
+        '<div class="unit-pill">' + (i + 1) + '. ' + esc(u.title) + '</div>' +
+        '</div>';
     }
     $("unitPath").innerHTML = html;
-    setTimeout(drawMapTrail, 40);
     var nodes = $("unitPath").querySelectorAll(".unit-node");
     for (var k = 0; k < nodes.length; k++) {
       onTap(nodes[k], function () {
@@ -2218,7 +2216,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v16 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Sửa lỗi TTS đọc nhầm "bé" thành "bớ", bản đồ đường đi phiêu lưu uốn lượn.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v17 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Bản đồ Đảo Kho Báu minh họa thật với đường nét đứt đỏ và các chặng tròn.</div></div>';
 
     $("infoBody").innerHTML = html;
 
