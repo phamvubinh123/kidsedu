@@ -1082,47 +1082,34 @@
     if (idx < 0) idx = 0;
     curSubj = MAP_ORDER[idx];
 
+    var prevSubj = MAP_ORDER[(idx + 2) % 3];
+    var nextSubj = MAP_ORDER[(idx + 1) % 3];
+
     var sj = subjectById(curSubj);
     var units = UNITS[curSubj];
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
     $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 3);
 
-    var tabs = document.querySelectorAll("#mapSubjTabs .map-tab");
-    for (var ti = 0; ti < tabs.length; ti++) {
-      if (tabs[ti].getAttribute("data-subj") === curSubj) addClass(tabs[ti], "active");
-      else removeClass(tabs[ti], "active");
-    }
-
     var cards = document.querySelectorAll("#mapAccordion .map-card");
-    var tabSlider = $("mapTabSlider");
-    if (instant) {
-      for (var ci = 0; ci < cards.length; ci++) addClass(cards[ci], "no-anim");
-      if (tabSlider) tabSlider.style.webkitTransition = "none";
-      if (tabSlider) tabSlider.style.transition = "none";
+    for (var ci = 0; ci < cards.length; ci++) {
+      var c = cards[ci];
+      var cSubj = c.getAttribute("data-subj");
+      var targetCls = (cSubj === curSubj) ? "pos-active" : ((cSubj === prevSubj) ? "pos-prev" : "pos-next");
+      var wasPrev = c.className.indexOf("pos-prev") !== -1;
+      var wasNext = c.className.indexOf("pos-next") !== -1;
+      var isWrapping = !instant && ((wasPrev && targetCls === "pos-next") || (wasNext && targetCls === "pos-prev"));
+      if (instant || isWrapping) addClass(c, "no-anim");
+      removeClass(c, "pos-prev");
+      removeClass(c, "pos-active");
+      removeClass(c, "pos-next");
+      addClass(c, targetCls);
     }
 
-    for (var cj = 0; cj < cards.length; cj++) {
-      if (cards[cj].getAttribute("data-subj") === curSubj) addClass(cards[cj], "active");
-      else removeClass(cards[cj], "active");
-    }
-
-    var tabTx = "translate3d(" + (idx * 100) + "%, 0, 0)";
-    if (tabSlider) {
-      tabSlider.style.webkitTransform = tabTx;
-      tabSlider.style.transform = tabTx;
-    }
-
-    if (instant) {
-      var acc = $("mapAccordion");
-      if (acc) void acc.offsetWidth;
-      setTimeout(function () {
-        for (var ck = 0; ck < cards.length; ck++) removeClass(cards[ck], "no-anim");
-        if (tabSlider) {
-          tabSlider.style.webkitTransition = "";
-          tabSlider.style.transition = "";
-        }
-      }, 30);
-    }
+    var acc = $("mapAccordion");
+    if (acc) void acc.offsetWidth;
+    setTimeout(function () {
+      for (var ck = 0; ck < cards.length; ck++) removeClass(cards[ck], "no-anim");
+    }, 30);
   }
 
   function renderSingleIslandMap(subj, pathEl) {
@@ -1218,17 +1205,6 @@
     if (mapControlsBound) return;
     mapControlsBound = true;
 
-    var tabs = document.querySelectorAll("#mapSubjTabs .map-tab");
-    for (var ti = 0; ti < tabs.length; ti++) {
-      onTap(tabs[ti], function () {
-        var nextSubj = this.getAttribute("data-subj");
-        if (nextSubj && nextSubj !== curSubj) {
-          Sound.click();
-          slideToSubject(nextSubj, false);
-        }
-      });
-    }
-
     var cards = document.querySelectorAll("#mapAccordion .map-card");
     for (var ci = 0; ci < cards.length; ci++) {
       onTap(cards[ci], function () {
@@ -1255,12 +1231,12 @@
         var dy = e.changedTouches[0].clientY - touchStartY;
         if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
           var idx = MAP_ORDER.indexOf(curSubj);
-          if (dx < 0 && idx >= 0 && idx < MAP_ORDER.length - 1) {
+          if (dx < 0) {
             Sound.click();
-            slideToSubject(MAP_ORDER[idx + 1], false);
-          } else if (dx > 0 && idx > 0) {
+            slideToSubject(MAP_ORDER[(idx + 1) % 3], false);
+          } else if (dx > 0) {
             Sound.click();
-            slideToSubject(MAP_ORDER[idx - 1], false);
+            slideToSubject(MAP_ORDER[(idx + 2) % 3], false);
           }
         }
       }, false);
@@ -2395,7 +2371,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v23 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Giao diện Accordion Expanding Cards (xếp lớp thu gọn 2 đảo bên cạnh đảo đang mở) mượt mà.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v24 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Bản đồ chính luôn căn giữa rộng rãi, 2 đảo phụ mấp mé 2 bên xoay vòng mượt mà.</div></div>';
 
     $("infoBody").innerHTML = html;
 

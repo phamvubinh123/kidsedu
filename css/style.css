@@ -220,34 +220,11 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   background-image: url("../assets/treasure-map-eng.jpg");
 }
 .unit-node {
-  position: absolute; width: 124px; text-align: center; cursor: pointer; z-index: 2;
-  -webkit-transform: translate(-50%, -28px); transform: translate(-50%, -28px);
+  position: absolute; width: 96px; text-align: center; cursor: pointer; z-index: 2;
+  -webkit-transform: translate(-50%, -22px); transform: translate(-50%, -22px);
 }
-.map-subj-tabs {
-  position: relative; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
-  background: rgba(255, 255, 255, 0.78); border-radius: 20px; padding: 4px; margin: 0 0 10px;
-  box-shadow: 0 4px 12px rgba(20, 60, 120, 0.14);
-}
-.map-tab-slider {
-  position: absolute; top: 4px; bottom: 4px; left: 4px;
-  width: calc(33.3333% - 2.66px); border-radius: 16px;
-  background: linear-gradient(180deg, #ffe14d, #ffc400);
-  box-shadow: 0 3px 0 #d97706, 0 4px 10px rgba(217, 119, 6, 0.25);
-  -webkit-transition: -webkit-transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
-  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 0;
-}
-.map-tab {
-  position: relative; z-index: 1; -webkit-flex: 1; flex: 1; padding: 8px 6px; border-radius: 16px;
-  background: transparent; color: #2a5aa0; font-size: 13px; font-weight: 800;
-  white-space: nowrap; text-align: center;
-  -webkit-transition: color 0.25s; transition: color 0.25s;
-}
-.map-tab.active { color: #7a3d0e; }
-
 .map-accordion {
-  display: -webkit-flex; display: flex; -webkit-align-items: stretch; align-items: stretch;
-  width: 100%;
+  position: relative; width: calc(100% + 28px); margin: 4px -14px 0; overflow: hidden;
 }
 .map-card {
   position: relative; overflow: hidden; border-radius: 22px;
@@ -255,18 +232,20 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   border: 3px solid rgba(255, 255, 255, 0.92);
   box-shadow: 0 10px 26px rgba(20, 60, 120, 0.22);
   cursor: pointer;
-  -webkit-flex: 0 0 50px; flex: 0 0 50px; width: 50px;
-  margin-top: 18px; margin-bottom: 18px;
-  -webkit-transition: -webkit-flex 0.48s cubic-bezier(0.22, 1, 0.36, 1), flex 0.48s cubic-bezier(0.22, 1, 0.36, 1), width 0.48s cubic-bezier(0.22, 1, 0.36, 1), margin 0.48s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
-  transition: flex 0.48s cubic-bezier(0.22, 1, 0.36, 1), width 0.48s cubic-bezier(0.22, 1, 0.36, 1), margin 0.48s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
+  -webkit-transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1), right 0.45s cubic-bezier(0.22, 1, 0.36, 1), width 0.45s cubic-bezier(0.22, 1, 0.36, 1), top 0.45s, bottom 0.45s, box-shadow 0.35s;
+  transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1), right 0.45s cubic-bezier(0.22, 1, 0.36, 1), width 0.45s cubic-bezier(0.22, 1, 0.36, 1), top 0.45s, bottom 0.45s, box-shadow 0.35s;
 }
-.map-card:not(:last-child) { margin-right: 6px; }
 .map-card.no-anim { -webkit-transition: none !important; transition: none !important; }
-.map-card.active {
-  -webkit-flex: 1 1 0%; flex: 1 1 0%; width: auto;
-  margin-top: 0; margin-bottom: 0;
-  border-width: 4px; cursor: default; z-index: 2;
+.map-card.pos-active {
+  position: relative; width: calc(100% - 64px); margin: 0 auto;
+  border-width: 4px; cursor: default; z-index: 3;
   box-shadow: 0 14px 32px rgba(20, 60, 120, 0.28);
+}
+.map-card.pos-prev {
+  position: absolute; top: 18px; bottom: 18px; width: 48px; left: -22px; z-index: 2;
+}
+.map-card.pos-next {
+  position: absolute; top: 18px; bottom: 18px; width: 48px; right: -22px; z-index: 2;
 }
 .map-card-bg {
   position: absolute; top: 0; right: 0; bottom: 0; left: 0;
@@ -277,36 +256,38 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .map-card--math .map-card-bg { background-image: url("../assets/treasure-map.jpg"); }
 .map-card--viet .map-card-bg { background-image: url("../assets/treasure-map-viet.jpg"); }
 .map-card--eng .map-card-bg { background-image: url("../assets/treasure-map-eng.jpg"); }
-.map-card.active .map-card-bg { opacity: 0; -webkit-filter: none; filter: none; pointer-events: none; }
+.map-card.pos-active .map-card-bg { opacity: 0; -webkit-filter: none; filter: none; pointer-events: none; }
 
 .map-card .unit-path {
   position: absolute; top: 0; left: 0; width: 100%; opacity: 0; pointer-events: none;
   -webkit-transition: opacity 0.32s ease; transition: opacity 0.32s ease;
 }
-.map-card.active .unit-path {
+.map-card.pos-active .unit-path {
   position: relative; opacity: 1; pointer-events: auto;
 }
 
 .map-card-strip {
   position: absolute; left: 0; right: 0; bottom: 14px; z-index: 3;
-  text-align: center; padding: 0 3px;
+  text-align: center; padding: 0 2px;
   -webkit-transition: opacity 0.22s; transition: opacity 0.22s;
 }
-.map-card.active .map-card-strip { opacity: 0; pointer-events: none; }
-.map-card:not(.active):hover .map-card-bg { -webkit-filter: grayscale(10%) brightness(0.95); filter: grayscale(10%) brightness(0.95); }
+.map-card.pos-prev .map-card-strip { padding-left: 18px; }
+.map-card.pos-next .map-card-strip { padding-right: 18px; }
+.map-card.pos-active .map-card-strip { opacity: 0; pointer-events: none; }
+.map-card:not(.pos-active):hover .map-card-bg { -webkit-filter: grayscale(10%) brightness(0.95); filter: grayscale(10%) brightness(0.95); }
 .map-strip-circle {
-  width: 36px; height: 36px; margin: 0 auto 5px; border-radius: 50%;
+  width: 24px; height: 24px; margin: 0 auto; border-radius: 50%;
   background: #ffffff; border: 2px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
-  font-size: 19px; line-height: 32px; text-align: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+  font-size: 13px; line-height: 20px; text-align: center;
 }
 .map-strip-label {
-  font-size: 10px; font-weight: 800; color: #ffffff; line-height: 1.15;
+  display: none; font-size: 10px; font-weight: 800; color: #ffffff; line-height: 1.15;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .map-strip-stars {
-  display: inline-block; margin-top: 3px; padding: 1px 5px; border-radius: 8px;
+  display: none; margin-top: 3px; padding: 1px 5px; border-radius: 8px;
   background: rgba(15, 23, 42, 0.62); color: #fde047;
   font-size: 9px; font-weight: 800; line-height: 1.3;
 }
@@ -315,20 +296,20 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .unit-node:active .unit-circle { -webkit-transform: scale(0.92); transform: scale(0.92); }
 .unit-circle {
   position: relative;
-  width: 58px; height: 58px; margin: 0 auto; border-radius: 50%;
+  width: 44px; height: 44px; margin: 0 auto; border-radius: 50%;
   background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
-  border: 4px solid #f97316;
-  box-shadow: 0 4px 0 #c2410c, 0 0 0 4px rgba(255, 255, 255, 0.72), 0 8px 18px rgba(0, 0, 0, 0.35);
+  border: 3px solid #f97316;
+  box-shadow: 0 3px 0 #c2410c, 0 0 0 3px rgba(255, 255, 255, 0.72), 0 6px 14px rgba(0, 0, 0, 0.35);
   display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  font-size: 26px; font-weight: 800; color: #7c2d12;
+  font-size: 20px; font-weight: 800; color: #7c2d12;
   -webkit-transition: -webkit-transform 0.15s; transition: transform 0.15s;
 }
 .unit-num {
-  position: absolute; top: -7px; left: -7px;
-  min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px;
+  position: absolute; top: -5px; left: -5px;
+  min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px;
   background: #ef4444; border: 2px solid #ffffff;
-  color: #ffffff; font-size: 12px; font-weight: 800; line-height: 18px;
+  color: #ffffff; font-size: 10px; font-weight: 800; line-height: 14px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.32);
 }
 .unit-boss-crown {
@@ -795,28 +776,41 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   /* Bản đồ Đảo Kho Báu trên iPad / Web */
   .map-accordion {
     max-width: 840px;
+    width: 100%;
+    margin: 4px auto 0;
+  }
+  .map-card.pos-active {
+    width: 660px;
     margin: 0 auto;
   }
-  .map-card:not(.active) {
-    -webkit-flex: 0 0 76px;
-    flex: 0 0 76px;
+  .map-card.pos-prev {
+    top: 26px;
+    bottom: 26px;
     width: 76px;
-    margin-top: 26px;
-    margin-bottom: 26px;
+    left: 4px;
   }
-  .map-card:not(:last-child) { margin-right: 10px; }
+  .map-card.pos-next {
+    top: 26px;
+    bottom: 26px;
+    width: 76px;
+    right: 4px;
+  }
+  .map-card.pos-prev .map-card-strip,
+  .map-card.pos-next .map-card-strip {
+    padding: 0 4px;
+  }
   .map-strip-circle {
     width: 48px;
     height: 48px;
+    margin-bottom: 5px;
     font-size: 25px;
     line-height: 44px;
   }
-  .map-strip-label { font-size: 12px; }
-  .map-strip-stars { font-size: 10px; padding: 2px 6px; }
-  .map-subj-tabs { max-width: 840px; margin: 0 auto 12px; }
-  .map-tab { font-size: 15px; padding: 9px 12px; }
-  .unit-node { -webkit-transform: translate(-50%, -33px); transform: translate(-50%, -33px); }
-  .unit-circle { width: 66px; height: 66px; font-size: 28px; }
+  .map-strip-label { display: block; font-size: 12px; }
+  .map-strip-stars { display: inline-block; font-size: 10px; padding: 2px 6px; }
+  .unit-node { width: 124px; -webkit-transform: translate(-50%, -33px); transform: translate(-50%, -33px); }
+  .unit-circle { width: 66px; height: 66px; font-size: 28px; border-width: 4px; }
+  .unit-num { min-width: 22px; height: 22px; font-size: 12px; line-height: 18px; top: -7px; left: -7px; border-radius: 11px; }
   .unit-stars { font-size: 18px; }
   .unit-pill { font-size: 13px; max-width: 150px; padding: 3px 10px; }
 
