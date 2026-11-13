@@ -521,6 +521,36 @@
   ];
   var currentProfileId = "hoanglong";
 
+  var DEFAULT_REAL_REWARDS = [
+    { id: "rw_sticker", icon: "🍦", name: "Kem / Sticker Siêu Nhân", cost: 150 },
+    { id: "rw_book", icon: "📖", name: "Truyện Tranh Thiếu Nhi", cost: 300 },
+    { id: "rw_car", icon: "🏎️", name: "Xe Đồ Chơi HotWheels", cost: 600 },
+    { id: "rw_watch", icon: "⌚", name: "Đồng Hồ Trẻ Em", cost: 1200 }
+  ];
+  var STREAK_MILESTONES = [
+    { days: 3, coins: 15, label: "3 ngày liên tiếp" },
+    { days: 7, coins: 40, label: "7 ngày chăm chỉ" },
+    { days: 14, coins: 60, label: "14 ngày siêu sao" },
+    { days: 30, coins: 120, label: "30 ngày quán quân" }
+  ];
+
+  function cloneDefaultRewards() {
+    var arr = [];
+    for (var i = 0; i < DEFAULT_REAL_REWARDS.length; i++) {
+      var r = DEFAULT_REAL_REWARDS[i];
+      arr.push({ id: r.id, icon: r.icon, name: r.name, cost: r.cost });
+    }
+    return arr;
+  }
+
+  function getTodayStr(offsetDays) {
+    var d = new Date();
+    if (offsetDays) d.setDate(d.getDate() + offsetDays);
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (day < 10 ? "0" + day : day);
+  }
+
   var state = {
     name: "HOÀNG LONG",
     coins: 0,
@@ -535,8 +565,69 @@
     bgm: true,         // Nhạc nền game
     autoRead: true,
     unlockAll: false,
+    streak: { count: 0, lastDate: "", best: 0, claimedMilestones: {} },
+    dailyQuest: { date: "", math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 },
+    realRewards: cloneDefaultRewards(),
+    pinnedRewardId: "rw_car",
+    rewardTickets: [],
     updatedAt: 0
   };
+
+  function ensureGamificationState() {
+    var today = getTodayStr(0);
+    if (!state.streak || typeof state.streak !== "object") {
+      state.streak = { count: 0, lastDate: "", best: 0, claimedMilestones: {} };
+    }
+    if (!state.streak.claimedMilestones) state.streak.claimedMilestones = {};
+    if (!state.dailyQuest || state.dailyQuest.date !== today) {
+      state.dailyQuest = { date: today, math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 };
+    }
+    if (!Array.isArray(state.realRewards) || state.realRewards.length === 0) {
+      state.realRewards = cloneDefaultRewards();
+    }
+    if (!state.pinnedRewardId && state.realRewards.length > 0) {
+      state.pinnedRewardId = state.realRewards[0].id;
+    }
+    if (!Array.isArray(state.rewardTickets)) state.rewardTickets = [];
+  }
+
+  function getPinnedReward() {
+    ensureGamificationState();
+    for (var i = 0; i < state.realRewards.length; i++) {
+      if (state.realRewards[i].id === state.pinnedRewardId) return state.realRewards[i];
+    }
+    return state.realRewards[0] || null;
+  }
+
+  function recordDailyActivity(subj) {
+    ensureGamificationState();
+    var today = getTodayStr(0);
+    var yesterday = getTodayStr(-1);
+    var bonusCoins = 0;
+    var bonusNotes = [];
+
+    if (state.streak.lastDate !== today) {
+      state.streak.count = (state.streak.lastDate === yesterday) ? (state.streak.count + 1) : 1;
+      state.streak.lastDate = today;
+      if (state.streak.count > (state.streak.best || 0)) state.streak.best = state.streak.count;
+      for (var mi = 0; mi < STREAK_MILESTONES.length; mi++) {
+        var ms = STREAK_MILESTONES[mi];
+        if (state.streak.count === ms.days && !state.streak.claimedMilestones[String(ms.days)]) {
+          state.streak.claimedMilestones[String(ms.days)] = true;
+          bonusCoins += ms.coins;
+          bonusNotes.push("🔥 Chuỗi " + ms.days + " ngày: +" + ms.coins + " xu!");
+        }
+      }
+    }
+
+    if (subj && (subj === "math" || subj === "viet" || subj === "eng") && !state.dailyQuest[subj]) {
+      state.dailyQuest[subj] = true;
+      bonusCoins += 5;
+      bonusNotes.push("🎯 Nhiệm vụ ngày: +5 xu!");
+    }
+    if (bonusCoins > 0) state.coins += bonusCoins;
+    return { bonusCoins: bonusCoins, bonusNotes: bonusNotes };
+  }
 
   function profileStoreKey(pid) {
     return "vqtt_state_" + (pid || currentProfileId);
@@ -602,7 +693,8 @@
       }
       // Tên hiển thị luôn lấy theo hồ sơ đang chọn để không bao giờ bị lẫn tên bé khác
       state.name = fallbackName;
-    } catch (e) {}
+      ensureGamificationState();
+    } catch (e) { ensureGamificationState(); }
   }
 
   function saveState() {
@@ -977,28 +1069,40 @@
     }
     $("badgeStripItems").innerHTML = html;
 
-    // Cập nhật banner Bé Học Tiếp Ngay
-    var cbEl = $("continueBanner");
-    if (cbEl) {
-      if (state.lastSubj && typeof state.lastUnitIdx === "number") {
-        var lastS = subjectById(state.lastSubj);
-        var uList = UNITS[state.lastSubj];
-        if (uList && uList[state.lastUnitIdx]) {
-          var lastU = uList[state.lastUnitIdx];
-          $("cbIcon").innerHTML = lastU.icon || "🚀";
-          if (lastU.topic === "passages") {
-            var pList = typeof READING_PASSAGES !== "undefined" ? READING_PASSAGES : [];
-            var curP = pList[state.lastPassageIdx || 0];
-            $("cbTitle").innerHTML = "Tiếng Việt • " + (curP ? curP.week + ": " + curP.title : lastU.title);
-          } else {
-            $("cbTitle").innerHTML = lastS.name + " • " + lastU.title;
-          }
-          cbEl.style.display = "flex";
-        } else {
-          cbEl.style.display = "none";
-        }
+    // Cập nhật thanh Nhiệm Vụ Ngày & Mục Tiêu Quà Thật
+    ensureGamificationState();
+    var dq = state.dailyQuest;
+    if ($("gqStreak")) $("gqStreak").innerHTML = state.streak.count || 0;
+    if ($("gqQuestDots")) {
+      var dotsHtml = '<span class="gq-dot' + (dq.math ? ' done' : '') + '">T</span>' +
+        '<span class="gq-dot' + (dq.viet ? ' done' : '') + '">V</span>' +
+        '<span class="gq-dot' + (dq.eng ? ' done' : '') + '">A</span>';
+      $("gqQuestDots").innerHTML = dotsHtml;
+    }
+    var doneQ = (dq.math ? 1 : 0) + (dq.viet ? 1 : 0) + (dq.eng ? 1 : 0);
+    var questSubEl = $("gqQuestSub");
+    if (questSubEl) {
+      if (doneQ >= 3 && !dq.claimed) {
+        questSubEl.innerHTML = "🎁 Rương ngày sẵn sàng!";
+        addClass(questSubEl, "ready");
+      } else if (doneQ >= 3) {
+        questSubEl.innerHTML = "✅ Đã xong 3/3 hôm nay";
+        removeClass(questSubEl, "ready");
       } else {
-        cbEl.style.display = "none";
+        questSubEl.innerHTML = "Nhiệm vụ: " + doneQ + "/3 (+15🪙)";
+        removeClass(questSubEl, "ready");
+      }
+    }
+    var pinned = getPinnedReward();
+    var goalBtn = $("gqGoalBtn");
+    if (pinned && $("gqGoalName") && $("gqGoalNum") && $("gqGoalFill")) {
+      var pct = Math.min(100, Math.round((state.coins / (pinned.cost || 1)) * 100));
+      $("gqGoalName").innerHTML = pinned.icon + " " + esc(pinned.name);
+      $("gqGoalNum").innerHTML = state.coins + "/" + pinned.cost;
+      $("gqGoalFill").style.width = pct + "%";
+      if (goalBtn) {
+        if (state.coins >= pinned.cost) addClass(goalBtn, "ready");
+        else removeClass(goalBtn, "ready");
       }
     }
 
@@ -1510,6 +1614,7 @@
     state.passages[p.id] = 3;
     var rewardCoins = isFirstTime ? p.reward : 5;
     state.coins += rewardCoins;
+    recordDailyActivity("viet");
     saveState();
     renderHome();
 
@@ -2072,7 +2177,20 @@
     var oldBest = state.progress[key][game.mode] || 0;
     var badgesBefore = countBadges();
     if (stars > oldBest) state.progress[key][game.mode] = stars;
+
+    ensureGamificationState();
+    var replayNote = "";
+    if (oldBest >= 3 && stars > 0) {
+      if ((state.dailyQuest.replayCoinsCount || 0) < 5) {
+        coins = Math.max(3, Math.round(coins * 0.3));
+        state.dailyQuest.replayCoinsCount = (state.dailyQuest.replayCoinsCount || 0) + 1;
+      } else {
+        coins = 0;
+        replayNote = "<br><small style='color:#d97706'>Hôm nay bé nhận đủ 5 lượt xu ôn bài rồi, thử bài mới nhé!</small>";
+      }
+    }
     state.coins += coins;
+    var actRes = stars > 0 ? recordDailyActivity(game.subj) : { bonusCoins: 0, bonusNotes: [] };
     saveState();
     var newBadge = countBadges() > badgesBefore;
 
@@ -2080,8 +2198,9 @@
     var sh = "";
     for (var s = 0; s < 3; s++) sh += '<span class="' + (s < stars ? "" : "off") + '" style="-webkit-animation-delay:' + (0.2 + s * 0.25) + 's;animation-delay:' + (0.2 + s * 0.25) + 's">⭐</span>';
     $("resultStars").innerHTML = sh;
-    $("resultScore").innerHTML = "Điểm: " + game.score + " / " + game.max + (newBadge ? "<br>🏅 Bé nhận được huy hiệu mới!" : "");
-    $("resultCoins").innerHTML = "+" + coins + ' <i class="coin big"></i>';
+    var bonusHtml = actRes.bonusNotes.length ? "<br><small style='color:#15803d;font-weight:800'>" + actRes.bonusNotes.join(" • ") + "</small>" : "";
+    $("resultScore").innerHTML = "Điểm: " + game.score + " / " + game.max + (newBadge ? "<br>🏅 Bé nhận được huy hiệu mới!" : "") + bonusHtml + replayNote;
+    $("resultCoins").innerHTML = "+" + (coins + actRes.bonusCoins) + ' <i class="coin big"></i>';
     openOverlay("resultOverlay");
     if (stars >= 2) { Sound.fanfare(); confetti(26); } else { Sound.good(); }
     later(function () { Sound.coin(); }, 900);
@@ -2246,35 +2365,172 @@
     openOverlay("infoOverlay");
   }
 
-  function openShop() {
-    var html = '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đang có <b>' + state.coins + '</b> <i class="coin sm"></i> • Chạm để mua / chọn nhân vật</div><div class="grid-cards">';
-    for (var i = 0; i < AVATARS.length; i++) {
-      var a = AVATARS[i];
-      var owned = state.owned.indexOf(a.id) > -1;
-      var using = state.avatar === a.id;
-      html += '<div class="shop-card' + (owned ? " owned" : "") + (using ? " using" : "") + '" data-id="' + a.id + '">' +
-        '<div class="shop-ic">' + avatarHTML(a.id) + '</div><div class="shop-name">' + a.name + "</div>" +
-        '<div class="shop-price">' + (using ? "Đang dùng ✅" : owned ? "Chọn" : a.price + ' <i class="coin sm"></i>') + "</div></div>";
+  function openDailyQuestModal() {
+    ensureGamificationState();
+    var dq = state.dailyQuest;
+    var doneQ = (dq.math ? 1 : 0) + (dq.viet ? 1 : 0) + (dq.eng ? 1 : 0);
+    var html = '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#d97706;font-size:16px">🔥 Chuỗi học liên tiếp: <b>' + (state.streak.count || 0) + '</b> ngày (Kỷ lục: ' + (state.streak.best || 0) + ')</div>';
+    html += '<div class="quest-row' + (dq.math ? ' done' : '') + '"><span>' + (dq.math ? '✅' : '🧮') + ' Chơi 1 lượt Toán 1</span><span class="quest-reward">' + (dq.math ? 'Đã nhận +5 🪙' : '+5 🪙') + '</span></div>';
+    html += '<div class="quest-row' + (dq.viet ? ' done' : '') + '"><span>' + (dq.viet ? '✅' : '📖') + ' Chơi / Đọc 1 bài Tiếng Việt</span><span class="quest-reward">' + (dq.viet ? 'Đã nhận +5 🪙' : '+5 🪙') + '</span></div>';
+    html += '<div class="quest-row' + (dq.eng ? ' done' : '') + '"><span>' + (dq.eng ? '✅' : '🌍') + ' Chơi 1 lượt Tiếng Anh</span><span class="quest-reward">' + (dq.eng ? 'Đã nhận +5 🪙' : '+5 🪙') + '</span></div>';
+
+    html += '<div style="text-align:center;margin-top:14px;">';
+    if (doneQ >= 3 && !dq.claimed) {
+      html += '<button class="btn-green" id="claimDailyChestBtn">🎁 Mở Rương Ngày (+15 🪙)</button>';
+    } else if (dq.claimed) {
+      html += '<div style="font-weight:800;color:#15803d;padding:10px;background:#dcfce7;border-radius:14px;">🎉 Bé đã mở Rương Ngày hôm nay rồi!</div>';
+    } else {
+      html += '<div style="font-weight:700;color:#475569;font-size:13px;">Hoàn thành cả 3 nhiệm vụ (' + doneQ + '/3) để mở Rương Ngày nhận thêm <b>+15 🪙</b>!</div>';
     }
-    html += "</div>";
-    $("infoTitle").innerHTML = "🛒 Cửa Hàng Nhân Vật";
+    html += '</div>';
+
+    html += '<div class="set-section-title" style="margin-top:16px;">🏆 Thưởng Chuỗi Ngày Học</div>';
+    for (var mi = 0; mi < STREAK_MILESTONES.length; mi++) {
+      var ms = STREAK_MILESTONES[mi];
+      var got = !!(state.streak.claimedMilestones && state.streak.claimedMilestones[String(ms.days)]);
+      html += '<div class="quest-row' + (got ? ' done' : '') + '"><span>' + (got ? '✅' : '🔥') + ' ' + ms.label + '</span><span class="quest-reward">+' + ms.coins + ' 🪙</span></div>';
+    }
+
+    $("infoTitle").innerHTML = "🎯 Nhiệm Vụ & Chuỗi Ngày";
     $("infoBody").innerHTML = html;
-    var cards = $("infoBody").querySelectorAll(".shop-card");
-    for (var k = 0; k < cards.length; k++) {
-      onTap(cards[k], function () {
-        var a = getAvatar(this.getAttribute("data-id"));
-        if (state.owned.indexOf(a.id) > -1) {
-          state.avatar = a.id; Sound.click();
-        } else if (state.coins >= a.price) {
-          state.coins -= a.price; state.owned.push(a.id); state.avatar = a.id;
-          Sound.coin(); confetti(14);
-        } else {
-          Sound.bad();
-          this.querySelector(".shop-price").innerHTML = "Cần thêm " + (a.price - state.coins) + ' <i class="coin sm"></i>';
-          return;
-        }
-        saveState(); renderHome(); openShop();
+    if ($("claimDailyChestBtn")) {
+      onTap($("claimDailyChestBtn"), function () {
+        state.dailyQuest.claimed = true;
+        state.coins += 15;
+        Sound.fanfare();
+        Sound.coin();
+        confetti(30);
+        saveState();
+        renderHome();
+        openDailyQuestModal();
       });
+    }
+    openOverlay("infoOverlay");
+  }
+
+  var curShopTab = "rewards";
+  function openShop(tab) {
+    ensureGamificationState();
+    if (tab === "rewards" || tab === "avatars") curShopTab = tab;
+    var html = '<div class="shop-tabs">' +
+      '<button type="button" class="shop-tab' + (curShopTab === "rewards" ? " active" : "") + '" data-stab="rewards">🎁 Quà Của Bé</button>' +
+      '<button type="button" class="shop-tab' + (curShopTab === "avatars" ? " active" : "") + '" data-stab="avatars">🦸 Nhân Vật</button>' +
+      '</div>';
+    html += '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đang có <b>' + state.coins + '</b> <i class="coin sm"></i></div>';
+
+    if (curShopTab === "rewards") {
+      html += '<div class="reward-list">';
+      for (var ri = 0; ri < state.realRewards.length; ri++) {
+        var r = state.realRewards[ri];
+        var isPinned = r.id === state.pinnedRewardId;
+        var canBuy = state.coins >= r.cost;
+        var pct = Math.min(100, Math.round((state.coins / (r.cost || 1)) * 100));
+        var needMore = Math.max(0, r.cost - state.coins);
+        html += '<div class="reward-card' + (canBuy ? ' can-buy' : (isPinned ? ' pinned' : '')) + '">' +
+          '<div class="rw-ic">' + esc(r.icon || "🎁") + '</div>' +
+          '<div class="rw-mid">' +
+            '<div class="rw-name">' + esc(r.name) + '</div>' +
+            '<div class="rw-meta">' + r.cost + ' 🪙 · ' + (canBuy ? 'Đủ xu đổi rồi! 🎉' : 'Còn thiếu ' + needMore + ' xu') + '</div>' +
+            '<div class="rw-bar"><div class="rw-bar-fill" style="width:' + pct + '%"></div></div>' +
+          '</div>' +
+          '<div class="rw-actions">' +
+            '<button type="button" class="rw-btn pin' + (isPinned ? ' on' : '') + '" data-pin="' + esc(r.id) + '">' + (isPinned ? '🎯 Đang nhắm' : 'Nhắm tới') + '</button>' +
+            '<button type="button" class="rw-btn buy" data-buy="' + esc(r.id) + '"' + (canBuy ? '' : ' disabled') + '>🎁 Đổi quà</button>' +
+          '</div></div>';
+      }
+      html += '</div>';
+
+      if (state.rewardTickets.length > 0) {
+        html += '<div class="set-section-title">🎟️ Phiếu Quà Đã Đổi</div>';
+        for (var ti = state.rewardTickets.length - 1; ti >= 0; ti--) {
+          var tk = state.rewardTickets[ti];
+          var stCls = tk.status === "delivered" ? "delivered" : "pending";
+          var stTxt = tk.status === "delivered" ? "✅ Đã nhận" : "⏳ Chờ Ba Mẹ";
+          html += '<div class="ticket-row"><span>' + esc(tk.icon || "🎁") + ' <b>' + esc(tk.rewardName) + '</b> (' + tk.cost + ' 🪙 · ' + esc(tk.date || "") + ')</span>' +
+            '<span class="ticket-status ' + stCls + '">' + stTxt + '</span></div>';
+        }
+      }
+      $("infoTitle").innerHTML = "🎁 Đổi Quà Thật";
+    } else {
+      html += '<div class="grid-cards">';
+      for (var i = 0; i < AVATARS.length; i++) {
+        var a = AVATARS[i];
+        var owned = state.owned.indexOf(a.id) > -1;
+        var using = state.avatar === a.id;
+        html += '<div class="shop-card' + (owned ? " owned" : "") + (using ? " using" : "") + '" data-id="' + a.id + '">' +
+          '<div class="shop-ic">' + avatarHTML(a.id) + '</div><div class="shop-name">' + a.name + "</div>" +
+          '<div class="shop-price">' + (using ? "Đang dùng ✅" : owned ? "Chọn" : a.price + ' <i class="coin sm"></i>') + "</div></div>";
+      }
+      html += "</div>";
+      $("infoTitle").innerHTML = "🦸 Cửa Hàng Nhân Vật";
+    }
+
+    $("infoBody").innerHTML = html;
+
+    var tabBtns = $("infoBody").querySelectorAll(".shop-tab");
+    for (var sb = 0; sb < tabBtns.length; sb++) {
+      onTap(tabBtns[sb], function () {
+        Sound.click();
+        openShop(this.getAttribute("data-stab"));
+      });
+    }
+
+    if (curShopTab === "rewards") {
+      var pinBtns = $("infoBody").querySelectorAll(".rw-btn.pin");
+      for (var pi = 0; pi < pinBtns.length; pi++) {
+        onTap(pinBtns[pi], function () {
+          Sound.click();
+          state.pinnedRewardId = this.getAttribute("data-pin");
+          saveState();
+          renderHome();
+          openShop("rewards");
+        });
+      }
+      var buyBtns = $("infoBody").querySelectorAll(".rw-btn.buy");
+      for (var bi = 0; bi < buyBtns.length; bi++) {
+        onTap(buyBtns[bi], function () {
+          var rid = this.getAttribute("data-buy");
+          var reward = null;
+          for (var x = 0; x < state.realRewards.length; x++) {
+            if (state.realRewards[x].id === rid) { reward = state.realRewards[x]; break; }
+          }
+          if (!reward || state.coins < reward.cost) { Sound.bad(); return; }
+          if (!window.confirm("Bé muốn đổi " + reward.cost + " xu để lấy " + reward.icon + " " + reward.name + " nhé?")) return;
+          state.coins -= reward.cost;
+          state.rewardTickets.push({
+            id: "tk_" + Date.now(),
+            rewardName: reward.name,
+            icon: reward.icon,
+            cost: reward.cost,
+            status: "pending",
+            date: getTodayStr(0)
+          });
+          Sound.fanfare();
+          Sound.coin();
+          confetti(28);
+          saveState();
+          renderHome();
+          openShop("rewards");
+        });
+      }
+    } else {
+      var cards = $("infoBody").querySelectorAll(".shop-card");
+      for (var k = 0; k < cards.length; k++) {
+        onTap(cards[k], function () {
+          var a = getAvatar(this.getAttribute("data-id"));
+          if (state.owned.indexOf(a.id) > -1) {
+            state.avatar = a.id; Sound.click();
+          } else if (state.coins >= a.price) {
+            state.coins -= a.price; state.owned.push(a.id); state.avatar = a.id;
+            Sound.coin(); confetti(14);
+          } else {
+            Sound.bad();
+            this.querySelector(".shop-price").innerHTML = "Cần thêm " + (a.price - state.coins) + ' <i class="coin sm"></i>';
+            return;
+          }
+          saveState(); renderHome(); openShop("avatars");
+        });
+      }
     }
     openOverlay("infoOverlay");
   }
@@ -2329,7 +2585,106 @@
     }
   }
 
+  function openParentRewardsModal() {
+    ensureGamificationState();
+    var html = '<div style="margin-bottom:10px;"><button class="small-btn" id="backToSetBtn">‹ Quay lại Cài đặt</button></div>';
+
+    var pendingList = [];
+    for (var ti = state.rewardTickets.length - 1; ti >= 0; ti--) {
+      if (state.rewardTickets[ti].status === "pending") pendingList.push({ idx: ti, tk: state.rewardTickets[ti] });
+    }
+    html += '<div class="set-section-title">🎟️ Phiếu Quà Chờ Duyệt (' + pendingList.length + ')</div>';
+    if (pendingList.length === 0) {
+      html += '<div style="font-size:13px;color:#64748b;margin-bottom:10px;">Hiện chưa có phiếu quà nào chờ duyệt.</div>';
+    } else {
+      for (var pi = 0; pi < pendingList.length; pi++) {
+        var item = pendingList[pi];
+        html += '<div class="ticket-row">' +
+          '<span>' + esc(item.tk.icon || "🎁") + ' <b>' + esc(item.tk.rewardName) + '</b> (' + item.tk.cost + ' 🪙)</span>' +
+          '<span><button type="button" class="small-btn" data-deliver="' + item.idx + '">✅ Đã trao</button> ' +
+          '<button type="button" class="small-btn red" data-refund="' + item.idx + '">↩️ Hoàn xu</button></span></div>';
+      }
+    }
+
+    html += '<div class="set-section-title" style="margin-top:12px;">🎁 Danh Sách Quà Thật</div>';
+    for (var ri = 0; ri < state.realRewards.length; ri++) {
+      var r = state.realRewards[ri];
+      html += '<div class="ticket-row"><span>' + esc(r.icon) + ' <b>' + esc(r.name) + '</b> — ' + r.cost + ' 🪙</span>' +
+        '<button type="button" class="small-btn red" data-delrw="' + esc(r.id) + '">Xóa</button></div>';
+    }
+
+    html += '<div class="parent-rw-form">' +
+      '<input class="parent-rw-input" id="rwIconIn" value="🎁" maxlength="4" style="width:52px;text-align:center;" placeholder="Icon">' +
+      '<input class="parent-rw-input" id="rwNameIn" style="flex:1;min-width:140px;" placeholder="Tên quà (vd: Đồng hồ, Xe...)">' +
+      '<input class="parent-rw-input" id="rwCostIn" type="number" min="10" step="10" value="500" style="width:90px;" placeholder="Xu">' +
+      '<button type="button" class="small-btn" id="addRwBtn" style="height:36px;">+ Thêm quà</button>' +
+      '</div>';
+
+    $("infoTitle").innerHTML = "🎁 Quản Lý Quà Thật";
+    $("infoBody").innerHTML = html;
+
+    onTap($("backToSetBtn"), function () { Sound.click(); openSettings(); });
+    var delivBtns = $("infoBody").querySelectorAll("[data-deliver]");
+    for (var di = 0; di < delivBtns.length; di++) {
+      onTap(delivBtns[di], function () {
+        var idx = parseInt(this.getAttribute("data-deliver"), 10);
+        if (state.rewardTickets[idx]) {
+          state.rewardTickets[idx].status = "delivered";
+          Sound.good();
+          saveState();
+          openParentRewardsModal();
+        }
+      });
+    }
+    var refBtns = $("infoBody").querySelectorAll("[data-refund]");
+    for (var fi = 0; fi < refBtns.length; fi++) {
+      onTap(refBtns[fi], function () {
+        var idx = parseInt(this.getAttribute("data-refund"), 10);
+        var tk = state.rewardTickets[idx];
+        if (tk) {
+          state.coins += (tk.cost || 0);
+          state.rewardTickets.splice(idx, 1);
+          Sound.click();
+          saveState();
+          renderHome();
+          openParentRewardsModal();
+        }
+      });
+    }
+    var delRwBtns = $("infoBody").querySelectorAll("[data-delrw]");
+    for (var xi = 0; xi < delRwBtns.length; xi++) {
+      onTap(delRwBtns[xi], function () {
+        var rid = this.getAttribute("data-delrw");
+        for (var k = 0; k < state.realRewards.length; k++) {
+          if (state.realRewards[k].id === rid) { state.realRewards.splice(k, 1); break; }
+        }
+        if (state.pinnedRewardId === rid && state.realRewards.length > 0) state.pinnedRewardId = state.realRewards[0].id;
+        Sound.click();
+        saveState();
+        renderHome();
+        openParentRewardsModal();
+      });
+    }
+    onTap($("addRwBtn"), function () {
+      var ic = ($("rwIconIn").value || "🎁").trim();
+      var nm = ($("rwNameIn").value || "").trim();
+      var cs = parseInt($("rwCostIn").value, 10);
+      if (!nm || !(cs > 0)) { Sound.bad(); return; }
+      state.realRewards.push({ id: "rw_" + Date.now(), icon: ic, name: nm, cost: cs });
+      Sound.good();
+      saveState();
+      renderHome();
+      openParentRewardsModal();
+    });
+    openOverlay("infoOverlay");
+  }
+
   function openSettings() {
+    ensureGamificationState();
+    var pendingCnt = 0;
+    for (var ti = 0; ti < state.rewardTickets.length; ti++) {
+      if (state.rewardTickets[ti].status === "pending") pendingCnt++;
+    }
     $("infoTitle").innerHTML = "⚙️ Cài Đặt & Hướng Dẫn";
     var html = "";
 
@@ -2341,6 +2696,7 @@
 
     // 2. CÀI ĐẶT CHO PHỤ HUYNH
     html += '<div class="set-section-title">👨‍👩‍👧 Cài Đặt Dành Cho Bố Mẹ</div>';
+    html += '<div class="set-row"><span>🎁 Quà thật & Duyệt phiếu' + (pendingCnt ? ' <b style="color:#dc2626">(' + pendingCnt + ' chờ)</b>' : '') + '</span><button class="small-btn" id="manageRewardsBtn">Quản lý</button></div>';
     html += '<div class="set-row"><span>☁️ Đồng bộ đám mây: <b id="setCloudStatus">' + (CloudSync.db ? 'Đã kết nối' : 'Lưu trên máy') + '</b></span><button class="small-btn" id="setCloudBtn">Xem</button></div>';
     html += '<div class="set-row"><span>🔓 Mở khóa tất cả bài</span><button class="toggle' + (state.unlockAll ? " on" : "") + '" data-key="unlockAll"></button></div>';
     html += '<div class="set-row"><span>📋 Sao lưu mã tiến độ</span><button class="small-btn" id="exportBtn">Lấy mã</button></div>';
@@ -2359,7 +2715,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v33 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Chuyển động carousel GPU mượt 60fps không giật, 3 đảo ngoài tự co giãn to rõ theo màn hình.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v34 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Chương trình Gamification hoàn chỉnh: Nhiệm vụ hằng ngày, Chuỗi ngày học 🔥, Mục tiêu Quà Thật cuối tháng & Duyệt phiếu quà cho Ba Mẹ.</div></div>';
 
     $("infoBody").innerHTML = html;
 
@@ -2383,6 +2739,11 @@
       var open = box.style.display !== "none";
       box.style.display = open ? "none" : "block";
       this.innerHTML = open ? "Xem kỹ" : "Thu gọn";
+    });
+    onTap($("manageRewardsBtn"), function () {
+      Sound.click();
+      if (!askParentalGate("Quản lý Quà Thật & Duyệt Phiếu")) return;
+      openParentRewardsModal();
     });
     onTap($("setCloudBtn"), function () {
       Sound.click();
@@ -2512,26 +2873,8 @@
       finishPassageReading();
     });
 
-    var cbEl = $("continueBanner");
-    if (cbEl) {
-      onTap(cbEl, function () {
-        Sound.click();
-        if (!state.lastSubj) return;
-        curSubj = state.lastSubj;
-        curUnitIdx = typeof state.lastUnitIdx === "number" ? state.lastUnitIdx : 0;
-        var uList = UNITS[curSubj];
-        if (uList && uList[curUnitIdx]) {
-          var u = uList[curUnitIdx];
-          if (u.topic === "passages") {
-            openPassageReader(state.lastPassageIdx || 0);
-          } else {
-            renderMap();
-            showScreen("screenMap");
-            openModePicker();
-          }
-        }
-      });
-    }
+    if ($("gqQuestBtn")) onTap($("gqQuestBtn"), function () { Sound.click(); openDailyQuestModal(); });
+    if ($("gqGoalBtn")) onTap($("gqGoalBtn"), function () { Sound.click(); openShop("rewards"); });
 
     if ($("settingsBtn")) onTap($("settingsBtn"), function () { Sound.click(); openSettings(); });
     onTap($("profileBtn"), function () { openProfileModal(); });

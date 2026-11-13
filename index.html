@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/mascot.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=33">
+  <link rel="stylesheet" href="css/style.css?v=34">
 </head>
 <body>
 
@@ -42,14 +42,22 @@
       <span class="bs-items" id="badgeStripItems"></span>
     </div>
 
-    <!-- Banner Bé Học Tiếp Ngay -->
-    <div class="continue-banner glass" id="continueBanner" style="display:none">
-      <div class="cb-icon" id="cbIcon">🚀</div>
-      <div class="cb-info">
-        <div class="cb-sub">LẦN TRƯỚC BÉ ĐANG HỌC:</div>
-        <div class="cb-title" id="cbTitle">Toán 1 • Bài 1: Đếm số</div>
+    <!-- Thanh Nhiệm Vụ Ngày & Mục Tiêu Quà Thật -->
+    <div class="goal-quest-bar" id="goalQuestBar">
+      <div class="gq-card gq-quest glass" id="gqQuestBtn">
+        <div class="gq-top">
+          <span class="gq-fire">🔥 <b id="gqStreak">0</b> ngày</span>
+          <span class="gq-dots" id="gqQuestDots"></span>
+        </div>
+        <div class="gq-sub" id="gqQuestSub">Nhiệm vụ hôm nay</div>
       </div>
-      <button class="cb-btn" id="cbBtn">Học tiếp ➜</button>
+      <div class="gq-card gq-goal glass" id="gqGoalBtn">
+        <div class="gq-top">
+          <span class="gq-goal-name" id="gqGoalName">🏎️ Xe Đồ Chơi</span>
+          <span class="gq-goal-num" id="gqGoalNum">0/600</span>
+        </div>
+        <div class="gq-prog-track"><div class="gq-prog-fill" id="gqGoalFill"></div></div>
+      </div>
     </div>
 
     <div class="island-map" id="islandMap"></div>
@@ -58,7 +66,7 @@
       <button class="nav-item active" data-nav="home"><span class="nav-ic home-ic">🏠</span><span>Trang chủ</span></button>
       <button class="nav-item" data-nav="report"><span class="nav-ic">📊</span><span>Tiến độ</span></button>
       <button class="nav-item" data-nav="badges"><span class="nav-ic">🏅</span><span>Huy hiệu</span></button>
-      <button class="nav-item" data-nav="shop"><span class="nav-ic">🛒</span><span>Cửa hàng</span></button>
+      <button class="nav-item" data-nav="shop"><span class="nav-ic">🎁</span><span>Đổi quà</span></button>
       <button class="nav-item" data-nav="settings"><span class="nav-ic">⚙️</span><span>Cài đặt & HD</span></button>
     </nav>
   </section>
@@ -261,9 +269,9 @@
   <!-- Firebase SDK v8 (Tương thích 100% cú pháp ES5 cho iPadOS 12.5.8 đến iOS 18) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/firebase-config.js?v=33"></script>
-  <script src="js/data.js?v=33"></script>
-  <script src="js/audio-manifest.js?v=33"></script>
-  <script src="js/app.js?v=33"></script>
+  <script src="js/firebase-config.js?v=34"></script>
+  <script src="js/data.js?v=34"></script>
+  <script src="js/audio-manifest.js?v=34"></script>
+  <script src="js/app.js?v=34"></script>
 </body>
 </html>

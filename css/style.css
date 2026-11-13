@@ -1322,5 +1322,114 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 .match-card.emo { font-size: 28px; letter-spacing: 2px; }
 
+/* ---------- Gamification: Thanh Nhiệm Vụ Ngày & Mục Tiêu Quà Thật ---------- */
+.goal-quest-bar {
+  display: -webkit-flex; display: flex; -webkit-align-items: stretch; align-items: stretch;
+  max-width: 860px; margin: 0 auto 4px;
+}
+.gq-card {
+  border-radius: 16px; padding: 7px 10px; cursor: pointer;
+  -webkit-transition: -webkit-transform 0.12s; transition: transform 0.12s;
+}
+.gq-card:active { -webkit-transform: scale(0.97); transform: scale(0.97); }
+.gq-quest { -webkit-flex: 0 0 43%; flex: 0 0 43%; margin-right: 8px; }
+.gq-goal { -webkit-flex: 1; flex: 1; min-width: 0; }
+.gq-top {
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  font-size: 13px; font-weight: 800; color: #1e3a8a;
+}
+.gq-fire { white-space: nowrap; }
+.gq-dots { white-space: nowrap; font-size: 13px; }
+.gq-dot {
+  display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center;
+  border-radius: 50%; margin-left: 2px; font-size: 10px;
+  background: rgba(148, 163, 184, 0.35); color: #64748b;
+}
+.gq-dot.done { background: #22c55e; color: #ffffff; }
+.gq-sub { font-size: 11px; font-weight: 700; color: #2a5aa0; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gq-sub.ready { color: #d97706; font-weight: 800; }
+.gq-goal-name {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 6px;
+}
+.gq-goal-num { white-space: nowrap; color: #b45309; font-size: 12px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.gq-prog-track {
+  height: 9px; margin-top: 5px; border-radius: 6px; overflow: hidden;
+  background: rgba(15, 23, 42, 0.12);
+}
+.gq-prog-fill {
+  height: 100%; width: 0%; border-radius: 6px;
+  background: linear-gradient(90deg, #34d399, #10b981);
+  -webkit-transition: width 0.35s ease; transition: width 0.35s ease;
+}
+.gq-card.ready { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.4), 0 6px 14px rgba(217, 119, 6, 0.25); }
+.gq-card.ready .gq-prog-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+
+/* ---------- Cửa Hàng 2 Tab & Quà Thật ---------- */
+.shop-tabs {
+  display: -webkit-flex; display: flex; margin-bottom: 12px;
+  background: #e2e8f0; border-radius: 16px; padding: 4px;
+}
+.shop-tab {
+  -webkit-flex: 1; flex: 1; padding: 10px 8px; border-radius: 12px;
+  font-size: 15px; font-weight: 800; color: #475569; background: transparent;
+  text-align: center;
+}
+.shop-tab.active {
+  background: #ffffff; color: #1e3a8a;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.12);
+}
+.reward-list { margin-bottom: 14px; }
+.reward-card {
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
+  background: #ffffff; border: 2px solid #e2e8f0; border-radius: 18px;
+  padding: 10px 12px; margin-bottom: 10px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+}
+.reward-card.pinned { border-color: #3b82f6; background: #eff6ff; }
+.reward-card.can-buy { border-color: #f59e0b; background: #fffbeb; }
+.rw-ic { font-size: 38px; line-height: 1; margin-right: 12px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.rw-mid { -webkit-flex: 1; flex: 1; min-width: 0; margin-right: 8px; }
+.rw-name { font-size: 15px; font-weight: 800; color: #1e293b; }
+.rw-meta { font-size: 12px; font-weight: 700; color: #b45309; margin-top: 2px; }
+.rw-bar { height: 7px; border-radius: 5px; background: #e2e8f0; margin-top: 5px; overflow: hidden; }
+.rw-bar-fill { height: 100%; background: linear-gradient(90deg, #34d399, #059669); border-radius: 5px; }
+.reward-card.can-buy .rw-bar-fill { background: linear-gradient(90deg, #fbbf24, #d97706); }
+.rw-actions { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.rw-btn {
+  padding: 6px 10px; border-radius: 11px; font-size: 12px; font-weight: 800;
+  background: #e2e8f0; color: #334155; text-align: center; margin-bottom: 5px;
+}
+.rw-btn.pin.on { background: #3b82f6; color: #ffffff; }
+.rw-btn.buy { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #78350f; margin-bottom: 0; box-shadow: 0 2px 0 #d97706; }
+.rw-btn.buy:disabled { background: #f1f5f9; color: #94a3b8; box-shadow: none; cursor: default; }
+
+.ticket-row {
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px;
+  padding: 8px 12px; margin-bottom: 8px; font-size: 13px;
+}
+.ticket-status { font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 10px; white-space: nowrap; margin-left: 8px; }
+.ticket-status.pending { background: #fef3c7; color: #b45309; }
+.ticket-status.delivered { background: #dcfce7; color: #15803d; }
+
+.quest-row {
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px;
+  padding: 10px 12px; margin-bottom: 8px; font-weight: 800; font-size: 14px; color: #1e293b;
+}
+.quest-row.done { background: #f0fdf4; border-color: #86efac; color: #166534; }
+.quest-reward { font-size: 13px; color: #d97706; white-space: nowrap; margin-left: 8px; }
+.parent-rw-form {
+  display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 10px; margin-top: 8px;
+}
+.parent-rw-input {
+  border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 8px 10px; font-size: 14px;
+  font-weight: 700; background: #ffffff; margin: 0 6px 8px 0;
+}
+
 
 
