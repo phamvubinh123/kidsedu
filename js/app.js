@@ -1022,28 +1022,28 @@
 
   var MAP_POINTS_BY_SUBJ = {
     math: [
-      { x: 58, y: 28 },
-      { x: 24, y: 36, cx: 34, cy: 27 },
-      { x: 37, y: 44, cx: 14, cy: 42 },
-      { x: 74, y: 46, cx: 56, cy: 38 },
-      { x: 62, y: 56, cx: 90, cy: 52 },
-      { x: 25, y: 62, cx: 44, cy: 59 },
-      { x: 52, y: 73, cx: 16, cy: 71 }
+      { x: 60, y: 30 },
+      { x: 24, y: 36, via: [[46, 29], [31, 31]] },
+      { x: 38, y: 44.5, via: [[20, 41], [27, 44]] },
+      { x: 75, y: 45.5, via: [[51, 44.5], [64, 42]] },
+      { x: 64, y: 56.5, via: [[83, 50], [77, 55]] },
+      { x: 25, y: 63, via: [[46, 58], [30, 59]] },
+      { x: 51, y: 74, via: [[23, 68], [34, 72]] }
     ],
     viet: [
-      { x: 43, y: 28 },
-      { x: 63, y: 36, cx: 61, cy: 31 },
-      { x: 32, y: 47, cx: 52, cy: 42 },
-      { x: 50, y: 56, cx: 30, cy: 53 },
-      { x: 65, y: 65, cx: 64, cy: 59 },
-      { x: 50, y: 75, cx: 60, cy: 72 }
+      { x: 43, y: 30 },
+      { x: 62, y: 38, via: [[56, 32], [63, 35]] },
+      { x: 30, y: 48, via: [[52, 41], [36, 43]] },
+      { x: 53, y: 56, via: [[36, 52], [44, 54]] },
+      { x: 69, y: 67, via: [[67, 58], [74, 63]] },
+      { x: 49, y: 77, via: [[60, 71], [52, 74]] }
     ],
     eng: [
-      { x: 48, y: 23 },
-      { x: 32, y: 34, cx: 30, cy: 27 },
-      { x: 68, y: 42, cx: 66, cy: 36 },
-      { x: 27, y: 53, cx: 26, cy: 45 },
-      { x: 59, y: 67, cx: 68, cy: 58 }
+      { x: 50, y: 23 },
+      { x: 31, y: 34, via: [[36, 26], [28, 30]] },
+      { x: 69, y: 42, via: [[48, 36], [66, 38]] },
+      { x: 24, y: 53, via: [[54, 45], [32, 47]] },
+      { x: 59, y: 68, via: [[34, 57], [58, 59], [68, 63]] }
     ]
   };
 
@@ -1129,8 +1129,23 @@
       for (var p = 1; p < pts.length; p++) {
         var x0 = pts[p - 1].x * 3, y0 = pts[p - 1].y * 4;
         var x1 = pts[p].x * 3, y1 = pts[p].y * 4;
-        var seg;
-        if (pts[p].cx != null && pts[p].cy != null) {
+        var seg = "";
+        if (pts[p].via && pts[p].via.length) {
+          var w = [{ x: x0, y: y0 }];
+          for (var vi = 0; vi < pts[p].via.length; vi++) {
+            w.push({ x: pts[p].via[vi][0] * 3, y: pts[p].via[vi][1] * 4 });
+          }
+          w.push({ x: x1, y: y1 });
+          for (var wi = 1; wi < w.length - 1; wi++) {
+            if (wi === w.length - 2) {
+              seg += " Q " + w[wi].x + " " + w[wi].y + ", " + w[wi + 1].x + " " + w[wi + 1].y;
+            } else {
+              var mx = Math.round((w[wi].x + w[wi + 1].x) / 2);
+              var my = Math.round((w[wi].y + w[wi + 1].y) / 2);
+              seg += " Q " + w[wi].x + " " + w[wi].y + ", " + mx + " " + my;
+            }
+          }
+        } else if (pts[p].cx != null && pts[p].cy != null) {
           seg = " Q " + (pts[p].cx * 3) + " " + (pts[p].cy * 4) + ", " + x1 + " " + y1;
         } else {
           var midY = Math.round((y0 + y1) / 2);
@@ -2370,7 +2385,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v26 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — 3 đảo màn hình chính to rõ, dàn đều cân đối trong 1 khung hình mobile.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v27 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đường nối đa điểm mượt mà ôm sát lối đi lát gạch trên cả 3 đảo.</div></div>';
 
     $("infoBody").innerHTML = html;
 
