@@ -221,7 +221,22 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 .unit-node {
   position: absolute; width: 124px; text-align: center; cursor: pointer; z-index: 2;
-  -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -28px); transform: translate(-50%, -28px);
+}
+.map-subj-tabs {
+  display: -webkit-flex; display: flex; -webkit-justify-content: center; justify-content: center;
+  margin: 0 -4px 10px;
+}
+.map-tab {
+  -webkit-flex: 1; flex: 1; margin: 0 4px; padding: 8px 6px; border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88); color: #2a5aa0; font-size: 13px; font-weight: 800;
+  box-shadow: 0 3px 0 #b9cfe8, 0 4px 10px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; text-align: center;
+}
+.map-tab:active { -webkit-transform: translateY(2px); transform: translateY(2px); box-shadow: 0 1px 0 #b9cfe8; }
+.map-tab.active {
+  background: linear-gradient(180deg, #ffe14d, #ffc400); color: #7a3d0e;
+  box-shadow: 0 3px 0 #d97706, 0 5px 12px rgba(217, 119, 6, 0.3);
 }
 .unit-node.next { z-index: 4; }
 .unit-node.is-boss { z-index: 3; }
@@ -711,6 +726,9 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
     margin: 0 auto;
     padding: 0;
   }
+  .map-subj-tabs { max-width: 680px; margin: 0 auto 12px; }
+  .map-tab { font-size: 15px; padding: 9px 12px; }
+  .unit-node { -webkit-transform: translate(-50%, -33px); transform: translate(-50%, -33px); }
   .unit-circle { width: 66px; height: 66px; font-size: 28px; }
   .unit-stars { font-size: 18px; }
   .unit-pill { font-size: 13px; max-width: 150px; padding: 3px 10px; }

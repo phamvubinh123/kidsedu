@@ -1022,28 +1022,28 @@
 
   var MAP_POINTS_BY_SUBJ = {
     math: [
-      { x: 58, y: 31 },
-      { x: 24, y: 38, cx: 34, cy: 29 },
-      { x: 35, y: 45, cx: 21, cy: 43 },
-      { x: 74, y: 47, cx: 56, cy: 43 },
-      { x: 64, y: 58, cx: 79, cy: 54 },
-      { x: 27, y: 63, cx: 44, cy: 59 },
-      { x: 52, y: 74, cx: 28, cy: 71 }
+      { x: 58, y: 28 },
+      { x: 24, y: 36, cx: 34, cy: 27 },
+      { x: 35, y: 43, cx: 19, cy: 41 },
+      { x: 74, y: 46, cx: 56, cy: 42 },
+      { x: 64, y: 56, cx: 80, cy: 52 },
+      { x: 27, y: 61, cx: 44, cy: 58 },
+      { x: 52, y: 72, cx: 28, cy: 69 }
     ],
     viet: [
-      { x: 43, y: 30 },
-      { x: 65, y: 39, cx: 64, cy: 33 },
-      { x: 32, y: 49, cx: 48, cy: 43 },
-      { x: 51, y: 58, cx: 32, cy: 55 },
-      { x: 66, y: 67, cx: 66, cy: 61 },
-      { x: 50, y: 77, cx: 61, cy: 74 }
+      { x: 43, y: 28 },
+      { x: 63, y: 36, cx: 61, cy: 31 },
+      { x: 32, y: 47, cx: 52, cy: 42 },
+      { x: 50, y: 56, cx: 30, cy: 53 },
+      { x: 65, y: 65, cx: 64, cy: 59 },
+      { x: 50, y: 75, cx: 60, cy: 72 }
     ],
     eng: [
-      { x: 48, y: 25 },
-      { x: 32, y: 36, cx: 30, cy: 29 },
-      { x: 68, y: 44, cx: 66, cy: 37 },
-      { x: 27, y: 55, cx: 26, cy: 47 },
-      { x: 60, y: 69, cx: 68, cy: 60 }
+      { x: 48, y: 23 },
+      { x: 32, y: 34, cx: 30, cy: 27 },
+      { x: 68, y: 42, cx: 66, cy: 36 },
+      { x: 27, y: 53, cx: 26, cy: 45 },
+      { x: 59, y: 67, cx: 68, cy: 58 }
     ]
   };
 
@@ -1080,6 +1080,22 @@
 
     var pathEl = $("unitPath");
     pathEl.className = "unit-path unit-path--" + curSubj;
+
+    var tabs = document.querySelectorAll("#mapSubjTabs .map-tab");
+    for (var ti = 0; ti < tabs.length; ti++) {
+      if (tabs[ti].getAttribute("data-subj") === curSubj) addClass(tabs[ti], "active");
+      else removeClass(tabs[ti], "active");
+      if (!tabs[ti].getAttribute("data-bound")) {
+        tabs[ti].setAttribute("data-bound", "1");
+        onTap(tabs[ti], function () {
+          var nextSubj = this.getAttribute("data-subj");
+          if (nextSubj && nextSubj !== curSubj) {
+            Sound.click();
+            openSubject(nextSubj);
+          }
+        });
+      }
+    }
 
     var pts = getMapPoints(units.length, curSubj);
     var highestUnlocked = 0;
@@ -2281,7 +2297,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v20 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Tinh chỉnh đường nối bo theo đường lát đá, hết đè chặng và cân đối đảo Tiếng Việt.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v21 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Căn tâm chặng tròn khớp đường nối và thêm thanh chuyển nhanh giữa 3 đảo.</div></div>';
 
     $("infoBody").innerHTML = html;
 
