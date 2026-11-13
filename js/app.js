@@ -108,7 +108,7 @@
     s = s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ");
     s = s.replace(/[\u2600-\u27BF]/g, " ");
 
-    // 2. Nếu là chữ cái hoặc âm tiết đơn lẻ được yêu cầu phát âm:
+    // 2. Nếu là chữ cái, âm tiết hoặc vần đơn lẻ được yêu cầu phát âm:
     var trimmed = s.trim();
     var singleMap = {
       "c": "cờ", "k": "ca", "q": "quy", "qu": "quờ",
@@ -117,7 +117,19 @@
       "n": "nờ", "p": "pờ", "ph": "phờ", "r": "rờ",
       "s": "sờ", "t": "tờ", "th": "thờ", "tr": "trờ",
       "v": "vờ", "x": "xờ", "ch": "chờ", "kh": "khờ",
-      "nh": "nhờ", "ng": "ngờ", "ngh": "ngờ kép", "gi": "giê"
+      "nh": "nhờ", "ng": "ngờ", "ngh": "ngờ kép", "gi": "giê",
+      "ưa": "vần ưa", "ua": "vần ua", "ia": "vần ia",
+      "an": "vần an", "ăn": "vần ăn", "ân": "vần ân",
+      "on": "vần on", "ôn": "vần ôn", "ơn": "vần ơn",
+      "en": "vần en", "ên": "vần ên", "in": "vần in", "un": "vần un",
+      "am": "vần am", "ăm": "vần ăm", "âm": "vần âm",
+      "om": "vần om", "ôm": "vần ôm", "ơm": "vần ơm",
+      "ai": "vần ai", "ay": "vần ay", "ây": "vần ây",
+      "ao": "vần ao", "eo": "vần eo",
+      "anh": "vần anh", "ach": "vần ach",
+      "ăng": "vần ăng", "ang": "vần ang", "ong": "vần ong", "ông": "vần ông",
+      "iêu": "vần iêu", "uôi": "vần uôi", "ươm": "vần ươm",
+      "oa": "vần oa", "oan": "vần oan", "uân": "vần uân", "uyên": "vần uyên"
     };
     if (singleMap.hasOwnProperty(trimmed.toLowerCase())) {
       return singleMap[trimmed.toLowerCase()];
@@ -163,8 +175,9 @@
     s = s.replace(/['"‘“]?g['"’”]?\s+hay\s+['"‘“]?gh['"’”]?/gi, "gờ đơn hay gờ kép");
     s = s.replace(/['"‘“]?ng['"’”]?\s+hay\s+['"‘“]?ngh['"’”]?/gi, "ngờ đơn hay ngờ kép");
 
-    // Xóa dấu nháy đơn, ngoặc vuông toán học, dấu chấm lửng
+    // Xóa dấu nháy đơn, ngoặc vuông toán học, dấu chấm lửng, ký tự phân tách
     s = s.replace(/\[\s*\?\s*\]/g, "mấy");
+    s = s.replace(/\s*(\||->|=>|➡️)\s*/g, ", ");
     s = s.replace(/\s*\.\.\.\s*/g, " ");
     s = s.replace(/['"“”‘’]/g, " ");
     s = s.replace(/\s{2,}/g, " ").trim();
@@ -326,10 +339,13 @@
       if (!state.sound || !text) return;
       var targetLang = lang || "vi-VN";
       var isVi = targetLang.indexOf("vi") === 0;
-      // Chuẩn hóa văn bản Unicode và phiên âm học vần tiếng Việt
-      var cleanText = isVi ? cleanVietnamesePhonetics(text) : (String(text).normalize ? String(text).normalize("NFC") : String(text));
+      var fbLang = isVi ? "vi" : "en";
+      // Chuẩn hóa văn bản Unicode và phiên âm học vần tiếng Việt / tiếng Anh
+      var cleanText = isVi
+        ? cleanVietnamesePhonetics(text)
+        : (String(text).normalize ? String(text).normalize("NFC") : String(text)).replace(/_/g, " ").replace(/\s{2,}/g, " ").trim();
 
-      // Kiểm tra xem thiết bị có voice tiếng Việt thực sự hay không
+      // Kiểm tra xem thiết bị có voice tiếng Việt / tiếng Anh thực sự hay không
       if (isVi) {
         if (!cachedVoiceVi) findBestVoices();
         // Nếu thiết bị không có voice tiếng Việt (như iPadOS 12.5.8 hoặc iOS 16 chưa tải giọng Linh):
@@ -338,10 +354,16 @@
           playFallbackTTS(cleanText, "vi");
           return;
         }
+      } else if (targetLang.indexOf("en") === 0) {
+        if (!cachedVoiceEn) findBestVoices();
+        if (!cachedVoiceEn) {
+          playFallbackTTS(cleanText, "en");
+          return;
+        }
       }
 
       if (!("speechSynthesis" in window)) {
-        if (isVi) playFallbackTTS(cleanText, "vi");
+        playFallbackTTS(cleanText, fbLang);
         return;
       }
 
@@ -357,21 +379,44 @@
         u.rate = rate || (targetLang === "en-US" ? 0.8 : 0.92);
 
         // Gán voice tiếng Việt/tiếng Anh chuẩn
-        if (isVi) {
-          if (cachedVoiceVi) u.voice = cachedVoiceVi;
-        } else if (targetLang.indexOf("en") === 0) {
-          if (!cachedVoiceEn) findBestVoices();
-          if (cachedVoiceEn) u.voice = cachedVoiceEn;
+        if (isVi && cachedVoiceVi) {
+          u.voice = cachedVoiceVi;
+        } else if (targetLang.indexOf("en") === 0 && cachedVoiceEn) {
+          u.voice = cachedVoiceEn;
         }
+
+        // Watchdog 450ms: nếu Safari/Chrome im lặng không kích hoạt onstart thì tự chuyển sang Fallback TTS
+        var started = false;
+        var watchdog = null;
+        u.onstart = function () {
+          started = true;
+          if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+        };
+        u.onend = function () {
+          if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+        };
+        u.onerror = function () {
+          if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+          if (!started) playFallbackTTS(cleanText, fbLang);
+        };
 
         // Timeout nhẹ 30ms để tránh bug Safari iOS WebKit drop utterance sau khi cancel
         setTimeout(function () {
-          try { window.speechSynthesis.speak(u); } catch (e) {
-            if (isVi) playFallbackTTS(cleanText, "vi");
+          try {
+            watchdog = setTimeout(function () {
+              if (!started) {
+                try { window.speechSynthesis.cancel(); } catch (err) {}
+                playFallbackTTS(cleanText, fbLang);
+              }
+            }, 450);
+            window.speechSynthesis.speak(u);
+          } catch (e) {
+            if (watchdog) { clearTimeout(watchdog); watchdog = null; }
+            playFallbackTTS(cleanText, fbLang);
           }
         }, 30);
       } catch (e) {
-        if (isVi) playFallbackTTS(cleanText, "vi");
+        playFallbackTTS(cleanText, fbLang);
       }
     },
     stopSpeak: function () {
@@ -1913,6 +1958,10 @@
     html += '<div class="guide-item"><span class="gi-ic">🛒</span><div>Dùng <b>xu vàng</b> kiếm được khi học giỏi để mua nhân vật mới trong Cửa hàng.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Nếu máy phát âm tiếng Anh, hãy vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> và tải giọng Linh về máy.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">📌</span><div><b>Ghim app ra màn hình:</b> Bấm nút Chia sẻ trên Safari ➜ chọn <b>Thêm vào MH chính (Add to Home Screen)</b> để chơi toàn màn hình và lưu bài vĩnh viễn.</div></div>';
+
+    html += '<div class="guide-sec">4. ℹ️ Giới Thiệu & Phiên Bản (About)</div>';
+    html += '<div class="guide-item"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v10 (13/11/2026) · <b>Bộ SGK:</b> Kết Nối Tri Thức 2026</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">✨</span><div><b>Cập nhật mới nhất (v10):</b> Giao diện đa màn hình iPad & Web Desktop, bỏ banner cũ, sửa lỗi phát âm TTS (no-referrer + watchdog 450ms + bộ vần lớp 1), phản hồi sai dịu mắt hơn.</div></div>';
 
     $("infoBody").innerHTML = html;
 
