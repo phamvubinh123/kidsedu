@@ -1024,11 +1024,11 @@
     math: [
       { x: 58, y: 28 },
       { x: 24, y: 36, cx: 34, cy: 27 },
-      { x: 35, y: 43, cx: 19, cy: 41 },
-      { x: 74, y: 46, cx: 56, cy: 42 },
-      { x: 64, y: 56, cx: 80, cy: 52 },
-      { x: 27, y: 61, cx: 44, cy: 58 },
-      { x: 52, y: 72, cx: 28, cy: 69 }
+      { x: 37, y: 44, cx: 14, cy: 42 },
+      { x: 74, y: 46, cx: 56, cy: 38 },
+      { x: 62, y: 56, cx: 90, cy: 52 },
+      { x: 25, y: 62, cx: 44, cy: 59 },
+      { x: 52, y: 73, cx: 16, cy: 71 }
     ],
     viet: [
       { x: 43, y: 28 },
@@ -1168,11 +1168,10 @@
         (isNext ? '<div class="unit-here-tag">🚩 CHƠI NGAY</div>' : '') +
         '<div class="unit-circle">' +
           '<span class="unit-num">' + (i + 1) + '</span>' +
-          (isBoss ? '<span class="unit-boss-crown">👑</span>' : '') +
+          (isBoss && unlocked ? '<span class="unit-boss-crown">👑</span>' : '') +
           (unlocked ? u.icon : "🔒") +
         '</div>' +
-        '<div class="unit-stars">' + starsHTML(st) + '</div>' +
-        '<div class="unit-pill">' + esc(u.title) + '</div>' +
+        (unlocked ? '<div class="unit-stars">' + starsHTML(st) + '</div><div class="unit-pill">' + esc(u.title) + '</div>' : '') +
         '</div>';
     }
     pathEl.innerHTML = html;
@@ -2371,7 +2370,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v24 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Bản đồ chính luôn căn giữa rộng rãi, 2 đảo phụ mấp mé 2 bên xoay vòng mượt mà.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v25 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Gom 3 đảo vừa khung hình mobile, map cao thoáng hơn, chặng khóa chỉ hiện ổ khóa, đường nối bo theo lối gạch.</div></div>';
 
     $("infoBody").innerHTML = html;
 
