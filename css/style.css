@@ -202,13 +202,13 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 .scroll-paper {
   position: relative; border-radius: 26px; padding: 0; overflow: hidden;
-  background: #00b4f0;
-  border: 4px solid #ffffff;
-  box-shadow: 0 10px 26px rgba(20, 60, 120, 0.35);
+  background: #7bc8f6;
+  border: 4px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 30px rgba(20, 60, 120, 0.25);
 }
 .unit-path {
   position: relative; width: 100%; height: 0; padding-bottom: 133.333%;
-  background: #00b4f0 url("../assets/treasure-map.jpg") center center / 100% 100% no-repeat;
+  background: #7bc8f6 url("../assets/treasure-map.jpg") center center / 100% 100% no-repeat;
 }
 .unit-path.unit-path--math {
   background-image: url("../assets/treasure-map.jpg");

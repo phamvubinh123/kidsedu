@@ -1020,20 +1020,29 @@
     return SUBJECTS[0];
   }
 
-  var MAP_POINTS_7 = [
-    { x: 38, y: 20 }, { x: 53, y: 31 }, { x: 67, y: 44 },
-    { x: 56, y: 57 }, { x: 39, y: 69 }, { x: 46, y: 80 }, { x: 52, y: 90 }
-  ];
+  var MAP_POINTS_BY_SUBJ = {
+    math: [
+      { x: 58, y: 31 }, { x: 25, y: 38 }, { x: 46, y: 45 },
+      { x: 74, y: 49 }, { x: 52, y: 56 }, { x: 27, y: 63 }, { x: 51, y: 74 }
+    ],
+    viet: [
+      { x: 44, y: 36 }, { x: 64, y: 44 }, { x: 35, y: 53 },
+      { x: 52, y: 62 }, { x: 64, y: 70 }, { x: 49, y: 78 }
+    ],
+    eng: [
+      { x: 46, y: 26 }, { x: 33, y: 36 }, { x: 67, y: 44 },
+      { x: 28, y: 55 }, { x: 58, y: 69 }
+    ]
+  };
 
-  function getMapPoints(count) {
-    if (count === 5) return [MAP_POINTS_7[0], MAP_POINTS_7[1], MAP_POINTS_7[2], MAP_POINTS_7[4], MAP_POINTS_7[6]];
-    if (count === 6) return [MAP_POINTS_7[0], MAP_POINTS_7[1], MAP_POINTS_7[2], MAP_POINTS_7[3], MAP_POINTS_7[4], MAP_POINTS_7[6]];
-    if (count <= 7) return MAP_POINTS_7.slice(0, count);
+  function getMapPoints(count, subj) {
+    var preset = MAP_POINTS_BY_SUBJ[subj];
+    if (preset && count <= preset.length) return preset.slice(0, count);
     var out = [];
     for (var i = 0; i < count; i++) {
-      var t = i / (count - 1);
-      var y = Math.round(18 + t * 72);
-      var x = Math.round(50 + Math.sin(t * Math.PI * 2.2) * 16);
+      var t = i / (count - 1 || 1);
+      var y = Math.round(28 + t * 50);
+      var x = Math.round(50 + Math.sin(t * Math.PI * 2.2) * 18);
       out.push({ x: x, y: y });
     }
     return out;
@@ -1060,7 +1069,7 @@
     var pathEl = $("unitPath");
     pathEl.className = "unit-path unit-path--" + curSubj;
 
-    var pts = getMapPoints(units.length);
+    var pts = getMapPoints(units.length, curSubj);
     var highestUnlocked = 0;
     for (var uIdx = 0; uIdx < units.length; uIdx++) {
       if (isUnlocked(curSubj, uIdx)) highestUnlocked = uIdx;
@@ -2255,7 +2264,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v17 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Bản đồ Đảo Kho Báu minh họa thật với đường nét đứt đỏ và các chặng tròn.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v19 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đồng bộ 3 bản đồ đảo bay 3D phong cách Pixar giống màn hình chính.</div></div>';
 
     $("infoBody").innerHTML = html;
 
