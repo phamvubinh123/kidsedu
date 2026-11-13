@@ -567,8 +567,17 @@
     CloudSync.saveProfileList();
   }
 
+  function findProfileById(pid) {
+    for (var i = 0; i < profiles.length; i++) {
+      if (profiles[i].id === pid) return profiles[i];
+    }
+    return null;
+  }
+
   function loadState() {
     loadProfiles();
+    var prof = findProfileById(currentProfileId);
+    var fallbackName = (prof && prof.name) ? prof.name : (currentProfileId === "hoanglong" ? "HOÀNG LONG" : currentProfileId.toUpperCase());
     try {
       var key = profileStoreKey(currentProfileId);
       var raw = localStorage.getItem(key);
@@ -579,11 +588,13 @@
       if (raw) {
         var s = JSON.parse(raw);
         for (var k in s) { if (s.hasOwnProperty(k)) state[k] = s[k]; }
-        if (!state.name || state.name === "BÉ YÊU") state.name = "HOÀNG LONG";
+        if (!state.name || state.name === "BÉ YÊU") state.name = fallbackName;
       } else {
-        var oldStars = parseInt(localStorage.getItem("edu1_stars"), 10);
-        if (oldStars > 0) state.coins = oldStars;
-        state.name = "HOÀNG LONG";
+        if (currentProfileId === "hoanglong") {
+          var oldStars = parseInt(localStorage.getItem("edu1_stars"), 10);
+          if (oldStars > 0) state.coins = oldStars;
+        }
+        state.name = fallbackName;
       }
     } catch (e) {}
   }
@@ -600,10 +611,11 @@
     saveState();
     currentProfileId = pid;
     saveProfilesList();
+    var prof = findProfileById(pid);
     // Đặt lại state mặc định trước khi nạp hồ sơ mới
-    state.name = pid.toUpperCase();
+    state.name = (prof && prof.name) ? prof.name : pid.toUpperCase();
     state.coins = 0;
-    state.avatar = "hero";
+    state.avatar = (prof && prof.avatar) ? prof.avatar : "hero";
     state.owned = ["hero"];
     state.progress = {};
     state.passages = {};
@@ -612,6 +624,7 @@
     state.lastPassageIdx = 0;
     state.updatedAt = 0;
     loadState();
+    saveState();
     Sound.good();
     renderHome();
     CloudSync.listenCurrentProfile();
@@ -2126,8 +2139,8 @@
     html += '<div class="guide-item"><span class="gi-ic">📌</span><div><b>Ghim app ra màn hình:</b> Bấm nút Chia sẻ trên Safari ➜ chọn <b>Thêm vào MH chính (Add to Home Screen)</b> để chơi toàn màn hình và lưu bài vĩnh viễn.</div></div>';
 
     html += '<div class="guide-sec">4. ℹ️ Giới Thiệu & Phiên Bản (About)</div>';
-    html += '<div class="guide-item"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v11 (13/11/2026) · <b>Bộ SGK:</b> Kết Nối Tri Thức 2026</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">✨</span><div><b>Cập nhật mới nhất (v11):</b> Thêm cơ chế Chạm Đếm Hình (Tap-to-Count) có nốt nhạc đếm số, chế độ Ghép Đôi Nhanh (Tap-to-Match), Responsive iPad/Web và sửa lỗi phát âm TTS.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v12 (13/11/2026) · <b>Bộ SGK:</b> Kết Nối Tri Thức 2026</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">✨</span><div><b>Cập nhật mới nhất (v12):</b> Sửa lỗi thanh cuộn đè góc bo & nút đóng popup trên Web, sửa lỗi đổi hồ sơ bé vẫn hiển thị tên bé cũ.</div></div>';
 
     $("infoBody").innerHTML = html;
 
