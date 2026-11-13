@@ -1116,51 +1116,7 @@
     if (!pathEl) return;
     var units = UNITS[subj];
     var pts = getMapPoints(units.length, subj);
-    var highestUnlocked = 0;
-    for (var uIdx = 0; uIdx < units.length; uIdx++) {
-      if (isUnlocked(subj, uIdx)) highestUnlocked = uIdx;
-    }
-
-    var dAll = "";
-    var dDone = "";
-    if (pts.length >= 2) {
-      dAll = "M " + (pts[0].x * 3) + " " + (pts[0].y * 4);
-      if (highestUnlocked > 0) dDone = dAll;
-      for (var p = 1; p < pts.length; p++) {
-        var x0 = pts[p - 1].x * 3, y0 = pts[p - 1].y * 4;
-        var x1 = pts[p].x * 3, y1 = pts[p].y * 4;
-        var seg = "";
-        if (pts[p].via && pts[p].via.length) {
-          var w = [{ x: x0, y: y0 }];
-          for (var vi = 0; vi < pts[p].via.length; vi++) {
-            w.push({ x: pts[p].via[vi][0] * 3, y: pts[p].via[vi][1] * 4 });
-          }
-          w.push({ x: x1, y: y1 });
-          for (var wi = 1; wi < w.length - 1; wi++) {
-            if (wi === w.length - 2) {
-              seg += " Q " + w[wi].x + " " + w[wi].y + ", " + w[wi + 1].x + " " + w[wi + 1].y;
-            } else {
-              var mx = Math.round((w[wi].x + w[wi + 1].x) / 2);
-              var my = Math.round((w[wi].y + w[wi + 1].y) / 2);
-              seg += " Q " + w[wi].x + " " + w[wi].y + ", " + mx + " " + my;
-            }
-          }
-        } else if (pts[p].cx != null && pts[p].cy != null) {
-          seg = " Q " + (pts[p].cx * 3) + " " + (pts[p].cy * 4) + ", " + x1 + " " + y1;
-        } else {
-          var midY = Math.round((y0 + y1) / 2);
-          seg = " C " + x0 + " " + midY + ", " + x1 + " " + midY + ", " + x1 + " " + y1;
-        }
-        dAll += seg;
-        if (p <= highestUnlocked) dDone += seg;
-      }
-    }
-
-    var html = '<svg class="map-trail-svg" viewBox="0 0 300 400" preserveAspectRatio="none">' +
-      (dAll ? '<path d="' + dAll + '" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="7.5" stroke-linecap="round"></path>' +
-              '<path d="' + dAll + '" fill="none" stroke="#ef4444" stroke-width="3.6" stroke-dasharray="8 6" stroke-linecap="round"></path>' : '') +
-      (dDone ? '<path d="' + dDone + '" fill="none" stroke="#f59e0b" stroke-width="4.5" stroke-linecap="round"></path>' : '') +
-      '</svg>';
+    var html = "";
 
     var nextMarked = false;
     for (var i = 0; i < units.length; i++) {
@@ -2385,7 +2341,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v27 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đường nối đa điểm mượt mà ôm sát lối đi lát gạch trên cả 3 đảo.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v28 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Dùng thẳng đường lát gạch 3D có sẵn trên đảo làm lối đi giữa các chặng, bỏ đường vẽ SVG thừa.</div></div>';
 
     $("infoBody").innerHTML = html;
 
