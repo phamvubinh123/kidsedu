@@ -206,6 +206,9 @@
       g.gain.exponentialRampToValueAtTime(vol || 0.25, t + 0.015);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g); g.connect(this.ctx.destination);
+      o.onended = function () {
+        try { o.disconnect(); g.disconnect(); } catch (e) {}
+      };
       o.start(t); o.stop(t + dur + 0.02);
     },
     click: function () { this.tone(880, "sine", 0, 0.07, 0.15, 1200); },
@@ -347,7 +350,7 @@
       this.init();
 
       // Ưu tiên phát giọng lồng tiếng thật 100% offline từ core_sprite.mp3 nếu có sẵn
-      if (this.spriteBuffer && typeof AUDIO_SPRITE_CONFIG !== "undefined" && AUDIO_SPRITE_CONFIG.phraseMap) {
+      if (this.spriteBuffer && typeof this.playCue === "function" && typeof AUDIO_SPRITE_CONFIG !== "undefined" && AUDIO_SPRITE_CONFIG.phraseMap) {
         var normKey = String(text).replace(/\s+/g, " ").trim().toLowerCase();
         var cueId = AUDIO_SPRITE_CONFIG.phraseMap[normKey];
         if (cueId && this.playCue(cueId)) {
@@ -437,9 +440,32 @@
         playFallbackTTS(cleanText, fbLang);
       }
     },
+    playCue: function (cueId) {
+      if (!this.ctx || !this.spriteBuffer || typeof AUDIO_SPRITE_CONFIG === "undefined" || !AUDIO_SPRITE_CONFIG.sprite) return false;
+      var cue = AUDIO_SPRITE_CONFIG.sprite[cueId];
+      if (!cue) return false;
+      this.stopCue();
+      try {
+        var src = this.ctx.createBufferSource();
+        src.buffer = this.spriteBuffer;
+        src.connect(this.ctx.destination);
+        this.activeCueSource = src;
+        src.start(0, cue.start, cue.duration);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+    stopCue: function () {
+      if (this.activeCueSource) {
+        try { this.activeCueSource.stop(0); } catch (e) {}
+        try { this.activeCueSource.disconnect(); } catch (e) {}
+        this.activeCueSource = null;
+      }
+    },
     stopSpeak: function () {
       try {
-        this.stopCue();
+        if (typeof this.stopCue === "function") this.stopCue();
         if ("speechSynthesis" in window) window.speechSynthesis.cancel();
         stopFallbackTTS();
       } catch (e) {}
@@ -704,23 +730,43 @@
     CloudSync.saveProfile(currentProfileId, state);
   }
 
-  function switchProfile(pid) {
-    if (!pid || pid === currentProfileId) return;
-    saveState();
-    currentProfileId = pid;
-    saveProfilesList();
-    var prof = findProfileById(pid);
-    // Đặt lại state mặc định trước khi nạp hồ sơ mới
-    state.name = (prof && prof.name) ? prof.name : pid.toUpperCase();
+  function resetStateForProfile(name, avatar) {
+    state.name = name || "HOÀNG LONG";
     state.coins = 0;
-    state.avatar = (prof && prof.avatar) ? prof.avatar : "hero";
+    state.avatar = avatar || "hero";
     state.owned = ["hero"];
     state.progress = {};
     state.passages = {};
     state.lastSubj = "math";
     state.lastUnitIdx = 0;
     state.lastPassageIdx = 0;
+    state.unlockAll = false;
+    state.streak = { count: 0, lastDate: "", best: 0, claimedMilestones: {} };
+    state.dailyQuest = { date: getTodayStr(0), math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 };
+    state.realRewards = cloneDefaultRewards();
+    state.pinnedRewardId = "rw_car";
+    state.rewardTickets = [];
     state.updatedAt = 0;
+  }
+
+  function askParentalGate(actionLabel) {
+    var a = 6 + Math.floor(Math.random() * 4); // 6..9
+    var b = 7 + Math.floor(Math.random() * 3); // 7..9
+    var ans = window.prompt("🔒 CỔNG BỐ MẸ (" + actionLabel + ")\nĐể tránh bé bấm nhầm, bố mẹ nhập kết quả phép nhân:\n" + a + " × " + b + " = ?");
+    if (ans === null) return false;
+    if (parseInt(ans, 10) === (a * b)) return true;
+    window.alert("Kết quả chưa đúng. Thao tác đã được hủy để bảo vệ dữ liệu của bé!");
+    return false;
+  }
+
+  function switchProfile(pid) {
+    if (!pid || pid === currentProfileId) return;
+    saveState();
+    currentProfileId = pid;
+    saveProfilesList();
+    var prof = findProfileById(pid);
+    // Đặt lại toàn bộ state mặc định (bao gồm cả Gamification) trước khi nạp hồ sơ mới
+    resetStateForProfile((prof && prof.name) ? prof.name : pid.toUpperCase(), (prof && prof.avatar) ? prof.avatar : "hero");
     loadState();
     saveState();
     Sound.good();
@@ -754,6 +800,7 @@
     if (!pid || profiles.length <= 1) return;
     var prof = findProfileById(pid);
     var label = prof ? prof.name : pid;
+    if (!askParentalGate("Xóa hồ sơ " + label)) return;
     if (!window.confirm('Bạn có chắc muốn xóa hồ sơ bé "' + label + '"? Mọi sao và xu của hồ sơ này sẽ bị xóa vĩnh viễn.')) return;
     var nextList = [];
     for (var i = 0; i < profiles.length; i++) {
@@ -768,16 +815,7 @@
       currentProfileId = profiles[0].id;
       saveProfilesList();
       var nextProf = profiles[0];
-      state.name = nextProf.name;
-      state.coins = 0;
-      state.avatar = nextProf.avatar || "hero";
-      state.owned = ["hero"];
-      state.progress = {};
-      state.passages = {};
-      state.lastSubj = "math";
-      state.lastUnitIdx = 0;
-      state.lastPassageIdx = 0;
-      state.updatedAt = 0;
+      resetStateForProfile(nextProf.name, nextProf.avatar || "hero");
       loadState();
       renderHome();
       CloudSync.listenCurrentProfile();
@@ -830,14 +868,20 @@
         var payload = {
           id: pid,
           name: data.name || "HOÀNG LONG",
-          coins: data.coins || 0,
+          coins: parseInt(data.coins, 10) || 0,
           avatar: data.avatar || "hero",
-          owned: data.owned || ["hero"],
+          owned: Array.isArray(data.owned) ? data.owned : ["hero"],
           progress: data.progress || {},
           passages: data.passages || {},
           lastSubj: data.lastSubj || "math",
           lastUnitIdx: data.lastUnitIdx || 0,
           lastPassageIdx: data.lastPassageIdx || 0,
+          unlockAll: !!data.unlockAll,
+          streak: data.streak || { count: 0, lastDate: "", best: 0, claimedMilestones: {} },
+          dailyQuest: data.dailyQuest || { date: getTodayStr(0), math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 },
+          realRewards: Array.isArray(data.realRewards) ? data.realRewards : cloneDefaultRewards(),
+          pinnedRewardId: data.pinnedRewardId || "rw_car",
+          rewardTickets: Array.isArray(data.rewardTickets) ? data.rewardTickets : [],
           updatedAt: data.updatedAt || Date.now()
         };
         this.db.ref("kidsedu/profiles/" + pid).set(payload, function (err) {
@@ -871,6 +915,7 @@
             }
             var prof = findProfileById(currentProfileId);
             if (prof && prof.name) state.name = prof.name;
+            ensureGamificationState();
             try { localStorage.setItem(profileStoreKey(currentProfileId), JSON.stringify(state)); } catch (e) {}
             renderHome();
             self.updatePill("online", "Đám mây");
@@ -995,7 +1040,7 @@
   }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function esc(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
   function hasClass(el, c) { return (" " + el.className + " ").indexOf(" " + c + " ") > -1; }
   function addClass(el, c) { if (!hasClass(el, c)) el.className = (el.className + " " + c).replace(/^\s+/, ""); }
@@ -1047,6 +1092,10 @@
     var screens = document.querySelectorAll(".screen");
     for (var i = 0; i < screens.length; i++) removeClass(screens[i], "active");
     addClass($(id), "active");
+    if (document.body) {
+      if (id === "screenHome") removeClass(document.body, "in-subscreen");
+      else addClass(document.body, "in-subscreen");
+    }
     window.scrollTo(0, 0);
   }
   function openOverlay(id) { addClass($(id), "open"); }
@@ -1345,23 +1394,6 @@
     slideToSubject(curSubj, !!instant);
   }
 
-  function bestScoreText(subj, topic) {
-    if (topic === "passages") {
-      var count = 0;
-      if (state.passages) {
-        for (var k in state.passages) {
-          if (state.passages.hasOwnProperty(k) && state.passages[k] > 0) count++;
-        }
-      }
-      var totalP = typeof READING_PASSAGES !== "undefined" ? READING_PASSAGES.length : 7;
-      return count + "/" + totalP;
-    }
-    var p = state.progress[unitKey(subj, topic)];
-    var n = 0;
-    if (p) { for (var k in p) if (p.hasOwnProperty(k) && p[k] > 0) n++; }
-    return n + "/3";
-  }
-
   function showToastBubble(msg) {
     $("infoTitle").innerHTML = "🔒 Chưa mở khóa";
     $("infoBody").innerHTML = '<div class="guide-item"><span class="gi-ic">🧒</span><div>' + msg + "</div></div>";
@@ -1609,24 +1641,43 @@
     Sound.fanfare();
     confetti(30);
 
+    ensureGamificationState();
     if (!state.passages) state.passages = {};
     var isFirstTime = !state.passages[p.id];
     state.passages[p.id] = 3;
-    var rewardCoins = isFirstTime ? p.reward : 5;
+    var rewardCoins = isFirstTime ? (parseInt(p.reward, 10) || 15) : 5;
+    var replayNote = "";
+    if (!isFirstTime) {
+      if ((state.dailyQuest.replayCoinsCount || 0) < 5) {
+        state.dailyQuest.replayCoinsCount = (state.dailyQuest.replayCoinsCount || 0) + 1;
+      } else {
+        rewardCoins = 0;
+        replayNote = "<br><small style='color:#d97706'>Hôm nay bé nhận đủ 5 lượt xu ôn bài rồi, thử bài mới nhé!</small>";
+      }
+    }
     state.coins += rewardCoins;
-    recordDailyActivity("viet");
+    var actRes = recordDailyActivity("viet");
     saveState();
     renderHome();
 
-    floatPoints("+" + rewardCoins + " 🪙", $("btnReadFinish"));
-    setTimeout(function () { Sound.coin(); }, 900);
+    var totalEarned = rewardCoins + (actRes.bonusCoins || 0);
+    if (totalEarned > 0) {
+      floatPoints("+" + totalEarned + " 🪙", $("btnReadFinish"));
+      setTimeout(function () { Sound.coin(); }, 900);
+    }
+
+    var bonusHtml = actRes.bonusNotes && actRes.bonusNotes.length
+      ? "<br><small style='color:#15803d;font-weight:800'>" + actRes.bonusNotes.join(" • ") + "</small>"
+      : "";
 
     $("infoTitle").innerHTML = "🎉 XUẤT SẮC LẮM!";
     $("infoBody").innerHTML =
       '<div style="text-align:center;padding:10px 0">' +
       '<div style="font-size:54px;margin-bottom:8px">⭐ ⭐ ⭐</div>' +
       '<div style="font-size:22px;font-weight:800;color:#15803d;margin-bottom:8px">Bé đã đọc xong bài ' + esc(p.week) + '!</div>' +
-      '<div style="font-size:17px;color:#4a3520;margin-bottom:12px">Bé đọc rất to, rõ ràng và truyền cảm.<br>Thưởng cho bé <b>+' + rewardCoins + ' xu vàng</b> nhé!</div>' +
+      '<div style="font-size:17px;color:#4a3520;margin-bottom:12px">Bé đọc rất to, rõ ràng và truyền cảm.<br>' +
+      (totalEarned > 0 ? 'Thưởng cho bé <b>+' + totalEarned + ' xu vàng</b> nhé!' : 'Bé chăm chỉ quá!') +
+      bonusHtml + replayNote + '</div>' +
       '</div>';
     openOverlay("infoOverlay");
     renderPassageScreen();
@@ -2715,7 +2766,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v34 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Chương trình Gamification hoàn chỉnh: Nhiệm vụ hằng ngày, Chuỗi ngày học 🔥, Mục tiêu Quà Thật cuối tháng & Duyệt phiếu quà cho Ba Mẹ.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v35 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Bản kiểm định Audit v35: Đồng bộ đám mây toàn diện cho Nhiệm vụ & Phiếu Quà Thật, tối ưu hiệu năng iPad/Mobile và bảo mật Cổng Phụ Huynh.</div></div>';
 
     $("infoBody").innerHTML = html;
 
@@ -2723,6 +2774,9 @@
     for (var i = 0; i < toggles.length; i++) {
       onTap(toggles[i], function () {
         var k = this.getAttribute("data-key");
+        if (k === "unlockAll" && !state.unlockAll) {
+          if (!askParentalGate("Mở khóa tất cả bài")) return;
+        }
         state[k] = !state[k];
         if (state[k]) addClass(this, "on"); else removeClass(this, "on");
         if (k === "bgm") {
@@ -2762,15 +2816,6 @@
         window.alert("Không thể tạo mã lưu!");
       }
     });
-    function askParentalGate(actionLabel) {
-      var a = 6 + Math.floor(Math.random() * 6);
-      var b = 3 + Math.floor(Math.random() * 5);
-      var ans = window.prompt("🔒 CỔNG BỐ MẸ (" + actionLabel + ")\nĐể tránh bé bấm nhầm, bố mẹ nhập kết quả phép tính:\n" + a + " + " + b + " = ?");
-      if (ans === null) return false;
-      if (parseInt(ans, 10) === (a + b)) return true;
-      window.alert("Kết quả chưa đúng. Thao tác đã được hủy để bảo vệ dữ liệu của bé!");
-      return false;
-    }
 
     onTap($("importBtn"), function () {
       Sound.click();
@@ -2779,9 +2824,12 @@
       if (input && input.replace(/\s/g, "").length > 5) {
         try {
           var restored = JSON.parse(decodeURIComponent(atob(input.trim())));
+          if (!restored || typeof restored !== "object") throw new Error("Invalid state");
           for (var k in restored) {
             if (restored.hasOwnProperty(k)) state[k] = restored[k];
           }
+          state.coins = Math.max(0, parseInt(state.coins, 10) || 0);
+          ensureGamificationState();
           saveState();
           renderHome();
           closeOverlay("infoOverlay");
@@ -2796,7 +2844,8 @@
       Sound.click();
       if (!askParentalGate("Xóa làm lại từ đầu")) return;
       if (window.confirm("Xác nhận lần cuối: Xóa toàn bộ sao, xu và nhân vật đã mua?")) {
-        state.coins = 0; state.progress = {}; state.passages = {}; state.owned = ["hero"]; state.avatar = "hero";
+        var keepName = state.name;
+        resetStateForProfile(keepName, "hero");
         saveState(); renderHome(); closeOverlay("infoOverlay");
       }
     });
@@ -2930,6 +2979,7 @@
       Sound.click();
       if (!game) return;
       if (game.mode === "memory") { Sound.speak("Lật hai thẻ để tìm cặp đi cùng nhau", "vi-VN"); return; }
+      if (game.mode === "match") { Sound.speak("Chạm một thẻ bên trái và một thẻ bên phải để ghép thành cặp đúng", "vi-VN"); return; }
       var q = game.list[game.idx];
       if (!q) return;
       readPrompt(q);
@@ -2937,10 +2987,26 @@
 
     onTap($("pauseBtn"), function () {
       Sound.click();
+      if (game && game.mode === "balloon" && !game.locked) {
+        clearTimers();
+        var arena = $("arena");
+        if (arena) {
+          var bls = arena.querySelectorAll(".balloon");
+          for (var bi = 0; bi < bls.length; bi++) {
+            setTransition(bls[bi], "none");
+          }
+        }
+      }
       $("pauseMascot").innerHTML = mascotHTML();
       openOverlay("pauseOverlay");
     });
-    onTap($("resumeBtn"), function () { Sound.click(); closeOverlay("pauseOverlay"); });
+    onTap($("resumeBtn"), function () {
+      Sound.click();
+      closeOverlay("pauseOverlay");
+      if (game && game.mode === "balloon" && !game.locked && game.list && game.list[game.idx]) {
+        renderBalloon(game.list[game.idx]);
+      }
+    });
     onTap($("quitBtn"), function () {
       Sound.click(); clearTimers(); Sound.stopSpeak();
       closeOverlay("pauseOverlay");

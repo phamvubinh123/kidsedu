@@ -51,7 +51,7 @@ var AUDIO_SPRITE_CONFIG = {
     "chào mừng bé đến vương quốc tri thức!": "vo_intro_welcome",
     "đến đảo số học thôi! cùng đếm nào!": "vo_island_math",
     "đảo tiếng việt đây rồi! mình cùng ghép vần nhé!": "vo_island_viet",
-    "hello! let's play on english island!": "vo_island_en",
+    "hello! let's play on english island!": "vo_island_eng",
     "hoan hô! tuyệt đỉnh luôn!": "vo_win_01",
     "bé tính siêu quá!": "vo_win_02",
     "thông minh tuyệt vời!": "vo_win_03",
