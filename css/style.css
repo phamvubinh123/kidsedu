@@ -234,6 +234,16 @@ body.in-subscreen .cloud-layer { display: none; }
   transform: translate3d(97%, 0, 0) scale(0.92);
   opacity: 0.96; z-index: 2;
 }
+.map-card.pos-far-prev {
+  -webkit-transform: translate3d(-194%, 0, 0) scale(0.88);
+  transform: translate3d(-194%, 0, 0) scale(0.88);
+  opacity: 0; pointer-events: none; z-index: 1;
+}
+.map-card.pos-far-next {
+  -webkit-transform: translate3d(194%, 0, 0) scale(0.88);
+  transform: translate3d(194%, 0, 0) scale(0.88);
+  opacity: 0; pointer-events: none; z-index: 1;
+}
 .map-card-bg {
   position: absolute; top: 0; right: 0; bottom: 0; left: 0;
   background-size: 100% 100%; background-position: center center; background-repeat: no-repeat;
@@ -786,6 +796,14 @@ body.in-subscreen .cloud-layer { display: none; }
   .map-card.pos-next {
     -webkit-transform: translate3d(640px, 0, 0) scale(0.92);
     transform: translate3d(640px, 0, 0) scale(0.92);
+  }
+  .map-card.pos-far-prev {
+    -webkit-transform: translate3d(-1280px, 0, 0) scale(0.88);
+    transform: translate3d(-1280px, 0, 0) scale(0.88);
+  }
+  .map-card.pos-far-next {
+    -webkit-transform: translate3d(1280px, 0, 0) scale(0.88);
+    transform: translate3d(1280px, 0, 0) scale(0.88);
   }
   .map-card.pos-prev .map-card-strip { right: 14px; left: auto; padding: 0; width: 68px; }
   .map-card.pos-next .map-card-strip { left: 14px; right: auto; padding: 0; width: 68px; }

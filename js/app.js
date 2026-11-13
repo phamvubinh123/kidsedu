@@ -1104,19 +1104,21 @@
   // ---------------------------------------------------------
   // 6. MÀN HÌNH CHÍNH
   // ---------------------------------------------------------
+  function currentBadge(ts) {
+    var cur = null;
+    for (var i = 0; i < BADGES.length; i++) {
+      if (ts >= BADGES[i].need) cur = BADGES[i];
+    }
+    return cur;
+  }
+
   function renderHome() {
     $("homeAvatar").innerHTML = avatarHTML(state.avatar);
     $("kidName").innerHTML = esc(state.name);
     $("coinCount").innerHTML = state.coins;
     var ts = totalStars();
-    var lv = Math.min(LEVELS.length - 1, Math.floor(ts / 8));
-    $("kidLevel").innerHTML = "Cấp " + (lv + 1) + " • " + LEVELS[lv] + " • " + ts + "⭐";
-
-    var html = "";
-    for (var i = 0; i < BADGES.length; i++) {
-      html += '<span class="' + (ts >= BADGES[i].need ? "" : "locked") + '">' + BADGES[i].icon + "</span>";
-    }
-    $("badgeStripItems").innerHTML = html;
+    var b = currentBadge(ts);
+    $("kidLevel").innerHTML = (b ? (b.icon + " " + b.name) : "🌟 Tân Binh") + " • " + ts + "⭐";
 
     // Cập nhật thanh Nhiệm Vụ Ngày & Mục Tiêu Quà Thật
     ensureGamificationState();
@@ -1246,9 +1248,6 @@
     if (idx < 0) idx = 0;
     curSubj = MAP_ORDER[idx];
 
-    var prevSubj = MAP_ORDER[(idx + 2) % 3];
-    var nextSubj = MAP_ORDER[(idx + 1) % 3];
-
     var sj = subjectById(curSubj);
     var units = UNITS[curSubj];
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
@@ -1257,15 +1256,15 @@
     var cards = document.querySelectorAll("#mapAccordion .map-card");
     for (var ci = 0; ci < cards.length; ci++) {
       var c = cards[ci];
-      var cSubj = c.getAttribute("data-subj");
-      var targetCls = (cSubj === curSubj) ? "pos-active" : ((cSubj === prevSubj) ? "pos-prev" : "pos-next");
-      var wasPrev = c.className.indexOf("pos-prev") !== -1;
-      var wasNext = c.className.indexOf("pos-next") !== -1;
-      var isWrapping = !instant && ((wasPrev && targetCls === "pos-next") || (wasNext && targetCls === "pos-prev"));
-      if (instant || isWrapping) addClass(c, "no-anim");
+      var cIdx = MAP_ORDER.indexOf(c.getAttribute("data-subj"));
+      var diff = cIdx - idx;
+      var targetCls = diff === 0 ? "pos-active" : (diff === -1 ? "pos-prev" : (diff === 1 ? "pos-next" : (diff < -1 ? "pos-far-prev" : "pos-far-next")));
+      if (instant) addClass(c, "no-anim");
+      removeClass(c, "pos-far-prev");
       removeClass(c, "pos-prev");
       removeClass(c, "pos-active");
       removeClass(c, "pos-next");
+      removeClass(c, "pos-far-next");
       addClass(c, targetCls);
     }
 
@@ -1371,12 +1370,12 @@
         var dy = e.changedTouches[0].clientY - touchStartY;
         if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
           var idx = MAP_ORDER.indexOf(curSubj);
-          if (dx < 0) {
+          if (dx < 0 && idx < MAP_ORDER.length - 1) {
             Sound.click();
-            slideToSubject(MAP_ORDER[(idx + 1) % 3], false);
-          } else if (dx > 0) {
+            slideToSubject(MAP_ORDER[idx + 1], false);
+          } else if (dx > 0 && idx > 0) {
             Sound.click();
-            slideToSubject(MAP_ORDER[(idx + 2) % 3], false);
+            slideToSubject(MAP_ORDER[idx - 1], false);
           }
         }
       }, false);
@@ -2766,7 +2765,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v35 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Bản kiểm định Audit v35: Đồng bộ đám mây toàn diện cho Nhiệm vụ & Phiếu Quà Thật, tối ưu hiệu năng iPad/Mobile và bảo mật Cổng Phụ Huynh.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v36 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Hiển thị huy hiệu hiện tại dưới tên bé, carousel 3 đảo không quay vòng.</div></div>';
 
     $("infoBody").innerHTML = html;
 
@@ -2945,7 +2944,7 @@
         closeOverlay("profileOverlay");
       }
     });
-    onTap($("badgeStrip"), function () { Sound.click(); openBadges(); });
+    if ($("badgeStrip")) onTap($("badgeStrip"), function () { Sound.click(); openBadges(); });
 
     var navs = document.querySelectorAll(".nav-item");
     for (var i = 0; i < navs.length; i++) {
