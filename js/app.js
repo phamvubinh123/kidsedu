@@ -599,14 +599,14 @@
       if (raw) {
         var s = JSON.parse(raw);
         for (var k in s) { if (s.hasOwnProperty(k)) state[k] = s[k]; }
-        if (!state.name || state.name === "BÉ YÊU") state.name = fallbackName;
       } else {
         if (currentProfileId === "hoanglong") {
           var oldStars = parseInt(localStorage.getItem("edu1_stars"), 10);
           if (oldStars > 0) state.coins = oldStars;
         }
-        state.name = fallbackName;
       }
+      // Tên hiển thị luôn lấy theo hồ sơ đang chọn để không bao giờ bị lẫn tên bé khác
+      state.name = fallbackName;
     } catch (e) {}
   }
 
@@ -740,6 +740,8 @@
             for (var k in val) {
               if (val.hasOwnProperty(k) && k !== "id") state[k] = val[k];
             }
+            var prof = findProfileById(currentProfileId);
+            if (prof && prof.name) state.name = prof.name;
             try { localStorage.setItem(profileStoreKey(currentProfileId), JSON.stringify(state)); } catch (e) {}
             renderHome();
             self.updatePill("online", "Đám mây");
@@ -2147,7 +2149,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v13 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Cài đặt gọn nhẹ, nhạc nền êm dịu chill bossa.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v14 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Sửa triệt để đồng bộ tên hồ sơ, Cài đặt gọn nhẹ, nhạc nền chill bossa.</div></div>';
 
     $("infoBody").innerHTML = html;
 
