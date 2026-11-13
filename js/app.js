@@ -135,41 +135,24 @@
       return singleMap[trimmed.toLowerCase()];
     }
 
-    // 3. Chuẩn hóa tên các âm chữ cái trong văn bản để TTS đọc đúng âm học vần lớp 1:
-    s = s.replace(/\bâm\s+['"‘“]?c['"’”]?/gi, "âm cờ");
-    s = s.replace(/\bâm\s+['"‘“]?k['"’”]?/gi, "âm cờ");
-    s = s.replace(/\bâm\s+['"‘“]?b['"’”]?/gi, "âm bờ");
-    s = s.replace(/\bâm\s+['"‘“]?d['"’”]?/gi, "âm dờ");
-    s = s.replace(/\bâm\s+['"‘“]?đ['"’”]?/gi, "âm đờ");
-    s = s.replace(/\bâm\s+['"‘“]?g['"’”]?/gi, "âm gờ");
-    s = s.replace(/\bâm\s+['"‘“]?gh['"’”]?/gi, "âm gờ");
-    s = s.replace(/\bâm\s+['"‘“]?h['"’”]?/gi, "âm hờ");
-    s = s.replace(/\bâm\s+['"‘“]?l['"’”]?/gi, "âm lờ");
-    s = s.replace(/\bâm\s+['"‘“]?m['"’”]?/gi, "âm mờ");
-    s = s.replace(/\bâm\s+['"‘“]?n['"’”]?/gi, "âm nờ");
-    s = s.replace(/\bâm\s+['"‘“]?p['"’”]?/gi, "âm pờ");
-    s = s.replace(/\bâm\s+['"‘“]?ph['"’”]?/gi, "âm phờ");
-    s = s.replace(/\bâm\s+['"‘“]?r['"’”]?/gi, "âm rờ");
-    s = s.replace(/\bâm\s+['"‘“]?s['"’”]?/gi, "âm sờ");
-    s = s.replace(/\bâm\s+['"‘“]?t['"’”]?/gi, "âm tờ");
-    s = s.replace(/\bâm\s+['"‘“]?th['"’”]?/gi, "âm thờ");
-    s = s.replace(/\bâm\s+['"‘“]?tr['"’”]?/gi, "âm trờ");
-    s = s.replace(/\bâm\s+['"‘“]?qu['"’”]?/gi, "âm quờ");
-    s = s.replace(/\bâm\s+['"‘“]?v['"’”]?/gi, "âm vờ");
-    s = s.replace(/\bâm\s+['"‘“]?x['"’”]?/gi, "âm xờ");
-    s = s.replace(/\bâm\s+['"‘“]?ch['"’”]?/gi, "âm chờ");
-    s = s.replace(/\bâm\s+['"‘“]?kh['"’”]?/gi, "âm khờ");
-    s = s.replace(/\bâm\s+['"‘“]?nh['"’”]?/gi, "âm nhờ");
-    s = s.replace(/\bâm\s+['"‘“]?ng['"’”]?/gi, "âm ngờ");
-    s = s.replace(/\bâm\s+['"‘“]?ngh['"’”]?/gi, "âm ngờ kép");
+    // 3. Chuẩn hóa tên các âm chữ cái trong văn bản (chỉ khớp âm đứng độc lập, không đè từ như "âm bé", "âm thanh")
+    var amList = [
+      ["ngh", "âm ngờ kép"], ["gh", "âm gờ"], ["ph", "âm phờ"], ["qu", "âm quờ"],
+      ["th", "âm thờ"], ["tr", "âm trờ"], ["ch", "âm chờ"], ["kh", "âm khờ"],
+      ["nh", "âm nhờ"], ["ng", "âm ngờ"],
+      ["c", "âm cờ"], ["k", "âm cờ"], ["b", "âm bờ"], ["d", "âm dờ"], ["đ", "âm đờ"],
+      ["g", "âm gờ"], ["h", "âm hờ"], ["l", "âm lờ"], ["m", "âm mờ"], ["n", "âm nờ"],
+      ["p", "âm pờ"], ["r", "âm rờ"], ["s", "âm sờ"], ["t", "âm tờ"], ["v", "âm vờ"], ["x", "âm xờ"]
+    ];
+    for (var ai = 0; ai < amList.length; ai++) {
+      var reAm = new RegExp("(^|[\\s('\"“‘])(?:âm|bắt đầu bằng)\\s+['\"‘“]?" + amList[ai][0] + "['\"’”]?(?=[\\s.,!?;:)'\"”’]|$)", "gi");
+      s = s.replace(reAm, function (m, p1) {
+        return p1 + (m.toLowerCase().indexOf("bắt đầu bằng") !== -1 ? "bắt đầu bằng " : "") + amList[ai][1];
+      });
+    }
 
-    s = s.replace(/bắt đầu bằng\s+['"‘“]?ph['"’”]?/gi, "bắt đầu bằng âm phờ");
-    s = s.replace(/bắt đầu bằng\s+['"‘“]?kh['"’”]?/gi, "bắt đầu bằng âm khờ");
-    s = s.replace(/bắt đầu bằng\s+['"‘“]?ch['"’”]?/gi, "bắt đầu bằng âm chờ");
-    s = s.replace(/bắt đầu bằng\s+['"‘“]?nh['"’”]?/gi, "bắt đầu bằng âm nhờ");
-    s = s.replace(/bắt đầu bằng\s+['"‘“]?th['"’”]?/gi, "bắt đầu bằng âm thờ");
-    s = s.replace(/bắt đầu bằng\s+['"‘“]?tr['"’”]?/gi, "bắt đầu bằng âm trờ");
-    s = s.replace(/bắt đầu bằng\s+['"‘“]?ng['"’”]?/gi, "bắt đầu bằng âm ngờ");
+    // Chuẩn hóa chữ in hoa "BÉ" để TTS không đọc nhầm thành "bớ"
+    s = s.replace(/(^|[\s('"“‘])BÉ(?=[\s.,!?;:)'"”’]|$)/g, "$1bé");
 
     s = s.replace(/['"‘“]?c['"’”]?\s+hay\s+['"‘“]?k['"’”]?/gi, "cờ hay ca");
     s = s.replace(/['"‘“]?g['"’”]?\s+hay\s+['"‘“]?gh['"’”]?/gi, "gờ đơn hay gờ kép");
@@ -1029,6 +1012,39 @@
     curSubj = subj;
     renderMap();
     showScreen("screenMap");
+    setTimeout(drawMapTrail, 60);
+  }
+
+  function drawMapTrail() {
+    var pathEl = $("unitPath");
+    var svg = $("mapTrailSvg");
+    if (!pathEl || !svg) return;
+    var nodes = pathEl.querySelectorAll(".unit-node");
+    if (!nodes || nodes.length < 2) { svg.innerHTML = ""; return; }
+    var w = pathEl.offsetWidth || 600;
+    var h = pathEl.offsetHeight || 600;
+    svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+    svg.setAttribute("width", String(w));
+    svg.setAttribute("height", String(h));
+
+    var pts = [];
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      var sign = n.querySelector(".unit-sign") || n;
+      var cx = n.offsetLeft + (n.offsetWidth / 2);
+      var cy = n.offsetTop + sign.offsetTop + (sign.offsetHeight / 2);
+      pts.push({ x: Math.round(cx), y: Math.round(cy) });
+    }
+
+    var d = "M " + pts[0].x + " " + pts[0].y;
+    for (var j = 1; j < pts.length; j++) {
+      var p0 = pts[j - 1], p1 = pts[j];
+      var midY = Math.round((p0.y + p1.y) / 2);
+      d += " C " + p0.x + " " + midY + ", " + p1.x + " " + midY + ", " + p1.x + " " + p1.y;
+    }
+    svg.innerHTML =
+      '<path d="' + d + '" fill="none" stroke="rgba(255,248,225,0.85)" stroke-width="14" stroke-linecap="round"></path>' +
+      '<path d="' + d + '" fill="none" stroke="#b5793b" stroke-width="6" stroke-dasharray="12 10" stroke-linecap="round"></path>';
   }
 
   function starsHTML(n) {
@@ -1042,15 +1058,17 @@
     var units = UNITS[curSubj];
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
     $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 3);
-    var html = "", nextMarked = false;
+    var html = '<svg class="map-trail-svg" id="mapTrailSvg"></svg>', nextMarked = false;
+    var decos = ["🌲", "🧭", "⛺", "🌴", "⛵", "🚩"];
     for (var i = 0; i < units.length; i++) {
       var u = units[i];
       var unlocked = isUnlocked(curSubj, i);
       var st = unitStars(curSubj, u.topic);
-      var cls = "unit-node " + (i % 2 === 0 ? "left" : "right");
+      var cls = "unit-node step-" + (i % 6) + " " + (i % 2 === 0 ? "left" : "right");
       if (!unlocked) cls += " locked";
       if (unlocked && st === 0 && !nextMarked) { cls += " next"; nextMarked = true; }
       html += '<div class="' + cls + '" data-idx="' + i + '">' +
+        '<span class="map-deco ' + (i % 2 === 0 ? "r" : "l") + '">' + decos[i % decos.length] + '</span>' +
         '<div class="unit-stars">' + starsHTML(st) + "</div>" +
         '<div class="unit-no">BÀI ' + (i + 1) + "</div>" +
         '<div class="unit-sign"><div class="unit-trophy">🏆 ' + bestScoreText(curSubj, u.topic) + '</div>' +
@@ -1060,6 +1078,7 @@
         "</div>";
     }
     $("unitPath").innerHTML = html;
+    setTimeout(drawMapTrail, 40);
     var nodes = $("unitPath").querySelectorAll(".unit-node");
     for (var k = 0; k < nodes.length; k++) {
       onTap(nodes[k], function () {
@@ -2199,7 +2218,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v15 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Thêm nút xóa hồ sơ bé, đồng bộ tên hồ sơ, Cài đặt gọn nhẹ, nhạc nền chill bossa.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v16 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Sửa lỗi TTS đọc nhầm "bé" thành "bớ", bản đồ đường đi phiêu lưu uốn lượn.</div></div>';
 
     $("infoBody").innerHTML = html;
 
