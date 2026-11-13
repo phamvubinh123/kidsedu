@@ -2341,7 +2341,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v28 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Dùng thẳng đường lát gạch 3D có sẵn trên đảo làm lối đi giữa các chặng, bỏ đường vẽ SVG thừa.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v29 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Gom tiêu đề đảo và tổng sao thành 1 thanh pill gọn đẹp.</div></div>';
 
     $("infoBody").innerHTML = html;
 

@@ -200,6 +200,14 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   text-align: center; font-weight: 800; font-size: 16px; color: #46537a; letter-spacing: 0.5px;
   box-shadow: 0 4px 0 #c9d8ea, 0 6px 12px rgba(0, 0, 0, 0.1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.map-header-pill {
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  padding: 10px 16px;
+}
+.map-header-stars {
+  color: #d97706; margin-left: 10px; -webkit-flex-shrink: 0; flex-shrink: 0;
+}
 .scroll-paper {
   position: relative; border-radius: 26px; padding: 0; overflow: hidden;
   background: #7bc8f6;
