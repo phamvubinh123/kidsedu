@@ -1022,16 +1022,28 @@
 
   var MAP_POINTS_BY_SUBJ = {
     math: [
-      { x: 58, y: 31 }, { x: 25, y: 38 }, { x: 46, y: 45 },
-      { x: 74, y: 49 }, { x: 52, y: 56 }, { x: 27, y: 63 }, { x: 51, y: 74 }
+      { x: 58, y: 31 },
+      { x: 24, y: 38, cx: 34, cy: 29 },
+      { x: 35, y: 45, cx: 21, cy: 43 },
+      { x: 74, y: 47, cx: 56, cy: 43 },
+      { x: 64, y: 58, cx: 79, cy: 54 },
+      { x: 27, y: 63, cx: 44, cy: 59 },
+      { x: 52, y: 74, cx: 28, cy: 71 }
     ],
     viet: [
-      { x: 44, y: 36 }, { x: 64, y: 44 }, { x: 35, y: 53 },
-      { x: 52, y: 62 }, { x: 64, y: 70 }, { x: 49, y: 78 }
+      { x: 43, y: 30 },
+      { x: 65, y: 39, cx: 64, cy: 33 },
+      { x: 32, y: 49, cx: 48, cy: 43 },
+      { x: 51, y: 58, cx: 32, cy: 55 },
+      { x: 66, y: 67, cx: 66, cy: 61 },
+      { x: 50, y: 77, cx: 61, cy: 74 }
     ],
     eng: [
-      { x: 46, y: 26 }, { x: 33, y: 36 }, { x: 67, y: 44 },
-      { x: 28, y: 55 }, { x: 58, y: 69 }
+      { x: 48, y: 25 },
+      { x: 32, y: 36, cx: 30, cy: 29 },
+      { x: 68, y: 44, cx: 66, cy: 37 },
+      { x: 27, y: 55, cx: 26, cy: 47 },
+      { x: 60, y: 69, cx: 68, cy: 60 }
     ]
   };
 
@@ -1083,8 +1095,13 @@
       for (var p = 1; p < pts.length; p++) {
         var x0 = pts[p - 1].x * 3, y0 = pts[p - 1].y * 4;
         var x1 = pts[p].x * 3, y1 = pts[p].y * 4;
-        var midY = Math.round((y0 + y1) / 2);
-        var seg = " C " + x0 + " " + midY + ", " + x1 + " " + midY + ", " + x1 + " " + y1;
+        var seg;
+        if (pts[p].cx != null && pts[p].cy != null) {
+          seg = " Q " + (pts[p].cx * 3) + " " + (pts[p].cy * 4) + ", " + x1 + " " + y1;
+        } else {
+          var midY = Math.round((y0 + y1) / 2);
+          seg = " C " + x0 + " " + midY + ", " + x1 + " " + midY + ", " + x1 + " " + y1;
+        }
         dAll += seg;
         if (p <= highestUnlocked) dDone += seg;
       }
@@ -2264,7 +2281,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v19 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đồng bộ 3 bản đồ đảo bay 3D phong cách Pixar giống màn hình chính.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v20 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Tinh chỉnh đường nối bo theo đường lát đá, hết đè chặng và cân đối đảo Tiếng Việt.</div></div>';
 
     $("infoBody").innerHTML = html;
 
