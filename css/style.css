@@ -1042,4 +1042,77 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 .report-item-btn:active { transform: translateY(1px); }
 
+/* ---------- Sprint 4: Chạm Đếm Hình (Tap-to-Count) ---------- */
+.tap-count-wrap { text-align: center; }
+.tap-count-bar {
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  margin-bottom: 10px; padding: 6px 10px; border-radius: 14px;
+  background: #fff8e6; border: 2px solid #e6c48c;
+}
+.tap-count-label { font-size: 15px; font-weight: 800; color: #7a3d0e; }
+.tap-count-label b { font-size: 18px; color: #c2410c; margin-left: 4px; }
+.tap-reset-btn {
+  font-size: 13px; font-weight: 800; color: #7a3d0e; background: #fff;
+  border: 2px solid #d8ab6b; border-radius: 10px; padding: 4px 10px;
+  box-shadow: 0 2px 0 #c99a5b;
+}
+.tap-reset-btn:active { -webkit-transform: translateY(2px); transform: translateY(2px); box-shadow: none; }
+.tap-count-grid {
+  display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  -webkit-justify-content: center; justify-content: center; margin: -4px;
+}
+.tap-item {
+  position: relative; min-width: 56px; height: 56px; margin: 5px; padding: 4px 8px;
+  border-radius: 16px; background: #fffdf5; border: 2px solid #f0cf7a;
+  font-size: 32px; line-height: 44px; text-align: center;
+  box-shadow: 0 3px 0 #e6c48c; -webkit-transition: -webkit-transform 0.12s; transition: transform 0.12s;
+}
+.tap-item:active { -webkit-transform: scale(0.92); transform: scale(0.92); }
+.tap-item.counted {
+  background: #ecfdf5; border-color: #22c55e; box-shadow: 0 3px 0 #86efac;
+  -webkit-animation: pop-in 0.22s ease-out; animation: pop-in 0.22s ease-out;
+}
+.tap-badge {
+  position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; line-height: 24px;
+  border-radius: 50%; background: #16a34a; color: #fff; font-size: 13px; font-weight: 800;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* ---------- Sprint 4: Ghép Đôi Nhanh (Tap-to-Match) ---------- */
+.match-board {
+  display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between;
+  margin: 0 -6px;
+}
+.match-col { -webkit-flex: 1; flex: 1; margin: 0 6px; }
+.match-col-title {
+  text-align: center; font-size: 13px; font-weight: 800; color: #7a3d0e;
+  background: rgba(255, 248, 230, 0.92); border: 2px solid #d8ab6b; border-radius: 12px;
+  padding: 4px 8px; margin-bottom: 8px;
+}
+.match-card {
+  width: 100%; min-height: 62px; margin-bottom: 10px; padding: 10px 10px;
+  border-radius: 16px; background: linear-gradient(180deg, #ffffff, #fff8e6);
+  border: 3px solid #d8ab6b; box-shadow: 0 4px 0 #b5793b, 0 6px 12px rgba(0,0,0,0.12);
+  font-size: 20px; font-weight: 800; color: #4a2a10; text-align: center;
+  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  -webkit-transition: -webkit-transform 0.12s; transition: transform 0.12s;
+}
+.match-card:active { -webkit-transform: translateY(2px); transform: translateY(2px); }
+.match-card.selected {
+  background: linear-gradient(180deg, #fffbeb, #fde68a); border-color: #d97706;
+  box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.55), 0 4px 0 #b45309;
+}
+.match-card.matched {
+  background: linear-gradient(180deg, #dcfce7, #bbf7d0); border-color: #16a34a;
+  color: #14532d; box-shadow: 0 2px 0 #15803d; opacity: 0.72; pointer-events: none;
+}
+.match-card.wrong {
+  background: linear-gradient(180deg, #fef3c7, #fde68a); border-color: #d97706;
+  color: #78350f; -webkit-animation: shake 0.35s; animation: shake 0.35s;
+}
+.match-card.emo { font-size: 28px; letter-spacing: 2px; }
+
+
 

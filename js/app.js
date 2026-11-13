@@ -233,6 +233,19 @@
       this.tone(1360, "triangle", 0.02, 0.06, 0.12);
     },
     coin: function () { this.tone(988, "square", 0, 0.08, 0.12); this.tone(1319, "square", 0.08, 0.22, 0.12); },
+    countNote: function (n) {
+      var scale = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50, 1174.66, 1318.51];
+      var idx = Math.max(0, Math.min(scale.length - 1, (n || 1) - 1));
+      var freq = scale[idx];
+      this.tone(freq, "triangle", 0, 0.16, 0.22);
+      this.tone(freq * 2, "sine", 0.01, 0.10, 0.09);
+    },
+    sparkle: function () {
+      var notes = [783.99, 1046.50, 1318.51, 1567.98];
+      for (var i = 0; i < notes.length; i++) {
+        this.tone(notes[i], "sine", i * 0.055, 0.20, 0.16);
+      }
+    },
     good: function () {
       // Hợp âm chiến thắng tươi vui + hiệu ứng chuông gió lấp lánh (sparkles)
       var n = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
@@ -432,6 +445,7 @@
   // ---------------------------------------------------------
   var MODES = [
     { id: "quiz", name: "Phiến Đá Bí Ẩn", icon: "📜", reward: 10, desc: "Chọn đáp án đúng" },
+    { id: "match", name: "Ghép Đôi Nhanh", icon: "🧩", reward: 15, desc: "Chạm nối cặp đúng" },
     { id: "memory", name: "Lật Thẻ Thần Kỳ", icon: "🃏", reward: 15, desc: "Tìm cặp giống nhau" },
     { id: "balloon", name: "Bóng Bay Tri Thức", icon: "🎈", reward: 20, desc: "Bắn bóng đáp án" }
   ];
@@ -1297,16 +1311,17 @@
     $("hudBar").style.width = "0%";
     $("boardLesson").innerHTML = u.icon + " " + u.title;
 
-    if (curMode === "memory") {
+    if (curMode === "memory" || curMode === "match") {
       var pairs = buildPairs(qs);
       if (pairs.length < 3) {
         // Không đủ cặp trong bài -> lấy thêm từ cả môn
         pairs = buildPairs(shuffle((QUESTION_BANK[curSubj] || []).slice()));
       }
-      game.pairs = pairs.slice(0, pairs.length >= 6 ? 6 : Math.min(4, pairs.length));
+      var maxPairs = curMode === "match" ? 5 : 6;
+      game.pairs = pairs.slice(0, pairs.length >= maxPairs ? maxPairs : Math.min(4, pairs.length));
       game.max = game.pairs.length * 10;
       showScreen("screenGame");
-      renderMemory();
+      if (curMode === "match") renderMatch(); else renderMemory();
     } else {
       game.list = qs.slice(0, curMode === "balloon" ? 6 : 8);
       game.max = game.list.length * 10;
@@ -1351,7 +1366,23 @@
 
   // ----- Hiển thị minh họa câu hỏi -----
   function visualHTML(q, compact) {
-    if (q.visualType === "icons") return '<div class="v-icons">' + esc(q.visual) + "</div>";
+    if (q.visualType === "icons") {
+      if (!compact && q.topic === "count") {
+        var tapIcons = extractEmojiList(q.visual);
+        if (tapIcons && tapIcons.length >= 2 && tapIcons.length <= 12) {
+          var th = '<div class="tap-count-wrap">' +
+            '<div class="tap-count-bar"><span class="tap-count-label" id="tapCountLabel">👆 Chạm từng hình để đếm: <b>0</b></span>' +
+            '<button type="button" class="tap-reset-btn" id="tapResetBtn">Đếm lại ↺</button></div>' +
+            '<div class="tap-count-grid">';
+          for (var ti = 0; ti < tapIcons.length; ti++) {
+            th += '<button type="button" class="tap-item" data-counted="0">' + esc(tapIcons[ti]) + '</button>';
+          }
+          th += '</div></div>';
+          return th;
+        }
+      }
+      return '<div class="v-icons">' + esc(q.visual) + "</div>";
+    }
     if (q.visualType === "formula") return '<div class="v-formula">' + esc(q.visual) + "</div>";
     if (q.visualType === "split") {
       return '<div class="split-tree"><div class="split-top">' + q.visualData.top + '</div>' +
@@ -1387,9 +1418,54 @@
     }
     html += "</div>";
     $("gameStage").innerHTML = html;
+    bindTapCount();
     var stones = $("gameStage").querySelectorAll(".stone");
     for (var k = 0; k < stones.length; k++) {
       onTap(stones[k], function () { answerQuiz(this, q); });
+    }
+  }
+
+  function bindTapCount() {
+    var items = $("gameStage").querySelectorAll(".tap-item");
+    if (!items || !items.length) return;
+    var count = 0;
+    var total = items.length;
+    var label = $("tapCountLabel");
+    var resetBtn = $("tapResetBtn");
+
+    function updateLabel() {
+      if (label) label.innerHTML = "👆 Chạm từng hình để đếm: <b>" + count + "</b>";
+    }
+
+    for (var i = 0; i < items.length; i++) {
+      onTap(items[i], function () {
+        if (game.locked || this.getAttribute("data-counted") === "1") return;
+        this.setAttribute("data-counted", "1");
+        count++;
+        addClass(this, "counted");
+        var badge = document.createElement("span");
+        badge.className = "tap-badge";
+        badge.innerHTML = String(count);
+        this.appendChild(badge);
+        updateLabel();
+        Sound.countNote(count);
+        if (count === total) later(function () { Sound.sparkle(); }, 180);
+        if (state.sound) Sound.speak(String(count), "vi-VN");
+      });
+    }
+
+    if (resetBtn) {
+      onTap(resetBtn, function () {
+        Sound.click();
+        count = 0;
+        updateLabel();
+        for (var j = 0; j < items.length; j++) {
+          items[j].setAttribute("data-counted", "0");
+          removeClass(items[j], "counted");
+          var b = items[j].querySelector(".tap-badge");
+          if (b) b.parentNode.removeChild(b);
+        }
+      });
     }
   }
 
@@ -1661,6 +1737,96 @@
         removeClass(a, "flipped"); removeClass(b, "flipped");
         game.flipped = []; game.locked = false;
       }, 1000);
+    }
+  }
+
+  // ===== CHẾ ĐỘ 4: GHÉP ĐÔI NHANH (Tap-to-Match) =====
+  function renderMatch() {
+    clearTimers();
+    var pairs = game.pairs;
+    game.matched = 0; game.misses = 0; game.locked = false;
+    game.selLeft = null; game.selRight = null;
+    $("boardHead").innerHTML = "Ghép đôi";
+    $("boardPrompt").innerHTML = "Chạm 1 thẻ bên <b>trái</b> và 1 thẻ bên <b>phải</b> để ghép thành cặp đúng!";
+    say("Bé chạm nối từng cặp hình và đáp án nhé! 🧩");
+
+    var leftList = [], rightList = [];
+    for (var i = 0; i < pairs.length; i++) {
+      leftList.push({ id: i, text: pairs[i].a });
+      rightList.push({ id: i, text: pairs[i].b });
+    }
+    shuffle(leftList);
+    shuffle(rightList);
+
+    var html = '<div class="match-board"><div class="match-col"><div class="match-col-title">🖼️ Hình / Câu hỏi</div>';
+    for (var l = 0; l < leftList.length; l++) {
+      var lEmo = isEmojiOnly(leftList[l].text) ? " emo" : "";
+      html += '<button type="button" class="match-card' + lEmo + '" data-side="left" data-id="' + leftList[l].id + '">' + esc(leftList[l].text) + "</button>";
+    }
+    html += '</div><div class="match-col"><div class="match-col-title">✨ Đáp án</div>';
+    for (var r = 0; r < rightList.length; r++) {
+      var rEmo = isEmojiOnly(rightList[r].text) ? " emo" : "";
+      html += '<button type="button" class="match-card' + rEmo + '" data-side="right" data-id="' + rightList[r].id + '">' + esc(rightList[r].text) + "</button>";
+    }
+    html += "</div></div>";
+
+    $("gameStage").innerHTML = html;
+    var cards = $("gameStage").querySelectorAll(".match-card");
+    for (var k = 0; k < cards.length; k++) {
+      onTap(cards[k], function () { pickMatchCard(this); });
+    }
+    if (state.autoRead) Sound.speak("Chạm một thẻ bên trái và một thẻ bên phải để ghép thành cặp đúng", "vi-VN");
+  }
+
+  function pickMatchCard(el) {
+    if (game.locked || hasClass(el, "matched")) return;
+    var side = el.getAttribute("data-side");
+    Sound.flip();
+
+    if (side === "left") {
+      if (game.selLeft) removeClass(game.selLeft, "selected");
+      game.selLeft = el;
+      addClass(el, "selected");
+    } else {
+      if (game.selRight) removeClass(game.selRight, "selected");
+      game.selRight = el;
+      addClass(el, "selected");
+    }
+
+    if (!game.selLeft || !game.selRight) return;
+    game.locked = true;
+    var leftEl = game.selLeft, rightEl = game.selRight;
+    var leftId = leftEl.getAttribute("data-id"), rightId = rightEl.getAttribute("data-id");
+
+    if (leftId === rightId) {
+      removeClass(leftEl, "selected"); removeClass(rightEl, "selected");
+      addClass(leftEl, "matched"); addClass(rightEl, "matched");
+      game.matched++;
+      game.score += 10;
+      updateHud();
+      floatPoints("+10", rightEl);
+      Sound.good();
+      var p = game.pairs[parseInt(leftId, 10)];
+      if (p && p.speak) later(function () { Sound.speak(p.speak, game.lang); }, 350);
+      say(pick(PRAISE), "good");
+      game.selLeft = null; game.selRight = null; game.locked = false;
+
+      if (game.matched >= game.pairs.length) {
+        later(function () {
+          game.score = Math.max(Math.round(game.max * 0.4), game.score - Math.max(0, game.misses) * 2);
+          finishGame();
+        }, 1000);
+      }
+    } else {
+      game.misses++;
+      Sound.bad();
+      addClass(leftEl, "wrong"); addClass(rightEl, "wrong");
+      say(pick(["Chưa khớp rồi! Bé chọn cặp khác nhé 🙂", "Gần đúng rồi, thử lại nha! 💪"]), "bad");
+      later(function () {
+        removeClass(leftEl, "selected"); removeClass(rightEl, "selected");
+        removeClass(leftEl, "wrong"); removeClass(rightEl, "wrong");
+        game.selLeft = null; game.selRight = null; game.locked = false;
+      }, 550);
     }
   }
 
@@ -1960,8 +2126,8 @@
     html += '<div class="guide-item"><span class="gi-ic">📌</span><div><b>Ghim app ra màn hình:</b> Bấm nút Chia sẻ trên Safari ➜ chọn <b>Thêm vào MH chính (Add to Home Screen)</b> để chơi toàn màn hình và lưu bài vĩnh viễn.</div></div>';
 
     html += '<div class="guide-sec">4. ℹ️ Giới Thiệu & Phiên Bản (About)</div>';
-    html += '<div class="guide-item"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v10 (13/11/2026) · <b>Bộ SGK:</b> Kết Nối Tri Thức 2026</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">✨</span><div><b>Cập nhật mới nhất (v10):</b> Giao diện đa màn hình iPad & Web Desktop, bỏ banner cũ, sửa lỗi phát âm TTS (no-referrer + watchdog 450ms + bộ vần lớp 1), phản hồi sai dịu mắt hơn.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v11 (13/11/2026) · <b>Bộ SGK:</b> Kết Nối Tri Thức 2026</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">✨</span><div><b>Cập nhật mới nhất (v11):</b> Thêm cơ chế Chạm Đếm Hình (Tap-to-Count) có nốt nhạc đếm số, chế độ Ghép Đôi Nhanh (Tap-to-Match), Responsive iPad/Web và sửa lỗi phát âm TTS.</div></div>';
 
     $("infoBody").innerHTML = html;
 
