@@ -1060,9 +1060,13 @@
     return out;
   }
 
+  var MAP_ORDER = ["math", "viet", "eng"];
+  var MAP_PATH_IDS = { math: "unitPathMath", viet: "unitPathViet", eng: "unitPathEng" };
+  var mapControlsBound = false;
+
   function openSubject(subj) {
     curSubj = subj;
-    renderMap();
+    renderMap(true);
     showScreen("screenMap");
   }
 
@@ -1072,35 +1076,75 @@
     return h;
   }
 
-  function renderMap() {
+  function slideToSubject(subj, instant) {
+    var idx = MAP_ORDER.indexOf(subj);
+    if (idx < 0) idx = 0;
+    curSubj = MAP_ORDER[idx];
+
     var sj = subjectById(curSubj);
     var units = UNITS[curSubj];
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
     $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 3);
 
-    var pathEl = $("unitPath");
-    pathEl.className = "unit-path unit-path--" + curSubj;
-
     var tabs = document.querySelectorAll("#mapSubjTabs .map-tab");
     for (var ti = 0; ti < tabs.length; ti++) {
       if (tabs[ti].getAttribute("data-subj") === curSubj) addClass(tabs[ti], "active");
       else removeClass(tabs[ti], "active");
-      if (!tabs[ti].getAttribute("data-bound")) {
-        tabs[ti].setAttribute("data-bound", "1");
-        onTap(tabs[ti], function () {
-          var nextSubj = this.getAttribute("data-subj");
-          if (nextSubj && nextSubj !== curSubj) {
-            Sound.click();
-            openSubject(nextSubj);
-          }
-        });
-      }
     }
 
-    var pts = getMapPoints(units.length, curSubj);
+    var track = $("mapSliderTrack");
+    var tabSlider = $("mapTabSlider");
+    if (instant) {
+      if (track) track.style.webkitTransition = "none";
+      if (track) track.style.transition = "none";
+      if (tabSlider) tabSlider.style.webkitTransition = "none";
+      if (tabSlider) tabSlider.style.transition = "none";
+    }
+
+    var trackTx = "translate3d(-" + (idx * 33.3333) + "%, 0, 0)";
+    var tabTx = "translate3d(" + (idx * 100) + "%, 0, 0)";
+    if (track) {
+      track.style.webkitTransform = trackTx;
+      track.style.transform = trackTx;
+    }
+    if (tabSlider) {
+      tabSlider.style.webkitTransform = tabTx;
+      tabSlider.style.transform = tabTx;
+    }
+
+    if (instant) {
+      if (track) void track.offsetWidth;
+      setTimeout(function () {
+        if (track) {
+          track.style.webkitTransition = "";
+          track.style.transition = "";
+        }
+        if (tabSlider) {
+          tabSlider.style.webkitTransition = "";
+          tabSlider.style.transition = "";
+        }
+      }, 30);
+    }
+
+    var prevBtn = $("mapPrevBtn");
+    var nextBtn = $("mapNextBtn");
+    if (prevBtn) {
+      if (idx <= 0) addClass(prevBtn, "hidden");
+      else removeClass(prevBtn, "hidden");
+    }
+    if (nextBtn) {
+      if (idx >= MAP_ORDER.length - 1) addClass(nextBtn, "hidden");
+      else removeClass(nextBtn, "hidden");
+    }
+  }
+
+  function renderSingleIslandMap(subj, pathEl) {
+    if (!pathEl) return;
+    var units = UNITS[subj];
+    var pts = getMapPoints(units.length, subj);
     var highestUnlocked = 0;
     for (var uIdx = 0; uIdx < units.length; uIdx++) {
-      if (isUnlocked(curSubj, uIdx)) highestUnlocked = uIdx;
+      if (isUnlocked(subj, uIdx)) highestUnlocked = uIdx;
     }
 
     var dAll = "";
@@ -1132,8 +1176,8 @@
     var nextMarked = false;
     for (var i = 0; i < units.length; i++) {
       var u = units[i];
-      var unlocked = isUnlocked(curSubj, i);
-      var st = unitStars(curSubj, u.topic);
+      var unlocked = isUnlocked(subj, i);
+      var st = unitStars(subj, u.topic);
       var isBoss = (i === units.length - 1);
       var cls = "unit-node";
       if (!unlocked) cls += " locked";
@@ -1146,7 +1190,7 @@
         nextMarked = true;
         isNext = true;
       }
-      html += '<div class="' + cls + '" data-idx="' + i + '" style="left:' + pts[i].x + '%;top:' + pts[i].y + '%;">' +
+      html += '<div class="' + cls + '" data-subj="' + subj + '" data-idx="' + i + '" style="left:' + pts[i].x + '%;top:' + pts[i].y + '%;">' +
         (isNext ? '<div class="unit-here-tag">🚩 CHƠI NGAY</div>' : '') +
         '<div class="unit-circle">' +
           '<span class="unit-num">' + (i + 1) + '</span>' +
@@ -1158,10 +1202,13 @@
         '</div>';
     }
     pathEl.innerHTML = html;
-    var nodes = $("unitPath").querySelectorAll(".unit-node");
+
+    var nodes = pathEl.querySelectorAll(".unit-node");
     for (var k = 0; k < nodes.length; k++) {
       onTap(nodes[k], function () {
+        var nodeSubj = this.getAttribute("data-subj") || curSubj;
         var idx = parseInt(this.getAttribute("data-idx"), 10);
+        if (nodeSubj !== curSubj) curSubj = nodeSubj;
         if (!isUnlocked(curSubj, idx)) {
           Sound.bad();
           addClass(this, "shake-it");
@@ -1178,6 +1225,79 @@
         }
       });
     }
+  }
+
+  function bindMapControlsOnce() {
+    if (mapControlsBound) return;
+    mapControlsBound = true;
+
+    var tabs = document.querySelectorAll("#mapSubjTabs .map-tab");
+    for (var ti = 0; ti < tabs.length; ti++) {
+      onTap(tabs[ti], function () {
+        var nextSubj = this.getAttribute("data-subj");
+        if (nextSubj && nextSubj !== curSubj) {
+          Sound.click();
+          slideToSubject(nextSubj, false);
+        }
+      });
+    }
+
+    var prevBtn = $("mapPrevBtn");
+    if (prevBtn) {
+      onTap(prevBtn, function () {
+        var idx = MAP_ORDER.indexOf(curSubj);
+        if (idx > 0) {
+          Sound.click();
+          slideToSubject(MAP_ORDER[idx - 1], false);
+        }
+      });
+    }
+
+    var nextBtn = $("mapNextBtn");
+    if (nextBtn) {
+      onTap(nextBtn, function () {
+        var idx = MAP_ORDER.indexOf(curSubj);
+        if (idx >= 0 && idx < MAP_ORDER.length - 1) {
+          Sound.click();
+          slideToSubject(MAP_ORDER[idx + 1], false);
+        }
+      });
+    }
+
+    var scrollPaper = $("mapScrollPaper");
+    if (scrollPaper) {
+      var touchStartX = 0;
+      var touchStartY = 0;
+      scrollPaper.addEventListener("touchstart", function (e) {
+        if (!e.touches || !e.touches.length) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }, false);
+      scrollPaper.addEventListener("touchend", function (e) {
+        if (!e.changedTouches || !e.changedTouches.length) return;
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        var dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          var idx = MAP_ORDER.indexOf(curSubj);
+          if (dx < 0 && idx >= 0 && idx < MAP_ORDER.length - 1) {
+            Sound.click();
+            slideToSubject(MAP_ORDER[idx + 1], false);
+          } else if (dx > 0 && idx > 0) {
+            Sound.click();
+            slideToSubject(MAP_ORDER[idx - 1], false);
+          }
+        }
+      }, false);
+    }
+  }
+
+  function renderMap(instant) {
+    for (var mi = 0; mi < MAP_ORDER.length; mi++) {
+      var sId = MAP_ORDER[mi];
+      renderSingleIslandMap(sId, $(MAP_PATH_IDS[sId]));
+    }
+    bindMapControlsOnce();
+    slideToSubject(curSubj, !!instant);
   }
 
   function bestScoreText(subj, topic) {
@@ -2297,7 +2417,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v21 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Căn tâm chặng tròn khớp đường nối và thêm thanh chuyển nhanh giữa 3 đảo.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v22 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Hiệu ứng trượt ngang mượt mà (Slide & Swipe) giữa 3 đảo ngay trong bản đồ.</div></div>';
 
     $("infoBody").innerHTML = html;
 

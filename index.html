@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/mascot.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=21">
+  <link rel="stylesheet" href="css/style.css?v=22">
 </head>
 <body>
 
@@ -72,12 +72,19 @@
       <button class="icon-btn bgm-btn on" id="mapBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền" style="margin-left:6px">🎵</button>
     </div>
     <div class="map-subj-tabs" id="mapSubjTabs">
+      <div class="map-tab-slider" id="mapTabSlider"></div>
       <button type="button" class="map-tab" data-subj="math">🧮 Toán Học</button>
       <button type="button" class="map-tab" data-subj="viet">📖 Tiếng Việt</button>
       <button type="button" class="map-tab" data-subj="eng">🌍 Tiếng Anh</button>
     </div>
-    <div class="scroll-paper">
-      <div class="unit-path" id="unitPath"></div>
+    <div class="scroll-paper" id="mapScrollPaper">
+      <button type="button" class="map-arrow prev" id="mapPrevBtn" aria-label="Đảo trước">‹</button>
+      <button type="button" class="map-arrow next" id="mapNextBtn" aria-label="Đảo sau">›</button>
+      <div class="map-slider-track" id="mapSliderTrack">
+        <div class="map-slide"><div class="unit-path unit-path--math" id="unitPathMath"></div></div>
+        <div class="map-slide"><div class="unit-path unit-path--viet" id="unitPathViet"></div></div>
+        <div class="map-slide"><div class="unit-path unit-path--eng" id="unitPathEng"></div></div>
+      </div>
     </div>
   </section>
 
@@ -240,9 +247,9 @@
   <!-- Firebase SDK v8 (Tương thích 100% cú pháp ES5 cho iPadOS 12.5.8 đến iOS 18) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/firebase-config.js?v=21"></script>
-  <script src="js/data.js?v=21"></script>
-  <script src="js/audio-manifest.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="js/firebase-config.js?v=22"></script>
+  <script src="js/data.js?v=22"></script>
+  <script src="js/audio-manifest.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
 </body>
 </html>
