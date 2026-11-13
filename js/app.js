@@ -663,6 +663,44 @@
     switchProfile(cleanId);
   }
 
+  function deleteProfile(pid) {
+    if (!pid || profiles.length <= 1) return;
+    var prof = findProfileById(pid);
+    var label = prof ? prof.name : pid;
+    if (!window.confirm('Bạn có chắc muốn xóa hồ sơ bé "' + label + '"? Mọi sao và xu của hồ sơ này sẽ bị xóa vĩnh viễn.')) return;
+    var nextList = [];
+    for (var i = 0; i < profiles.length; i++) {
+      if (profiles[i].id !== pid) nextList.push(profiles[i]);
+    }
+    if (!nextList.length) return;
+    profiles = nextList;
+    try { localStorage.removeItem(profileStoreKey(pid)); } catch (e) {}
+    CloudSync.deleteProfile(pid);
+
+    if (currentProfileId === pid) {
+      currentProfileId = profiles[0].id;
+      saveProfilesList();
+      var nextProf = profiles[0];
+      state.name = nextProf.name;
+      state.coins = 0;
+      state.avatar = nextProf.avatar || "hero";
+      state.owned = ["hero"];
+      state.progress = {};
+      state.passages = {};
+      state.lastSubj = "math";
+      state.lastUnitIdx = 0;
+      state.lastPassageIdx = 0;
+      state.updatedAt = 0;
+      loadState();
+      renderHome();
+      CloudSync.listenCurrentProfile();
+    } else {
+      saveProfilesList();
+    }
+    Sound.click();
+    renderProfileCards();
+  }
+
   // Bộ máy đồng bộ đám mây Firebase
   var CloudSync = {
     db: null,
@@ -725,6 +763,10 @@
       } catch (e) {
         self.updatePill("offline", "Lưu máy");
       }
+    },
+    deleteProfile: function (pid) {
+      if (!this.db || !pid) return;
+      try { this.db.ref("kidsedu/profiles/" + pid).remove(); } catch (e) {}
     },
     listenCurrentProfile: function () {
       if (!this.db || !currentProfileId) return;
@@ -2106,9 +2148,17 @@
           '<div class="profile-meta">⭐ ' + stars + ' sao • 🪙 ' + coins + ' xu</div>' +
         '</div>' +
         '<div class="profile-tag">' + (isActive ? 'Đang học ✅' : 'Chọn') + '</div>' +
+        (profiles.length > 1 ? '<button type="button" class="profile-del" data-del-pid="' + esc(p.id) + '" title="Xóa hồ sơ">🗑️</button>' : '') +
       '</div>';
     }
     c.innerHTML = html;
+    var delBtns = c.querySelectorAll(".profile-del");
+    for (var d = 0; d < delBtns.length; d++) {
+      onTap(delBtns[d], function (e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        deleteProfile(this.getAttribute("data-del-pid"));
+      });
+    }
     var cards = c.querySelectorAll(".profile-card");
     for (var j = 0; j < cards.length; j++) {
       onTap(cards[j], function () {
@@ -2149,7 +2199,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v14 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Sửa triệt để đồng bộ tên hồ sơ, Cài đặt gọn nhẹ, nhạc nền chill bossa.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v15 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Thêm nút xóa hồ sơ bé, đồng bộ tên hồ sơ, Cài đặt gọn nhẹ, nhạc nền chill bossa.</div></div>';
 
     $("infoBody").innerHTML = html;
 
