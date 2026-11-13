@@ -494,21 +494,18 @@
   var LEVELS = ["Mầm Non Chăm Chỉ", "Bé Ngoan Hiếu Học", "Ong Nhỏ Thông Thái", "Nhà Thám Hiểm Nhí", "Ngôi Sao Lớp 1", "Kiện Tướng Tri Thức", "Siêu Trí Tuệ Nhí"];
 
   var AVATARS = [
-    { id: "hero", name: "Hiệp Sĩ Nhí", price: 0, img: "assets/mascot.jpg", emoji: "🧒" },
-    { id: "cat", name: "Mèo Mướp", price: 20, emoji: "🐱" },
-    { id: "dog", name: "Cún Con", price: 20, emoji: "🐶" },
-    { id: "bunny", name: "Thỏ Ngọc", price: 30, emoji: "🐰" },
-    { id: "panda", name: "Gấu Trúc", price: 40, emoji: "🐼" },
-    { id: "fox", name: "Cáo Đỏ", price: 50, emoji: "🦊" },
-    { id: "koala", name: "Koala", price: 60, emoji: "🐨" },
-    { id: "tiger", name: "Hổ Vàng", price: 70, emoji: "🐯" },
-    { id: "lion", name: "Sư Tử", price: 80, emoji: "🦁" },
-    { id: "frog", name: "Ếch Xanh", price: 90, emoji: "🐸" },
-    { id: "robot", name: "Rô-bốt", price: 110, emoji: "🤖" },
-    { id: "unicorn", name: "Kỳ Lân", price: 130, emoji: "🦄" },
-    { id: "princess", name: "Công Chúa", price: 150, emoji: "👸" },
-    { id: "dragon", name: "Rồng Thần", price: 200, emoji: "🐲" },
-    { id: "alien", name: "Bạn Ngoài Hành Tinh", price: 250, emoji: "👽" }
+    { id: "hero", name: "Hiệp Sĩ Nhí", price: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
+    { id: "sword", name: "Hiệp Sĩ Kiếm Bạc", price: 20, emoji: "⚔️" },
+    { id: "shield", name: "Hiệp Sĩ Khiên Vàng", price: 30, emoji: "🛡️" },
+    { id: "archer", name: "Hiệp Sĩ Cung Thủ", price: 40, emoji: "🏹" },
+    { id: "fire", name: "Hiệp Sĩ Lửa Đỏ", price: 50, emoji: "🔥" },
+    { id: "ice", name: "Hiệp Sĩ Băng Giá", price: 60, emoji: "❄️" },
+    { id: "thunder", name: "Hiệp Sĩ Sấm Sét", price: 80, emoji: "⚡" },
+    { id: "ninja", name: "Hiệp Sĩ Bóng Đêm", price: 100, emoji: "🥷" },
+    { id: "mecha", name: "Hiệp Sĩ Rô-Bốt", price: 120, emoji: "🤖" },
+    { id: "mage", name: "Hiệp Sĩ Phép Thuật", price: 150, emoji: "🧙" },
+    { id: "star", name: "Hiệp Sĩ Ánh Sao", price: 180, emoji: "🌟" },
+    { id: "king", name: "Vua Hiệp Sĩ", price: 220, emoji: "👑" }
   ];
 
   var PRAISE = [
@@ -548,10 +545,10 @@
   var currentProfileId = "hoanglong";
 
   var DEFAULT_REAL_REWARDS = [
-    { id: "rw_sticker", icon: "🍦", name: "Kem / Sticker Siêu Nhân", cost: 150 },
-    { id: "rw_book", icon: "📖", name: "Truyện Tranh Thiếu Nhi", cost: 300 },
+    { id: "rw_tv", icon: "📺", img: "assets/rw-tv.jpg", name: "Xem TV / Chơi game 30'", cost: 100 },
+    { id: "rw_sticker", icon: "🍦", img: "assets/rw-icecream.jpg", name: "Kem / Sticker Siêu Nhân", cost: 150 },
     { id: "rw_car", icon: "🏎️", name: "Xe Đồ Chơi HotWheels", cost: 600 },
-    { id: "rw_watch", icon: "⌚", name: "Đồng Hồ Trẻ Em", cost: 1200 }
+    { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng Hồ Trẻ Em", cost: 1200 }
   ];
   var STREAK_MILESTONES = [
     { days: 3, coins: 15, label: "3 ngày liên tiếp" },
@@ -564,7 +561,9 @@
     var arr = [];
     for (var i = 0; i < DEFAULT_REAL_REWARDS.length; i++) {
       var r = DEFAULT_REAL_REWARDS[i];
-      arr.push({ id: r.id, icon: r.icon, name: r.name, cost: r.cost });
+      var item = { id: r.id, icon: r.icon, name: r.name, cost: r.cost };
+      if (r.img) item.img = r.img;
+      arr.push(item);
     }
     return arr;
   }
@@ -610,11 +609,48 @@
     }
     if (!Array.isArray(state.realRewards) || state.realRewards.length === 0) {
       state.realRewards = cloneDefaultRewards();
+    } else {
+      // Đồng bộ hình ảnh mới và thay rw_book -> rw_tv lên đầu cho hồ sơ đã lưu
+      var hasTv = false;
+      var bookIdx = -1;
+      for (var ri = 0; ri < state.realRewards.length; ri++) {
+        var rw = state.realRewards[ri];
+        if (rw.id === "rw_tv") hasTv = true;
+        if (rw.id === "rw_book") bookIdx = ri;
+        for (var di = 0; di < DEFAULT_REAL_REWARDS.length; di++) {
+          if (DEFAULT_REAL_REWARDS[di].id === rw.id && DEFAULT_REAL_REWARDS[di].img) {
+            rw.img = DEFAULT_REAL_REWARDS[di].img;
+          }
+        }
+      }
+      if (bookIdx > -1) {
+        state.realRewards.splice(bookIdx, 1);
+      }
+      if (!hasTv && bookIdx > -1) {
+        var tv = DEFAULT_REAL_REWARDS[0];
+        state.realRewards.unshift({ id: tv.id, icon: tv.icon, img: tv.img, name: tv.name, cost: tv.cost });
+      }
     }
     if (!state.pinnedRewardId && state.realRewards.length > 0) {
       state.pinnedRewardId = state.realRewards[0].id;
     }
     if (!Array.isArray(state.rewardTickets)) state.rewardTickets = [];
+
+    // Đảm bảo avatar thuộc danh sách 12 hiệp sĩ hiện tại
+    var validAvatar = false;
+    for (var ai = 0; ai < AVATARS.length; ai++) {
+      if (AVATARS[ai].id === state.avatar) { validAvatar = true; break; }
+    }
+    if (!validAvatar) state.avatar = "hero";
+    if (!Array.isArray(state.owned)) state.owned = ["hero"];
+    var cleanOwned = [];
+    for (var oi = 0; oi < state.owned.length; oi++) {
+      for (var aj = 0; aj < AVATARS.length; aj++) {
+        if (AVATARS[aj].id === state.owned[oi]) { cleanOwned.push(state.owned[oi]); break; }
+      }
+    }
+    if (cleanOwned.indexOf("hero") === -1) cleanOwned.unshift("hero");
+    state.owned = cleanOwned;
   }
 
   function getPinnedReward() {
@@ -2476,8 +2512,11 @@
         var canBuy = state.coins >= r.cost;
         var pct = Math.min(100, Math.round((state.coins / (r.cost || 1)) * 100));
         var needMore = Math.max(0, r.cost - state.coins);
+        var rwIconHtml = r.img
+          ? '<img class="rw-thumb" src="' + esc(r.img) + '" alt="" onerror="this.parentNode.innerHTML=\'' + esc(r.icon || "🎁") + '\'">'
+          : esc(r.icon || "🎁");
         html += '<div class="reward-card' + (canBuy ? ' can-buy' : (isPinned ? ' pinned' : '')) + '">' +
-          '<div class="rw-ic">' + esc(r.icon || "🎁") + '</div>' +
+          '<div class="rw-ic">' + rwIconHtml + '</div>' +
           '<div class="rw-mid">' +
             '<div class="rw-name">' + esc(r.name) + '</div>' +
             '<div class="rw-meta">' + r.cost + ' 🪙 · ' + (canBuy ? 'Đủ xu đổi rồi! 🎉' : 'Còn thiếu ' + needMore + ' xu') + '</div>' +
@@ -2765,7 +2804,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v36 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Hiển thị huy hiệu hiện tại dưới tên bé, carousel 3 đảo không quay vòng.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v37 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Bộ quà thật kèm hình minh họa (Xem TV / Chơi game 30\', Kem Merino, Xe, Đồng hồ) & 12 Hiệp Sĩ.</div></div>';
 
     $("infoBody").innerHTML = html;
 

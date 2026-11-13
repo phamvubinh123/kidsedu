@@ -1311,7 +1311,8 @@ body.in-subscreen .cloud-layer { display: none; }
 }
 .reward-card.pinned { border-color: #3b82f6; background: #eff6ff; }
 .reward-card.can-buy { border-color: #f59e0b; background: #fffbeb; }
-.rw-ic { font-size: 38px; line-height: 1; margin-right: 12px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.rw-ic { width: 54px; height: 54px; font-size: 36px; line-height: 54px; text-align: center; margin-right: 12px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.rw-thumb { width: 54px; height: 54px; border-radius: 12px; object-fit: cover; display: block; border: 1.5px solid #e2e8f0; background: #f8fafc; }
 .rw-mid { -webkit-flex: 1; flex: 1; min-width: 0; margin-right: 8px; }
 .rw-name { font-size: 15px; font-weight: 800; color: #1e293b; }
 .rw-meta { font-size: 12px; font-weight: 700; color: #b45309; margin-top: 2px; }
