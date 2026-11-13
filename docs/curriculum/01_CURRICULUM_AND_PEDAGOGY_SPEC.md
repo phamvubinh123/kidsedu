@@ -12,13 +12,15 @@
 Trẻ 6 tuổi bước vào lớp 1 đang trong giai đoạn chuyển đổi tâm lý then chốt từ *"Chơi là hoạt động chủ đạo"* (mẫu giáo) sang *"Học tập có chủ đích và kỷ luật"* (tiểu học). Do đó:
 - **Tư duy trực quan hình tượng chiếm ưu thế tuyệt đối:** Trẻ nhận thức thông qua hình ảnh, màu sắc, âm thanh và chuyển động trước khi hiểu ký hiệu ngôn ngữ trừu tượng.
 - **Khả năng đọc chữ độc lập còn sơ khai:** Trẻ chưa đọc thạo hướng dẫn bằng văn bản.
-  > **Quy tắc vàng 1:** **Audio-First / Voice-First:** 100% hướng dẫn, câu hỏi, phản hồi tương tác phải có giọng đọc lồng tiếng chuẩn xác, ấm áp.
+  > **Quy tắc vàng 1:** **Audio-First (Audio Sprites Priority):** 100% hướng dẫn, câu hỏi, phản hồi tương tác phải có giọng đọc lồng tiếng chuẩn xác, ấm áp, sử dụng **Audio Sprites nén sẵn** làm ưu tiên số 1 để chạy ổn định trên iPad cũ (không phụ thuộc Web Speech API hay bị lỗi mất tiếng Việt).
 - **Kỹ năng vận động tinh (Fine Motor Skills) chưa hoàn thiện:**
-  > **Quy tắc vàng 2:** Thao tác vật lý trên màn hình cảm ứng tối giản chỉ gồm: **Chạm 1 chạm (Tap)**, **Kéo thả nhẹ nhàng (Drag & Drop)**, **Vuốt (Swipe)** và **Tô vẽ nét chữ (Trace)**. Vùng chạm (hitbox) $\ge 64 \times 64 \text{ px}$, khoảng cách giữa các nút $\ge 16 \text{ px}$.
+  > **Quy tắc vàng 2:** **Tap-to-Select / Tap-to-Place ưu tiên thay thế Kéo-Thả:** Trẻ 6 tuổi thường tì lòng bàn tay lên màn hình gây trượt ngón tay khi kéo. Ưu tiên tuyệt đối thao tác **Chạm nguồn $\to$ Chạm đích** (Tap-to-Move), kết hợp tô nét (Trace) có dung sai rộng. Vùng chạm (hitbox) $\ge 64 \times 64 \text{ px}$, khoảng cách giữa các nút $\ge 16 \text{ px}$.
 - **Khoảng chú ý ngắn (Attention Span):**
   > **Quy tắc vàng 3:** **Micro-learning:** Mỗi màn chơi / bài học chỉ kéo dài từ **3 đến 5 phút** (gồm 3 - 5 tương tác ngắn), sau đó trao cúp/ngọc/sao để tạo cảm giác hoàn thành và duy trì động lực nội tại.
 - **Tâm lý nhạy cảm với thất bại:**
   > **Quy tắc vàng 4:** **No Harsh Punishment:** Tuyệt đối không dùng âm thanh còi hú tiêu cực, dấu gạch chéo đỏ đáng sợ hay trừ điểm nặng nề. Khi sai, dùng âm thanh "uh-oh" nhẹ nhàng và lời khích lệ tích cực: *"Bé thử lại lần nữa nhé!", "Nhìn kỹ lại giỏ quả nào!"*.
+- **Giới hạn bộ nhớ làm việc (Working Memory Cap):**
+  > **Quy tắc vàng 5:** **Visual Priming & 2-3 Đáp án:** Hình ảnh trực quan phải xuất hiện trước, câu lệnh giọng nói ngắn gọn dưới 4 giây. Với học kỳ 1, mỗi câu hỏi chỉ hiển thị **2 đến 3 lựa chọn** to rõ để tránh quá tải nhận thức khiến trẻ bấm loạn xạ.
 
 ---
 
