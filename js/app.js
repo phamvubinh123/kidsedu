@@ -181,7 +181,20 @@
         var AC = window.AudioContext || window.webkitAudioContext;
         if (AC) { try { this.ctx = new AC(); } catch (e) {} }
       }
-      if (this.ctx && this.ctx.state === "suspended") { this.ctx.resume(); }
+      if (this.ctx && this.ctx.state === "suspended") {
+        try { this.ctx.resume(); } catch (e) {}
+      }
+      if (this.ctx && !this._unlocked) {
+        this._unlocked = true;
+        try {
+          var buf = this.ctx.createBuffer(1, 1, 22050);
+          var src = this.ctx.createBufferSource();
+          src.buffer = buf;
+          src.connect(this.ctx.destination);
+          if (typeof src.start === "function") { src.start(0); }
+          else if (typeof src.noteOn === "function") { src.noteOn(0); }
+        } catch (e) {}
+      }
     },
     tone: function (freq, type, start, dur, vol, slideTo) {
       if (!state.sound) return;
@@ -407,8 +420,29 @@
     { id: "alien", name: "Bạn Ngoài Hành Tinh", price: 250, emoji: "👽" }
   ];
 
-  var PRAISE = ["Giỏi quá! 🎉", "Xuất sắc luôn! 🌟", "Đúng rồi! Bé thông minh ghê! 💯", "Tuyệt vời! 🏆", "Siêu quá đi! ✨", "Chuẩn không cần chỉnh! 👍"];
-  var RETRY = ["Gần đúng rồi! Thử lại nhé 💪", "Ối, chưa đúng! Bé nghĩ thêm chút nha 🤔", "Cố lên! Chọn lại nào 😊"];
+  var PRAISE = [
+    "Hoan hô! Tuyệt đỉnh luôn! 🎉",
+    "Bé tính siêu quá! 🌟",
+    "Thông minh tuyệt vời! 💯",
+    "Bé gần mở được rương vàng rồi! 🏆",
+    "Chính xác! Bé giỏi lắm! ✨",
+    "Quá đỉnh! Thêm một ngôi sao nữa nè! ⭐",
+    "Đúng rồi! Thỏ Trắng vỗ tay khen bé! 🐰👏",
+    "Khè khè! Dũng sĩ nhỏ cừ khôi quá! 🐲🔥",
+    "Chuẩn không cần chỉnh! Tuyệt vời! 👍",
+    "Nhanh như chớp! Bé siêu thật đấy! ⚡",
+    "Tuyệt lắm! Mảnh ngọc sáng lên rồi kìa! 💎",
+    "Yeah! Mở rương kho báu thôi nào! 🎁"
+  ];
+  var RETRY = [
+    "Suýt đúng rồi, bé thử lại lần nữa nhé! 💪",
+    "Đừng lo, có Rồng Con ở đây cùng bạn! 🐲",
+    "Ồ, mình nhìn kỹ lại một chút nào! 👀",
+    "Gần trúng rồi đó! Chọn lại xem sao! ✨",
+    "Không sao đâu, bé đếm chậm lại chút nhé! 🐢",
+    "Cố lên nào Dũng Sĩ Tí Hon! 🌟",
+    "Nghe lại câu hỏi cùng Thỏ Trắng nhé! 🐰"
+  ];
 
   // ---------------------------------------------------------
   // 3. TRẠNG THÁI, HỒ SƠ BÉ & ĐỒNG BỘ ĐÁM MÂY (Firebase)
@@ -1920,8 +1954,19 @@
         window.alert("Không thể tạo mã lưu!");
       }
     });
+    function askParentalGate(actionLabel) {
+      var a = 6 + Math.floor(Math.random() * 6);
+      var b = 3 + Math.floor(Math.random() * 5);
+      var ans = window.prompt("🔒 CỔNG BỐ MẸ (" + actionLabel + ")\nĐể tránh bé bấm nhầm, bố mẹ nhập kết quả phép tính:\n" + a + " + " + b + " = ?");
+      if (ans === null) return false;
+      if (parseInt(ans, 10) === (a + b)) return true;
+      window.alert("Kết quả chưa đúng. Thao tác đã được hủy để bảo vệ dữ liệu của bé!");
+      return false;
+    }
+
     onTap($("importBtn"), function () {
       Sound.click();
+      if (!askParentalGate("Khôi phục dữ liệu")) return;
       var input = window.prompt("Dán mã lưu tiến độ vào đây để khôi phục:");
       if (input && input.replace(/\s/g, "").length > 5) {
         try {
@@ -1940,7 +1985,9 @@
       }
     });
     onTap($("resetBtn"), function () {
-      if (window.confirm("Xóa toàn bộ sao, xu và nhân vật đã mua?")) {
+      Sound.click();
+      if (!askParentalGate("Xóa làm lại từ đầu")) return;
+      if (window.confirm("Xác nhận lần cuối: Xóa toàn bộ sao, xu và nhân vật đã mua?")) {
         state.coins = 0; state.progress = {}; state.passages = {}; state.owned = ["hero"]; state.avatar = "hero";
         saveState(); renderHome(); closeOverlay("infoOverlay");
       }
@@ -1952,6 +1999,25 @@
   // 11. GẮN SỰ KIỆN
   // ---------------------------------------------------------
   function bindEvents() {
+    // Khóa cử chỉ đa điểm Safari iPad cũ (tránh trẻ tì lòng bàn tay làm zoom/cuộn trang)
+    var supportsPassive = false;
+    try {
+      var opts = Object.defineProperty({}, "passive", {
+        get: function () { supportsPassive = true; return false; }
+      });
+      window.addEventListener("testPassive", null, opts);
+      window.removeEventListener("testPassive", null, opts);
+    } catch (e) {}
+
+    document.addEventListener("gesturestart", function (e) {
+      e.preventDefault();
+    }, false);
+    document.addEventListener("touchmove", function (e) {
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, supportsPassive ? { passive: false } : false);
+
     // Mở khóa âm thanh iOS & tự động bật BGM ở lần chạm đầu tiên
     function unlockAudio() {
       Sound.init();
