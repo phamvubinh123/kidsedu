@@ -1062,6 +1062,7 @@
 
   var MAP_ORDER = ["math", "viet", "eng"];
   var MAP_PATH_IDS = { math: "unitPathMath", viet: "unitPathViet", eng: "unitPathEng" };
+  var MAP_STRIP_STAR_IDS = { math: "stripStarsMath", viet: "stripStarsViet", eng: "stripStarsEng" };
   var mapControlsBound = false;
 
   function openSubject(subj) {
@@ -1092,49 +1093,35 @@
       else removeClass(tabs[ti], "active");
     }
 
-    var track = $("mapSliderTrack");
+    var cards = document.querySelectorAll("#mapAccordion .map-card");
     var tabSlider = $("mapTabSlider");
     if (instant) {
-      if (track) track.style.webkitTransition = "none";
-      if (track) track.style.transition = "none";
+      for (var ci = 0; ci < cards.length; ci++) addClass(cards[ci], "no-anim");
       if (tabSlider) tabSlider.style.webkitTransition = "none";
       if (tabSlider) tabSlider.style.transition = "none";
     }
 
-    var trackTx = "translate3d(-" + (idx * 33.3333) + "%, 0, 0)";
-    var tabTx = "translate3d(" + (idx * 100) + "%, 0, 0)";
-    if (track) {
-      track.style.webkitTransform = trackTx;
-      track.style.transform = trackTx;
+    for (var cj = 0; cj < cards.length; cj++) {
+      if (cards[cj].getAttribute("data-subj") === curSubj) addClass(cards[cj], "active");
+      else removeClass(cards[cj], "active");
     }
+
+    var tabTx = "translate3d(" + (idx * 100) + "%, 0, 0)";
     if (tabSlider) {
       tabSlider.style.webkitTransform = tabTx;
       tabSlider.style.transform = tabTx;
     }
 
     if (instant) {
-      if (track) void track.offsetWidth;
+      var acc = $("mapAccordion");
+      if (acc) void acc.offsetWidth;
       setTimeout(function () {
-        if (track) {
-          track.style.webkitTransition = "";
-          track.style.transition = "";
-        }
+        for (var ck = 0; ck < cards.length; ck++) removeClass(cards[ck], "no-anim");
         if (tabSlider) {
           tabSlider.style.webkitTransition = "";
           tabSlider.style.transition = "";
         }
       }, 30);
-    }
-
-    var prevBtn = $("mapPrevBtn");
-    var nextBtn = $("mapNextBtn");
-    if (prevBtn) {
-      if (idx <= 0) addClass(prevBtn, "hidden");
-      else removeClass(prevBtn, "hidden");
-    }
-    if (nextBtn) {
-      if (idx >= MAP_ORDER.length - 1) addClass(nextBtn, "hidden");
-      else removeClass(nextBtn, "hidden");
     }
   }
 
@@ -1242,38 +1229,27 @@
       });
     }
 
-    var prevBtn = $("mapPrevBtn");
-    if (prevBtn) {
-      onTap(prevBtn, function () {
-        var idx = MAP_ORDER.indexOf(curSubj);
-        if (idx > 0) {
+    var cards = document.querySelectorAll("#mapAccordion .map-card");
+    for (var ci = 0; ci < cards.length; ci++) {
+      onTap(cards[ci], function () {
+        var nextSubj = this.getAttribute("data-subj");
+        if (nextSubj && nextSubj !== curSubj) {
           Sound.click();
-          slideToSubject(MAP_ORDER[idx - 1], false);
+          slideToSubject(nextSubj, false);
         }
       });
     }
 
-    var nextBtn = $("mapNextBtn");
-    if (nextBtn) {
-      onTap(nextBtn, function () {
-        var idx = MAP_ORDER.indexOf(curSubj);
-        if (idx >= 0 && idx < MAP_ORDER.length - 1) {
-          Sound.click();
-          slideToSubject(MAP_ORDER[idx + 1], false);
-        }
-      });
-    }
-
-    var scrollPaper = $("mapScrollPaper");
-    if (scrollPaper) {
+    var accEl = $("mapAccordion");
+    if (accEl) {
       var touchStartX = 0;
       var touchStartY = 0;
-      scrollPaper.addEventListener("touchstart", function (e) {
+      accEl.addEventListener("touchstart", function (e) {
         if (!e.touches || !e.touches.length) return;
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
       }, false);
-      scrollPaper.addEventListener("touchend", function (e) {
+      accEl.addEventListener("touchend", function (e) {
         if (!e.changedTouches || !e.changedTouches.length) return;
         var dx = e.changedTouches[0].clientX - touchStartX;
         var dy = e.changedTouches[0].clientY - touchStartY;
@@ -1295,6 +1271,8 @@
     for (var mi = 0; mi < MAP_ORDER.length; mi++) {
       var sId = MAP_ORDER[mi];
       renderSingleIslandMap(sId, $(MAP_PATH_IDS[sId]));
+      var stripEl = $(MAP_STRIP_STAR_IDS[sId]);
+      if (stripEl) stripEl.innerHTML = subjectStars(sId) + "/" + (UNITS[sId].length * 3) + " ⭐";
     }
     bindMapControlsOnce();
     slideToSubject(curSubj, !!instant);
@@ -2417,7 +2395,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v22 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Hiệu ứng trượt ngang mượt mà (Slide & Swipe) giữa 3 đảo ngay trong bản đồ.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v23 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Giao diện Accordion Expanding Cards (xếp lớp thu gọn 2 đảo bên cạnh đảo đang mở) mượt mà.</div></div>';
 
     $("infoBody").innerHTML = html;
 

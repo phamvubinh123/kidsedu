@@ -245,23 +245,71 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 .map-tab.active { color: #7a3d0e; }
 
-.map-slider-track {
-  display: -webkit-flex; display: flex; width: 300%;
-  -webkit-transition: -webkit-transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+.map-accordion {
+  display: -webkit-flex; display: flex; -webkit-align-items: stretch; align-items: stretch;
+  width: 100%;
 }
-.map-slider-track.no-anim { -webkit-transition: none !important; transition: none !important; }
-.map-slide { width: 33.3333%; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.map-arrow {
-  position: absolute; top: 50%; margin-top: -22px; width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9); color: #2a5aa0; font-size: 28px; line-height: 36px; font-weight: 800;
-  box-shadow: 0 4px 12px rgba(20, 60, 120, 0.25); z-index: 10; text-align: center;
-  -webkit-transition: opacity 0.2s, -webkit-transform 0.12s; transition: opacity 0.2s, transform 0.12s;
+.map-card {
+  position: relative; overflow: hidden; border-radius: 22px;
+  background: #7bc8f6;
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 26px rgba(20, 60, 120, 0.22);
+  cursor: pointer;
+  -webkit-flex: 0 0 50px; flex: 0 0 50px; width: 50px;
+  margin-top: 18px; margin-bottom: 18px;
+  -webkit-transition: -webkit-flex 0.48s cubic-bezier(0.22, 1, 0.36, 1), flex 0.48s cubic-bezier(0.22, 1, 0.36, 1), width 0.48s cubic-bezier(0.22, 1, 0.36, 1), margin 0.48s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
+  transition: flex 0.48s cubic-bezier(0.22, 1, 0.36, 1), width 0.48s cubic-bezier(0.22, 1, 0.36, 1), margin 0.48s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s;
 }
-.map-arrow:active { -webkit-transform: scale(0.9); transform: scale(0.9); }
-.map-arrow.prev { left: 10px; }
-.map-arrow.next { right: 10px; }
-.map-arrow.hidden { opacity: 0; pointer-events: none; }
+.map-card:not(:last-child) { margin-right: 6px; }
+.map-card.no-anim { -webkit-transition: none !important; transition: none !important; }
+.map-card.active {
+  -webkit-flex: 1 1 0%; flex: 1 1 0%; width: auto;
+  margin-top: 0; margin-bottom: 0;
+  border-width: 4px; cursor: default; z-index: 2;
+  box-shadow: 0 14px 32px rgba(20, 60, 120, 0.28);
+}
+.map-card-bg {
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+  background-size: cover; background-position: center center; background-repeat: no-repeat;
+  -webkit-filter: grayscale(42%) brightness(0.84); filter: grayscale(42%) brightness(0.84);
+  -webkit-transition: opacity 0.35s, -webkit-filter 0.35s; transition: opacity 0.35s, filter 0.35s;
+}
+.map-card--math .map-card-bg { background-image: url("../assets/treasure-map.jpg"); }
+.map-card--viet .map-card-bg { background-image: url("../assets/treasure-map-viet.jpg"); }
+.map-card--eng .map-card-bg { background-image: url("../assets/treasure-map-eng.jpg"); }
+.map-card.active .map-card-bg { opacity: 0; -webkit-filter: none; filter: none; pointer-events: none; }
+
+.map-card .unit-path {
+  position: absolute; top: 0; left: 0; width: 100%; opacity: 0; pointer-events: none;
+  -webkit-transition: opacity 0.32s ease; transition: opacity 0.32s ease;
+}
+.map-card.active .unit-path {
+  position: relative; opacity: 1; pointer-events: auto;
+}
+
+.map-card-strip {
+  position: absolute; left: 0; right: 0; bottom: 14px; z-index: 3;
+  text-align: center; padding: 0 3px;
+  -webkit-transition: opacity 0.22s; transition: opacity 0.22s;
+}
+.map-card.active .map-card-strip { opacity: 0; pointer-events: none; }
+.map-card:not(.active):hover .map-card-bg { -webkit-filter: grayscale(10%) brightness(0.95); filter: grayscale(10%) brightness(0.95); }
+.map-strip-circle {
+  width: 36px; height: 36px; margin: 0 auto 5px; border-radius: 50%;
+  background: #ffffff; border: 2px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
+  font-size: 19px; line-height: 32px; text-align: center;
+}
+.map-strip-label {
+  font-size: 10px; font-weight: 800; color: #ffffff; line-height: 1.15;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.map-strip-stars {
+  display: inline-block; margin-top: 3px; padding: 1px 5px; border-radius: 8px;
+  background: rgba(15, 23, 42, 0.62); color: #fde047;
+  font-size: 9px; font-weight: 800; line-height: 1.3;
+}
 .unit-node.next { z-index: 4; }
 .unit-node.is-boss { z-index: 3; }
 .unit-node:active .unit-circle { -webkit-transform: scale(0.92); transform: scale(0.92); }
@@ -745,12 +793,27 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   }
 
   /* Bản đồ Đảo Kho Báu trên iPad / Web */
-  .scroll-paper {
-    max-width: 680px;
+  .map-accordion {
+    max-width: 840px;
     margin: 0 auto;
-    padding: 0;
   }
-  .map-subj-tabs { max-width: 680px; margin: 0 auto 12px; }
+  .map-card:not(.active) {
+    -webkit-flex: 0 0 76px;
+    flex: 0 0 76px;
+    width: 76px;
+    margin-top: 26px;
+    margin-bottom: 26px;
+  }
+  .map-card:not(:last-child) { margin-right: 10px; }
+  .map-strip-circle {
+    width: 48px;
+    height: 48px;
+    font-size: 25px;
+    line-height: 44px;
+  }
+  .map-strip-label { font-size: 12px; }
+  .map-strip-stars { font-size: 10px; padding: 2px 6px; }
+  .map-subj-tabs { max-width: 840px; margin: 0 auto 12px; }
   .map-tab { font-size: 15px; padding: 9px 12px; }
   .unit-node { -webkit-transform: translate(-50%, -33px); transform: translate(-50%, -33px); }
   .unit-circle { width: 66px; height: 66px; font-size: 28px; }
