@@ -1274,7 +1274,7 @@
     var html = "";
     for (var i = 0; i < MODES.length; i++) {
       var m = MODES[i];
-      html += '<div class="mode-card' + (m.id === curMode ? " sel" : "") + '" data-mode="' + m.id + '">' +
+      html += '<div class="mode-card" data-mode="' + m.id + '">' +
         '<div class="mc-head"><div class="mc-name">' + m.name + '</div><div class="mc-best">' + starsMini(p[m.id] || 0) + "</div></div>" +
         '<div class="mc-body"><div class="mc-icon">' + m.icon + '</div><div class="mc-reward">x' + m.reward + ' <i class="coin sm"></i></div>' +
         '<div class="mc-desc">' + m.desc + "</div></div></div>";
@@ -1283,11 +1283,10 @@
     var cards = $("modeCards").querySelectorAll(".mode-card");
     for (var k = 0; k < cards.length; k++) {
       onTap(cards[k], function () {
-        Sound.flip();
+        Sound.click();
         curMode = this.getAttribute("data-mode");
-        var all = $("modeCards").querySelectorAll(".mode-card");
-        for (var j = 0; j < all.length; j++) removeClass(all[j], "sel");
-        addClass(this, "sel");
+        closeOverlay("modeOverlay");
+        startGame();
       });
     }
     openOverlay("modeOverlay");
@@ -2360,7 +2359,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v31 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Luật mở khóa mới: hoàn thành ít nhất 3/4 trò chơi ở chặng trước để mở chặng tiếp theo.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v32 (13/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Bỏ nút Chơi ngay, 4 thẻ chế độ đều nhau và chạm 1 lần để vào chơi luôn.</div></div>';
 
     $("infoBody").innerHTML = html;
 
@@ -2570,7 +2569,7 @@
 
     onTap($("mapBackBtn"), function () { Sound.click(); renderHome(); showScreen("screenHome"); });
 
-    onTap($("playBtn"), function () { Sound.click(); closeOverlay("modeOverlay"); startGame(); });
+    if ($("playBtn")) onTap($("playBtn"), function () { Sound.click(); closeOverlay("modeOverlay"); startGame(); });
 
     var closers = document.querySelectorAll("[data-close]");
     for (var c = 0; c < closers.length; c++) {
