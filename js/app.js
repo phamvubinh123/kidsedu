@@ -1020,7 +1020,7 @@
           if (state.passages.hasOwnProperty(k) && state.passages[k] > 0) count++;
         }
       }
-      return count >= 12 ? 4 : count >= 7 ? 3 : count >= 3 ? 2 : count >= 1 ? 1 : 0;
+      return count >= 40 ? 4 : count >= 20 ? 3 : count >= 8 ? 2 : count >= 1 ? 1 : 0;
     }
     return unitGamesDone(subj, topic);
   }
@@ -1507,6 +1507,21 @@
   var isReadingSample = false;
   var readReturnScreen = "screenHome";
   var curWeekGroup = 0;
+  var curWeekNum = 1;
+
+  function getPassageWeekNum(p) {
+    if (!p || !p.week) return 1;
+    var m = p.week.match(/\d+/);
+    return m ? parseInt(m[0], 10) : 1;
+  }
+
+  function firstPassageIdxOfWeek(wNum) {
+    if (typeof READING_PASSAGES === "undefined") return 0;
+    for (var i = 0; i < READING_PASSAGES.length; i++) {
+      if (getPassageWeekNum(READING_PASSAGES[i]) === wNum) return i;
+    }
+    return 0;
+  }
 
   function openPassageReader(idx) {
     if (typeof idx === "number") {
@@ -1518,8 +1533,9 @@
     }
     if (typeof READING_PASSAGES !== "undefined" && READING_PASSAGES.length > 0) {
       if (curPassageIdx >= READING_PASSAGES.length) curPassageIdx = READING_PASSAGES.length - 1;
+      curWeekNum = getPassageWeekNum(READING_PASSAGES[curPassageIdx]);
+      curWeekGroup = Math.floor((curWeekNum - 1) / 6);
     }
-    curWeekGroup = Math.floor(curPassageIdx / 6);
     state.lastSubj = "viet";
     state.lastUnitIdx = 4; // index của bài Luyện đọc đoạn văn
     state.lastPassageIdx = curPassageIdx;
@@ -1534,19 +1550,18 @@
     if (curPassageIdx >= READING_PASSAGES.length) curPassageIdx = READING_PASSAGES.length - 1;
 
     var p = READING_PASSAGES[curPassageIdx];
+    curWeekNum = getPassageWeekNum(p);
+    curWeekGroup = Math.floor((curWeekNum - 1) / 6);
     $("readWeekTag").innerHTML = esc(p.week);
     $("readLessonTitle").innerHTML = esc(p.title);
 
-    // 1. Bộ lọc nhóm tuần (Tuần 1-6, 7-12, 13-18) + Carousel chọn tuần
+    // 1. Bộ lọc 3 cụm tuần (Tuần 1-6, 7-12, 13-18) -> Tuần lẻ -> Các bài trong tuần
     var groupLabels = ["Tuần 1–6", "Tuần 7–12", "Tuần 13–18"];
     var grpEl = $("weekGroupTabs");
     if (grpEl) {
       var grpHtml = "";
-      var numGroups = Math.ceil(READING_PASSAGES.length / 6);
-      if (curWeekGroup >= numGroups) curWeekGroup = 0;
-      for (var g = 0; g < numGroups; g++) {
-        var gLabel = groupLabels[g] || ("Tuần " + (g * 6 + 1) + "–" + Math.min(READING_PASSAGES.length, (g + 1) * 6));
-        grpHtml += '<button class="week-group-btn' + (g === curWeekGroup ? " active" : "") + '" data-wgrp="' + g + '">' + esc(gLabel) + '</button>';
+      for (var g = 0; g < 3; g++) {
+        grpHtml += '<button class="week-group-btn' + (g === curWeekGroup ? " active" : "") + '" data-wgrp="' + g + '">' + esc(groupLabels[g]) + '</button>';
       }
       grpEl.innerHTML = grpHtml;
       var gBtns = grpEl.querySelectorAll(".week-group-btn");
@@ -1555,27 +1570,54 @@
           Sound.click();
           stopSampleReading();
           curWeekGroup = parseInt(this.getAttribute("data-wgrp"), 10) || 0;
-          var gStart = curWeekGroup * 6;
-          var gEnd = Math.min(READING_PASSAGES.length, gStart + 6);
-          if (curPassageIdx < gStart || curPassageIdx >= gEnd) {
-            curPassageIdx = gStart;
-            state.lastPassageIdx = curPassageIdx;
-            saveState();
-          }
+          var targetWeek = curWeekGroup * 6 + 1;
+          curPassageIdx = firstPassageIdxOfWeek(targetWeek);
+          state.lastPassageIdx = curPassageIdx;
+          saveState();
           renderPassageScreen();
         });
       }
     }
 
-    var startIdx = curWeekGroup * 6;
-    var endIdx = Math.min(READING_PASSAGES.length, startIdx + 6);
+    var subEl = $("weekSubTabs");
+    if (subEl) {
+      var wStart = curWeekGroup * 6 + 1;
+      var wEnd = Math.min(18, wStart + 5);
+      var subHtml = "";
+      for (var wn = wStart; wn <= wEnd; wn++) {
+        var wAllDone = true, wHasAny = false;
+        for (var wi = 0; wi < READING_PASSAGES.length; wi++) {
+          if (getPassageWeekNum(READING_PASSAGES[wi]) === wn) {
+            wHasAny = true;
+            if (!(state.passages && state.passages[READING_PASSAGES[wi].id] > 0)) wAllDone = false;
+          }
+        }
+        subHtml += '<button class="week-group-btn' + (wn === curWeekNum ? " active" : "") + '" data-wnum="' + wn + '">T' + wn + (wHasAny && wAllDone ? " ⭐" : "") + '</button>';
+      }
+      subEl.innerHTML = subHtml;
+      var sBtns = subEl.querySelectorAll(".week-group-btn");
+      for (var sb = 0; sb < sBtns.length; sb++) {
+        onTap(sBtns[sb], function () {
+          Sound.click();
+          stopSampleReading();
+          var targetW = parseInt(this.getAttribute("data-wnum"), 10) || 1;
+          curPassageIdx = firstPassageIdxOfWeek(targetW);
+          state.lastPassageIdx = curPassageIdx;
+          saveState();
+          renderPassageScreen();
+        });
+      }
+    }
+
     var carHtml = "";
-    for (var i = startIdx; i < endIdx; i++) {
+    for (var i = 0; i < READING_PASSAGES.length; i++) {
       var item = READING_PASSAGES[i];
+      if (getPassageWeekNum(item) !== curWeekNum) continue;
       var isDone = state.passages && state.passages[item.id] > 0;
       var activeCls = i === curPassageIdx ? " active" : "";
+      var shortTitle = item.title.split(":")[0];
       carHtml += '<button class="week-tab' + activeCls + '" data-pidx="' + i + '">' +
-        esc(item.week) + (isDone ? " ⭐" : "") + "</button>";
+        esc(shortTitle) + (isDone ? " ⭐" : "") + "</button>";
     }
     $("weekCarousel").innerHTML = carHtml;
     var wTabs = $("weekCarousel").querySelectorAll(".week-tab");
@@ -1584,7 +1626,6 @@
         Sound.click();
         stopSampleReading();
         curPassageIdx = parseInt(this.getAttribute("data-pidx"), 10);
-        curWeekGroup = Math.floor(curPassageIdx / 6);
         state.lastPassageIdx = curPassageIdx;
         saveState();
         renderPassageScreen();
@@ -1645,12 +1686,17 @@
       });
     }
 
-    // 4. Đoạn văn hoàn chỉnh (chạm bất kỳ chữ nào đọc chữ đó)
-    var pWords = p.paragraph.split(" ");
+    // 4. Đoạn văn hoàn chỉnh (chạm bất kỳ chữ nào đọc chữ đó, giữ xuống dòng thơ/hội thoại)
+    var pLines = p.paragraph.split("\n");
     var pMarkup = "";
-    for (var pw = 0; pw < pWords.length; pw++) {
-      var cleanPW = pWords[pw].replace(/[.,!?;:"()]/g, "");
-      pMarkup += '<span class="p-word" data-word="' + esc(cleanPW) + '">' + esc(pWords[pw]) + '</span> ';
+    for (var pl = 0; pl < pLines.length; pl++) {
+      var pWords = pLines[pl].split(" ");
+      for (var pw = 0; pw < pWords.length; pw++) {
+        if (!pWords[pw]) continue;
+        var cleanPW = pWords[pw].replace(/[.,!?;:"()–]/g, "");
+        pMarkup += '<span class="p-word" data-word="' + esc(cleanPW) + '">' + esc(pWords[pw]) + '</span> ';
+      }
+      if (pl < pLines.length - 1) pMarkup += "<br>";
     }
     $("readParagraph").innerHTML = pMarkup;
     var pwEls = $("readParagraph").querySelectorAll(".p-word");
@@ -2869,7 +2915,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v38 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Tách riêng tab Luyện đọc Tiếng Việt đủ 18 tuần HK1, mở khóa tự do, gộp tab Thành tích & hệ thống 4 sao tương ứng 4 chế độ chơi.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v39 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Nạp đầy đủ toàn bộ 83 bài học (Bài 1 → Bài 83) từ PDF SGK Tiếng Việt 1 Tập 1, lọc theo Cụm tuần / Tuần / Bài.</div></div>';
 
     $("infoBody").innerHTML = html;
 

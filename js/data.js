@@ -37,256 +37,1637 @@ var UNITS = {
 
 var READING_PASSAGES = [
   {
-    id: "t1",
-    week: "Tuần 1",
-    title: "Bé và bà",
-    source: "SGK Tiếng Việt 1 - Bài 1 - 5",
-    words: ["ba ba", "bè cá", "bờ đê", "bé bế", "cá cờ", "cò bé"],
-    sentences: [
-      "Bà bế bé đi bờ đê.",
-      "Bà có cá cờ và cà.",
-      "Bé ca ô a bên bà."
+    "id": "b1",
+    "week": "Tuần 1",
+    "title": "Bài 1: A a",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 1",
+    "words": [
+      "a"
     ],
-    paragraph: "Bà bế bé ra bờ đê. Ở bờ đê có cò và có bè cá. Bà kể bé nghe về chú cò bé. Bé vỗ tay cười khà khà bên bà.",
-    reward: 15
+    "sentences": [
+      "Nam và Hà ca hát."
+    ],
+    "paragraph": "Nam và Hà ca hát.",
+    "reward": 15
   },
   {
-    id: "t2",
-    week: "Tuần 2",
-    title: "Đi học",
-    source: "SGK Tiếng Việt 1 - Bài 6 - 10",
-    words: ["đi bộ", "đồ cổ", "cô Hà", "hồ cá", "kì cọ", "lá cờ"],
-    sentences: [
-      "Bé đi bộ đến lớp cô Hà.",
-      "Cô Hà vẽ lá cờ đỏ.",
-      "Bờ hồ có cò đi mò cá."
+    "id": "b2",
+    "week": "Tuần 1",
+    "title": "Bài 2: B b (dấu huyền)",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 2",
+    "words": [
+      "b",
+      "ba",
+      "bà",
+      "ba ba"
     ],
-    paragraph: "Sáng sớm, bé đi bộ đến lớp học. Cô Hà dạy bé đọc o, ô, ơ và vẽ lá cờ đỏ. Ra về, bé kể cho bà nghe về lớp học có cô Hà và các bạn nhỏ.",
-    reward: 15
+    "sentences": [
+      "Bà cho bé búp bê.",
+      "A, bà."
+    ],
+    "paragraph": "Bà cho bé búp bê. A, bà.",
+    "reward": 15
   },
   {
-    id: "t3",
-    week: "Tuần 3",
-    title: "Mẹ và bé",
-    source: "SGK Tiếng Việt 1 - Bài 11 - 15",
-    words: ["mẹ và bé", "nơ đỏ", "tủ gỗ", "vẽ tranh", "xe đạp", "sư tử"],
-    sentences: [
-      "Mẹ mua cho bé chiếc nơ đỏ.",
-      "Bé ngồi bên tủ gỗ tập vẽ.",
-      "Bố sửa chiếc xe đạp cho bé."
+    "id": "b3",
+    "week": "Tuần 1",
+    "title": "Bài 3: C c (dấu sắc)",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 3",
+    "words": [
+      "c",
+      "ca",
+      "cà",
+      "cá"
     ],
-    paragraph: "Chiều mát, mẹ dắt bé đi dạo phố. Mẹ mua cho bé chiếc nơ đỏ và hộp bút màu. Về nhà, bé ngồi bên bàn học vẽ bức tranh có mẹ, có bố và ngôi nhà nhỏ.",
-    reward: 15
+    "sentences": [
+      "Nam và bố câu cá.",
+      "A, cá."
+    ],
+    "paragraph": "Nam và bố câu cá. A, cá.",
+    "reward": 15
   },
   {
-    id: "t4",
-    week: "Tuần 4",
-    title: "Nhà ở quê",
-    source: "SGK Tiếng Việt 1 - Bài 16 - 20",
-    words: ["nhà ngói", "khế chua", "chú thỏ", "phố cổ", "quả na", "tre xanh"],
-    sentences: [
-      "Nhà bà ở quê lợp ngói đỏ.",
-      "Sau nhà có cây khế và lũy tre xanh.",
-      "Chú thỏ trắng ăn cỏ bên hiên."
+    "id": "b4",
+    "week": "Tuần 1",
+    "title": "Bài 4: E e Ê ê",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 4",
+    "words": [
+      "e",
+      "ê",
+      "bè",
+      "bé",
+      "bế"
     ],
-    paragraph: "Quê nội bé có ngôi nhà ngói đỏ rất đẹp. Trước sân có giàn hoa giấy nở rộ. Sau nhà có cây khế, cây na và bụi tre xanh rì rào trong gió.",
-    reward: 15
+    "sentences": [
+      "Bé kể mẹ nghe về bạn bè.",
+      "Bà bế bé."
+    ],
+    "paragraph": "Bé kể mẹ nghe về bạn bè. Bà bế bé.",
+    "reward": 15
   },
   {
-    id: "t5",
-    week: "Tuần 5",
-    title: "Quà của bà",
-    source: "SGK Tiếng Việt 1 - Bài 25",
-    words: ["khế ngọt", "thị thơm", "quà quê", "bà cháu", "bé bỏng", "san sẻ"],
-    sentences: [
-      "Bà cho bé giỏ khế ngọt.",
-      "Bé chia quà cho cả nhà.",
-      "Cả nhà vui vẻ ăn khế ngọt."
+    "id": "b5",
+    "week": "Tuần 1",
+    "title": "Bài 5: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 5",
+    "words": [
+      "ba bà",
+      "be bé",
+      "cá bé",
+      "bè cá",
+      "bế bé"
     ],
-    paragraph: "Bà ở quê ra thăm bé. Bà cho bé bao nhiêu là quà quê. Nào là khế ngọt, thị thơm, nào là bánh đa giòn rụm. Bé sà vào lòng bà, cảm ơn bà ríu rít.",
-    reward: 15
+    "sentences": [
+      "Bà bế bé.",
+      "Búp bê làm những việc gì?",
+      "Vì sao dế mèn hát tặng búp bê?",
+      "Búp bê thấy thế nào khi nghe dế mèn hát?"
+    ],
+    "paragraph": "Bà bế bé. Búp bê và dế mèn: Búp bê làm những việc gì? Vì sao dế mèn hát tặng búp bê? Búp bê thấy thế nào khi nghe dế mèn hát?",
+    "reward": 15
   },
   {
-    id: "t6",
-    week: "Tuần 6",
-    title: "Khu vườn nhỏ",
-    source: "SGK Tiếng Việt 1 - Bài 26 - 30",
-    words: ["ghế gỗ", "kính râm", "ngõ nhỏ", "nghỉ hè", "quả thị", "gà gô"],
-    sentences: [
-      "Bố kê chiếc ghế gỗ dưới gốc cây.",
-      "Nghỉ hè, bé ra khu vườn nhỏ chơi.",
-      "Bé nghe tiếng gà gáy vang đầu ngõ."
+    "id": "b6",
+    "week": "Tuần 2",
+    "title": "Bài 6: O o (dấu hỏi)",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 6",
+    "words": [
+      "bò",
+      "bó",
+      "bỏ",
+      "cò",
+      "có",
+      "cỏ"
     ],
-    paragraph: "Khu vườn nhỏ của nhà bé thật mát mẻ. Bố kê chiếc ghế gỗ cạnh giàn mướp xanh. Mỗi sáng, bé ra vườn tưới cây và nghe tiếng chim hót ríu rít trên cành.",
-    reward: 15
+    "sentences": [
+      "Đàn bò gặm cỏ.",
+      "Bê có cỏ."
+    ],
+    "paragraph": "Đàn bò gặm cỏ. Bê có cỏ.",
+    "reward": 15
   },
   {
-    id: "t7",
-    week: "Tuần 7",
-    title: "Về quê thăm bà",
-    source: "SGK Tiếng Việt 1 - Ôn tập",
-    words: ["gắn bó", "chăm chỉ", "bến đỗ", "đầm ấm", "nhà sàn", "tre ngà"],
-    sentences: [
-      "Lá cờ đỏ thắm bên nhà sàn.",
-      "Bàn ghế nhà bé làm từ tre ngà.",
-      "Chú cún con mon men đến bên bé."
+    "id": "b7",
+    "week": "Tuần 2",
+    "title": "Bài 7: Ô ô (dấu nặng)",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 7",
+    "words": [
+      "bố",
+      "bổ",
+      "bộ",
+      "cô",
+      "cổ",
+      "cộ",
+      "cô bé",
+      "cổ cò"
     ],
-    paragraph: "Nghỉ lễ, mẹ cho Hà về quê thăm bà và bé Bin. Hà vừa về đến ngõ, bà và bé Bin đã ra đón. Bé Bin nhìn Hà, lon ton đến bên chị. Hà bế Bin và hôn lên má bé.",
-    reward: 15
+    "sentences": [
+      "Bố và Hà đi bộ trên hè phố.",
+      "Bố bê bể cá."
+    ],
+    "paragraph": "Bố và Hà đi bộ trên hè phố. Bố bê bể cá.",
+    "reward": 15
   },
   {
-    id: "t8",
-    week: "Tuần 8",
-    title: "Chú cún con",
-    source: "SGK Tiếng Việt 1 - Bài 35",
-    words: ["cún con", "lon ton", "bốn chân", "mũm mĩm", "hiền lành", "nhanh nhẹn"],
-    sentences: [
-      "Nhà bé nuôi một chú cún con mũm mĩm.",
-      "Cún con có bộ lông vàng óng mượt.",
-      "Đi học về, cún chạy lon ton ra đón bé."
+    "id": "b8",
+    "week": "Tuần 2",
+    "title": "Bài 8: D d Đ đ",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 8",
+    "words": [
+      "da",
+      "dẻ",
+      "dế",
+      "đá",
+      "đò",
+      "đá dế",
+      "đa đa",
+      "ô đỏ"
     ],
-    paragraph: "Chú cún con nhà bé rất ngoan và nhanh nhẹn. Cún có đôi mắt tròn xoe và cái đuôi vẫy tít mỗi khi thấy bé về. Bé rất yêu quý và hay cho cún ăn cơm.",
-    reward: 15
+    "sentences": [
+      "Dưới gốc đa, các bạn chơi dung dăng dung dẻ.",
+      "Bé có ô đỏ."
+    ],
+    "paragraph": "Dưới gốc đa, các bạn chơi dung dăng dung dẻ. Bé có ô đỏ.",
+    "reward": 15
   },
   {
-    id: "t9",
-    week: "Tuần 9",
-    title: "Bữa cơm đầm ấm",
-    source: "SGK Tiếng Việt 1 - Bài 40",
-    words: ["bữa cơm", "đầm ấm", "tôm rang", "canh chua", "mâm cơm", "thơm ngon"],
-    sentences: [
-      "Mẹ nấu bữa cơm tối thật thơm ngon.",
-      "Trên mâm có món tôm rang và canh chua.",
-      "Cả nhà quây quần bên nhau rất đầm ấm."
+    "id": "b9",
+    "week": "Tuần 2",
+    "title": "Bài 9: Ơ ơ (dấu ngã)",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 9",
+    "words": [
+      "bờ",
+      "bở",
+      "cờ",
+      "cỡ",
+      "dỡ",
+      "bờ đê",
+      "cá cờ",
+      "đỡ bé"
     ],
-    paragraph: "Buổi tối, mẹ nấu nhiều món ăn ngon cho cả gia đình. Bé giúp mẹ xếp bát đũa lên mâm cơm. Cả nhà vừa ăn vừa trò chuyện vui vẻ, không khí thật đầm ấm.",
-    reward: 15
+    "sentences": [
+      "Tàu dỡ hàng ở cảng.",
+      "Bố đỡ bé."
+    ],
+    "paragraph": "Tàu dỡ hàng ở cảng. Bố đỡ bé.",
+    "reward": 15
   },
   {
-    id: "t10",
-    week: "Tuần 10",
-    title: "Đàn gà con",
-    source: "SGK Tiếng Việt 1 - Bài 45",
-    words: ["ríu rít", "mồi ngon", "tục tục", "vườn rau", "chăm chỉ", "xúm xít"],
-    sentences: [
-      "Gà mẹ dắt đàn con ra vườn tìm mồi.",
-      "Đàn con lông vàng óng như tơ.",
-      "Gà mẹ tục tục gọi con khi thấy giun."
+    "id": "b10",
+    "week": "Tuần 2",
+    "title": "Bài 10: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 10",
+    "words": [
+      "bó cỏ",
+      "cá cờ",
+      "bờ đê",
+      "đỡ bà",
+      "cờ đỏ",
+      "đỗ đỏ",
+      "dỗ bé"
     ],
-    paragraph: "Buổi sớm, gà mẹ dắt đàn con ra vườn tìm mồi. Đàn con lon ton ríu rít chạy theo sau mẹ. Gặp mồi ngon, gà mẹ tục tục gọi con lại ăn. Cả đàn gà xúm xít quanh mẹ thật là vui vẻ.",
-    reward: 15
+    "sentences": [
+      "Bờ đê có dế.",
+      "Bà có đỗ đỏ.",
+      "Bà kiến sống ở đâu?",
+      "Đàn kiến con dùng vật gì để khiêng bà kiến?"
+    ],
+    "paragraph": "Bờ đê có dế. Bà có đỗ đỏ. Đàn kiến con ngoan ngoãn: Bà kiến sống ở đâu? Đàn kiến con dùng vật gì để khiêng bà kiến? Đàn kiến con đưa bà kiến đến đâu? Được ở nhà mới, bà kiến nói gì với đàn kiến con?",
+    "reward": 15
   },
   {
-    id: "t11",
-    week: "Tuần 11",
-    title: "Con mèo mướp",
-    source: "SGK Tiếng Việt 1 - Bài 50",
-    words: ["mèo mướp", "trèo cau", "leo trèo", "bắt chuột", "sưởi nắng", "ngái ngủ"],
-    sentences: [
-      "Chú mèo mướp nằm sưởi nắng ngoài sân.",
-      "Mèo mướp leo trèo rất giỏi và khéo léo.",
-      "Đêm đến, mèo rình bắt chuột bảo vệ kho lúa."
+    "id": "b11",
+    "week": "Tuần 3",
+    "title": "Bài 11: I i K k",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 11",
+    "words": [
+      "kè",
+      "kẻ",
+      "kệ",
+      "kí",
+      "bí đỏ",
+      "kẻ ô",
+      "đi đò",
+      "kì đà"
     ],
-    paragraph: "Mèo mướp nhà bà có bộ lông vằn xám rất đẹp. Ban ngày, mèo hay nằm cuộn tròn sưởi nắng bên thềm. Nhờ có mèo mướp nhanh nhẹn mà lũ chuột không dám vào nhà.",
-    reward: 15
+    "sentences": [
+      "Nam vẽ kì đà.",
+      "Kì đà bò ở kẽ đá."
+    ],
+    "paragraph": "Nam vẽ kì đà. Kì đà bò ở kẽ đá.",
+    "reward": 15
   },
   {
-    id: "t12",
-    week: "Tuần 12",
-    title: "Giờ ra chơi",
-    source: "SGK Tiếng Việt 1 - Bài 55",
-    words: ["ra chơi", "nhảy dây", "đá cầu", "bắt tay", "sân trường", "tiếng cười"],
-    sentences: [
-      "Tiếng trống vang lên báo hiệu giờ ra chơi.",
-      "Các bạn gái thích nhảy dây dưới tán bàng.",
-      "Các bạn trai rủ nhau đá cầu ngoài sân."
+    "id": "b12",
+    "week": "Tuần 3",
+    "title": "Bài 12: H h L l",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 12",
+    "words": [
+      "hé",
+      "ho",
+      "hổ",
+      "li",
+      "lá đỏ",
+      "bờ hồ",
+      "cá hố",
+      "le le"
     ],
-    paragraph: "Tùng! Tùng! Tùng! Giờ ra chơi đã đến. Sân trường rộn ràng tiếng nói cười. Nhóm thì nhảy dây, nhóm thì chơi đá cầu, đuổi bắt. Ai nấy đều vui tươi, khỏe khoắn.",
-    reward: 15
+    "sentences": [
+      "Le le bơi trên hồ.",
+      "Bé bị ho. Bà đã có lá hẹ."
+    ],
+    "paragraph": "Le le bơi trên hồ. Bé bị ho. Bà đã có lá hẹ.",
+    "reward": 15
   },
   {
-    id: "t13",
-    week: "Tuần 13",
-    title: "Mùa thu quê em",
-    source: "SGK Tiếng Việt 1 - Bài 60",
-    words: ["trong xanh", "heo may", "xào xạc", "ngắm hoa", "dịu dàng", "thềm nhà"],
-    sentences: [
-      "Bầu trời mùa thu trong xanh cao vút.",
-      "Gió heo may thổi nhè nhẹ mát lành.",
-      "Lá vàng rơi xào xạc bên thềm nhà."
+    "id": "b13",
+    "week": "Tuần 3",
+    "title": "Bài 13: U u Ư ư",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 13",
+    "words": [
+      "dù",
+      "đủ",
+      "hũ",
+      "cử",
+      "dự",
+      "lữ",
+      "đu đủ",
+      "hổ dữ"
     ],
-    paragraph: "Mùa thu sang, bầu trời ngày thêm trong xanh. Gió heo may nhè nhẹ thổi qua rặng cây. Lá vàng rơi xào xạc trên lối đi. Bé cùng mẹ ra công viên dạo chơi và ngắm những khóm hoa cúc vàng rực rỡ.",
-    reward: 15
+    "sentences": [
+      "Đu đủ chín ngọt lừ.",
+      "Cá hổ là cá dữ."
+    ],
+    "paragraph": "Đu đủ chín ngọt lừ. Cá hổ là cá dữ.",
+    "reward": 15
   },
   {
-    id: "t14",
-    week: "Tuần 14",
-    title: "Lớp học sạch đẹp",
-    source: "SGK Tiếng Việt 1 - Bài 65",
-    words: ["sạch đẹp", "bàn ghế", "ngăn nắp", "chậu hoa", "tập viết", "chăm ngoan"],
-    sentences: [
-      "Lớp học của bé luôn sạch đẹp và gọn gàng.",
-      "Bàn ghế được xếp ngay ngắn thẳng hàng.",
-      "Trên bục giảng có lọ hoa tươi thắm."
+    "id": "b14",
+    "week": "Tuần 3",
+    "title": "Bài 14: Ch ch Kh kh",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 14",
+    "words": [
+      "chè",
+      "chỉ",
+      "chợ",
+      "khế",
+      "kho",
+      "lá khô",
+      "chú khỉ",
+      "chợ cá"
     ],
-    paragraph: "Sáng nào các bạn cũng đến lớp sớm để quét dọn và lau bảng. Sách vở trên bàn được xếp thật ngăn nắp. Bé rất thích ngồi trong lớp học sạch đẹp để nghe cô giảng bài.",
-    reward: 15
+    "sentences": [
+      "Mấy chú khỉ ăn chuối.",
+      "Chị có cá kho khế."
+    ],
+    "paragraph": "Mấy chú khỉ ăn chuối. Chị có cá kho khế.",
+    "reward": 15
   },
   {
-    id: "t15",
-    week: "Tuần 15",
-    title: "Ngày chủ nhật của bé",
-    source: "SGK Tiếng Việt 1 - Bài 70",
-    words: ["chủ nhật", "tưới cây", "nhặt rau", "quét nhà", "ấm cúng", "chung tay"],
-    sentences: [
-      "Chủ nhật, cả nhà cùng nhau làm việc.",
-      "Bố tưới cây cảnh trước hiên nhà.",
-      "Mẹ nấu bữa trưa thật ngon lành."
+    "id": "b15",
+    "week": "Tuần 3",
+    "title": "Bài 15: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 15",
+    "words": [
+      "chú hề",
+      "lá khô",
+      "bờ hồ",
+      "chợ cá",
+      "cá dữ",
+      "che ô",
+      "lá hẹ"
     ],
-    paragraph: "Hôm nay là chủ nhật, cả nhà bé cùng chung tay làm việc nhà. Bố tưới những chậu hoa trước sân. Mẹ nấu những món ăn ngon. Chị Hà quét dọn nhà cửa, còn bé thì nhặt rau giúp mẹ. Cả nhà ngập tràn tiếng cười vui.",
-    reward: 15
+    "sentences": [
+      "Chị cho bé cá cờ.",
+      "Dì Kha cho Hà đi chợ.",
+      "Quạ nhìn thấy gì dưới gốc cây?",
+      "Quạ đã nghĩ ra điều gì?"
+    ],
+    "paragraph": "Chị cho bé cá cờ. Dì Kha cho Hà đi chợ. Con quạ thông minh: Quạ nhìn thấy gì dưới gốc cây? Quạ có uống được nước trong bình không? Vì sao? Quạ đã nghĩ ra điều gì? Cuối cùng, quạ có uống được nước trong bình không? Vì sao?",
+    "reward": 15
   },
   {
-    id: "t16",
-    week: "Tuần 16",
-    title: "Ước mơ của bé",
-    source: "SGK Tiếng Việt 1 - Bài 75",
-    words: ["ước mơ", "phi công", "bầu trời", "chiếc cánh", "tương lai", "vươn xa"],
-    sentences: [
-      "Bé ước mơ lớn lên sẽ làm phi công.",
-      "Bé muốn lái máy bay bay cao trên bầu trời.",
-      "Bé chăm chỉ học hành để thực hiện ước mơ."
+    "id": "b16",
+    "week": "Tuần 4",
+    "title": "Bài 16: M m N n",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 16",
+    "words": [
+      "má",
+      "mẹ",
+      "mỡ",
+      "na",
+      "cá mè",
+      "lá me",
+      "nơ đỏ",
+      "ca nô"
     ],
-    paragraph: "Mỗi khi nhìn thấy máy bay bay ngang bầu trời, bé lại thấy thật thích thú. Bé ước mơ mai sau trở thành phi công giỏi để đi khắp mọi miền đất nước. Vì thế, ngày nào bé cũng chăm chỉ đọc sách và làm toán.",
-    reward: 15
+    "sentences": [
+      "Mẹ mua nơ cho Hà.",
+      "Bố mẹ cho Hà đi ca nô."
+    ],
+    "paragraph": "Mẹ mua nơ cho Hà. Bố mẹ cho Hà đi ca nô.",
+    "reward": 15
   },
   {
-    id: "t17",
-    week: "Tuần 17",
-    title: "Chuyện bà kể",
-    source: "SGK Tiếng Việt 1 - Bài 80",
-    words: ["trầm ấm", "say sưa", "Hồ Gươm", "sự tích", "cây quất", "truyền thuyết"],
-    sentences: [
-      "Mỗi lần về quê, bé lại được nghe bà kể chuyện.",
-      "Bà kể chuyện hồ Hoàn Kiếm và sự tích cây xoài.",
-      "Giọng kể của bà trầm ấm yêu thương."
+    "id": "b17",
+    "week": "Tuần 4",
+    "title": "Bài 17: G g Gi gi",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 17",
+    "words": [
+      "ga",
+      "gỗ",
+      "giá",
+      "giò",
+      "gà gô",
+      "đồ gỗ",
+      "giá đỗ",
+      "cụ già"
     ],
-    paragraph: "Mỗi lần về quê, Hà lại được bà kể cho nghe nhiều câu chuyện hay. Nào là truyền thuyết về hồ Hoàn Kiếm, nào là sự tích cây quất, cây xoài. Giọng kể của bà trầm ấm. Hà ngồi bên bà, say sưa lắng nghe từng lời.",
-    reward: 15
+    "sentences": [
+      "Hà có giỏ trứng gà.",
+      "Bà che gió cho ba chú gà."
+    ],
+    "paragraph": "Hà có giỏ trứng gà. Bà che gió cho ba chú gà.",
+    "reward": 15
   },
   {
-    id: "t18",
-    week: "Tuần 18",
-    title: "Mùa xuân đón Tết",
-    source: "SGK Tiếng Việt 1 - Ôn tập cuối HK1",
-    words: ["hoa đào", "lung linh", "áo mới", "chúc Tết", "ấm áp", "an lành"],
-    sentences: [
-      "Hoa đào trước ngõ nở rộ sắc hồng.",
-      "Mẹ may cho bé chiếc áo mới đón xuân.",
-      "Bé cùng bố mẹ đi chúc Tết ông bà."
+    "id": "b18",
+    "week": "Tuần 4",
+    "title": "Bài 18: Gh gh Nh nh",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 18",
+    "words": [
+      "ghế đá",
+      "ghẹ đỏ",
+      "nhà gỗ",
+      "lá nho"
     ],
-    paragraph: "Tết đang đến gần, hoa đào trước ngõ cười tươi sáng hồng, hoa mai trong vườn lung linh cánh vàng. Mẹ may áo mới cho bé. Bé theo bố mẹ đi chúc Tết ông bà, mong một năm mới an lành và nhiều niềm vui.",
-    reward: 15
+    "sentences": [
+      "Hà ghé nhà bà.",
+      "Nhà bà ở ngõ nhỏ.",
+      "Mẹ nhờ Hà bê ghế nhỏ."
+    ],
+    "paragraph": "Mẹ nhờ Hà bê ghế nhỏ.",
+    "reward": 15
+  },
+  {
+    "id": "b19",
+    "week": "Tuần 4",
+    "title": "Bài 19: Ng ng Ngh ngh",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 19",
+    "words": [
+      "ngã ba",
+      "ngõ nhỏ",
+      "củ nghệ",
+      "nghỉ hè"
+    ],
+    "sentences": [
+      "Nghé theo mẹ ra ngõ.",
+      "Nghé đã no cỏ.",
+      "Nghé ngủ ở bờ đê."
+    ],
+    "paragraph": "Nghé đã no cỏ. Nghé ngủ ở bờ đê.",
+    "reward": 15
+  },
+  {
+    "id": "b20",
+    "week": "Tuần 4",
+    "title": "Bài 20: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 20",
+    "words": [
+      "nụ cà",
+      "nhà ga",
+      "nghỉ hè",
+      "ngủ mơ",
+      "bỡ ngỡ",
+      "giá đỗ",
+      "nho nhỏ",
+      "ghế gỗ"
+    ],
+    "sentences": [
+      "Mẹ ghé nhà bà.",
+      "Nhà bà ở ngõ nhỏ."
+    ],
+    "paragraph": "Cô chủ không biết quý tình bạn: Cô bé nuôi con vật gì? Cô bé muốn đổi con vật đó lấy con vật nào? Cô bé đổi gà mái lấy con vật nào? Thấy chú chó nhỏ xinh xắn, cô bé đã làm gì? Cuối cùng, có con vật nào ở bên cô bé không? Vì sao?",
+    "reward": 15
+  },
+  {
+    "id": "b21",
+    "week": "Tuần 5",
+    "title": "Bài 21: R r S s",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 21",
+    "words": [
+      "rổ rá",
+      "cá rô",
+      "su su",
+      "chữ số"
+    ],
+    "sentences": [
+      "Bầy sẻ non ríu ra ríu rít bên mẹ.",
+      "Chợ có gà ri, cá rô, su su.",
+      "Chợ có cả rổ rá."
+    ],
+    "paragraph": "Chợ có gà ri, cá rô, su su. Chợ có cả rổ rá.",
+    "reward": 15
+  },
+  {
+    "id": "b22",
+    "week": "Tuần 5",
+    "title": "Bài 22: T t Tr tr",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 22",
+    "words": [
+      "ô tô",
+      "sư tử",
+      "cá trê",
+      "tre ngà"
+    ],
+    "sentences": [
+      "Nam tô bức tranh cây tre.",
+      "Hà tả hồ cá.",
+      "Hồ to, có cá mè, cá trê, cá rô."
+    ],
+    "paragraph": "Hà tả hồ cá. Hồ to, có cá mè, cá trê, cá rô.",
+    "reward": 15
+  },
+  {
+    "id": "b23",
+    "week": "Tuần 5",
+    "title": "Bài 23: Th th ia",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 23",
+    "words": [
+      "thủ đô",
+      "lá thư",
+      "thìa dĩa",
+      "lá tía tô"
+    ],
+    "sentences": [
+      "Trung thu, bé được chia quà.",
+      "Bé chia thìa, chia dĩa cho cả nhà.",
+      "Thìa dĩa to cho bố mẹ.",
+      "Thìa dĩa nhỏ cho bé."
+    ],
+    "paragraph": "Bé chia thìa, chia dĩa cho cả nhà. Thìa dĩa to cho bố mẹ. Thìa dĩa nhỏ cho bé.",
+    "reward": 15
+  },
+  {
+    "id": "b24",
+    "week": "Tuần 5",
+    "title": "Bài 24: ua ưa",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 24",
+    "words": [
+      "cà chua",
+      "múa ô",
+      "dưa lê",
+      "cửa sổ"
+    ],
+    "sentences": [
+      "Mẹ đưa Hà đến lớp học múa.",
+      "Mẹ đi chợ mua cá, mua cua.",
+      "Mẹ mua cả sữa chua, dưa lê."
+    ],
+    "paragraph": "Mẹ đi chợ mua cá, mua cua. Mẹ mua cả sữa chua, dưa lê.",
+    "reward": 15
+  },
+  {
+    "id": "b25",
+    "week": "Tuần 5",
+    "title": "Bài 25: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 25",
+    "words": [
+      "củ sả",
+      "lưa thưa",
+      "lá mía",
+      "rễ tre",
+      "mùa thu",
+      "cửa sổ",
+      "khế chua",
+      "tổ cò"
+    ],
+    "sentences": [
+      "Mùa hè, nhà bà có dừa, có dưa lê.",
+      "Mùa thu, nhà bà có na, có thị."
+    ],
+    "paragraph": "Chó sói và cừu non: Nhởn nhơ gặm cỏ, cừu non gặp phải chuyện gì? Cừu non nói gì với sói? Cừu non đã làm gì để thoát khỏi sói? Câu chuyện kết thúc như thế nào?",
+    "reward": 15
+  },
+  {
+    "id": "b26",
+    "week": "Tuần 6",
+    "title": "Bài 26: Ph ph Qu qu",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 26",
+    "words": [
+      "pha trà",
+      "phố cổ",
+      "quê nhà",
+      "quả khế"
+    ],
+    "sentences": [
+      "Cả nhà từ phố về thăm quê.",
+      "Bà ra Thủ đô.",
+      "Bà cho bé quà quê.",
+      "Bố đưa bà đi Bờ Hồ, đi phố cổ."
+    ],
+    "paragraph": "Bà ra Thủ đô. Bà cho bé quà quê. Bố đưa bà đi Bờ Hồ, đi phố cổ.",
+    "reward": 15
+  },
+  {
+    "id": "b27",
+    "week": "Tuần 6",
+    "title": "Bài 27: V v X x",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 27",
+    "words": [
+      "vở vẽ",
+      "vỉa hè",
+      "xe lu",
+      "thị xã"
+    ],
+    "sentences": [
+      "Hà vẽ xe đạp.",
+      "Nghỉ hè, bố mẹ cho Hà về quê.",
+      "Quê Hà là xứ sở của dừa."
+    ],
+    "paragraph": "Nghỉ hè, bố mẹ cho Hà về quê. Quê Hà là xứ sở của dừa.",
+    "reward": 15
+  },
+  {
+    "id": "b28",
+    "week": "Tuần 6",
+    "title": "Bài 28: Y y",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 28",
+    "words": [
+      "y tá",
+      "dã quỳ",
+      "đá quý"
+    ],
+    "sentences": [
+      "Thời gian quý hơn vàng bạc.",
+      "Mẹ và Hà ghé nhà dì Kha.",
+      "Dì kể cho Hà nghe về bà.",
+      "Hà chú ý nghe dì kể."
+    ],
+    "paragraph": "Mẹ và Hà ghé nhà dì Kha. Dì kể cho Hà nghe về bà. Hà chú ý nghe dì kể.",
+    "reward": 15
+  },
+  {
+    "id": "b29",
+    "week": "Tuần 6",
+    "title": "Bài 29: Luyện tập chính tả",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 29",
+    "words": [
+      "cá cờ",
+      "chữ kí",
+      "gà gô",
+      "ghế gỗ",
+      "cá ngừ",
+      "củ nghệ"
+    ],
+    "sentences": [
+      "Phân biệt c với k",
+      "Phân biệt g với gh",
+      "Phân biệt ng với ngh"
+    ],
+    "paragraph": "Phân biệt c với k: k đi với i, e, ê; c đi với a, o, ... Phân biệt g với gh: gh đi với i, e, ê; g đi với a, o, ... Phân biệt ng với ngh: ngh đi với i, e, ê; ng đi với a, o, ...",
+    "reward": 15
+  },
+  {
+    "id": "b30",
+    "week": "Tuần 6",
+    "title": "Bài 30: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 30",
+    "words": [
+      "phố cổ",
+      "qua phà",
+      "vỉa hè",
+      "đá quý",
+      "cổ vũ",
+      "xa xa",
+      "xứ sở"
+    ],
+    "sentences": [
+      "Nhà bé ở Thủ đô.",
+      "Thủ đô có Bờ Hồ.",
+      "Quê bé ở Phú Thọ.",
+      "Xa nhà, bé nhớ mẹ. Xa quê, bé nhớ bà."
+    ],
+    "paragraph": "Nhà bé ở Thủ đô. Thủ đô có Bờ Hồ. Quê bé ở Phú Thọ. Phú Thọ có chè, có cọ. Xa nhà, bé nhớ mẹ. Xa quê, bé nhớ bà.",
+    "reward": 15
+  },
+  {
+    "id": "b31",
+    "week": "Tuần 7",
+    "title": "Bài 31: an ăn ân",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 31",
+    "words": [
+      "bạn thân",
+      "khăn rằn",
+      "quả mận"
+    ],
+    "sentences": [
+      "Ngựa vằn và hươu cao cổ là đôi bạn thân.",
+      "Đàn gà cứ tha thẩn gần chân mẹ.",
+      "Đã có mẹ che chắn, cả đàn chả sợ gì lũ quạ dữ."
+    ],
+    "paragraph": "Đàn gà cứ tha thẩn gần chân mẹ. Đã có mẹ che chắn, cả đàn chả sợ gì lũ quạ dữ.",
+    "reward": 15
+  },
+  {
+    "id": "b32",
+    "week": "Tuần 7",
+    "title": "Bài 32: on ôn ơn",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 32",
+    "words": [
+      "nón lá",
+      "con chồn",
+      "sơn ca"
+    ],
+    "sentences": [
+      "Sơn ca véo von: Mẹ ơi, con đã lớn khôn.",
+      "Ve vẻ vè ve, vè bốn chú lợn.",
+      "Nhởn nhơ nô giỡn, ăn ngủ vô tư."
+    ],
+    "paragraph": "Bốn chú lợn con: Ve vẻ vè ve / Vè bốn chú lợn / Nhởn nhơ nô giỡn / Ăn ngủ vô tư. / Hẳn họ nhà \"Trư\" / Là to tròn thế. / Ve vè nghe kể / Bốn chú lợn con. (Tiến Việt)",
+    "reward": 15
+  },
+  {
+    "id": "b33",
+    "week": "Tuần 7",
+    "title": "Bài 33: en ên in un",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 33",
+    "words": [
+      "ngọn nến",
+      "đèn pin",
+      "cún con"
+    ],
+    "sentences": [
+      "Cún con nhìn thấy dế mèn trên tàu lá.",
+      "Con gì tên có chữ \"ba\", ăn cua ăn cá, nhìn qua ngỡ rùa?",
+      "Con gì quen vẻ già nua, bốn chân ngắn ngủn, thỏ thua chả ngờ?"
+    ],
+    "paragraph": "– Con gì tên có chữ \"ba\" / Ăn cua ăn cá, nhìn qua ngỡ rùa? / – Con gì quen vẻ già nua / Bốn chân ngắn ngủn, thỏ thua chả ngờ? (Phúc Định)",
+    "reward": 15
+  },
+  {
+    "id": "b34",
+    "week": "Tuần 7",
+    "title": "Bài 34: am ăm âm",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 34",
+    "words": [
+      "quả cam",
+      "tăm tre",
+      "củ sâm"
+    ],
+    "sentences": [
+      "Nhện ngắm nghía tấm lưới vừa làm xong.",
+      "Mùa hè, ve râm ran, sen nở thắm.",
+      "Lũ trẻ nô đùa trên thảm cỏ ven hồ."
+    ],
+    "paragraph": "Mùa hè, ve râm ran, sen nở thắm. Lũ trẻ nô đùa trên thảm cỏ ven hồ.",
+    "reward": 15
+  },
+  {
+    "id": "b35",
+    "week": "Tuần 7",
+    "title": "Bài 35: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 35",
+    "words": [
+      "củ sắn",
+      "tấm gỗ",
+      "khôn lớn",
+      "bàn chân",
+      "mưa phùn",
+      "bến đò",
+      "đèn pin",
+      "chăm chỉ"
+    ],
+    "sentences": [
+      "Sen nở thắm hồ.",
+      "Nhìn rùa, thỏ chê: \"Quả là chậm như rùa.\".",
+      "Thế là, rùa đi xa hơn hẳn thỏ."
+    ],
+    "paragraph": "Thỏ và rùa\nNhìn rùa, thỏ chê: \"Quả là chậm như rùa.\". Rùa ôn tồn: \"Ta thi nhé.\". Thỏ hớn hở tham gia. Thỏ nhởn nhơ múa ca, rùa cứ bò cần mẫn. Thế là, rùa đi xa hơn hẳn thỏ.",
+    "reward": 15
+  },
+  {
+    "id": "b36",
+    "week": "Tuần 8",
+    "title": "Bài 36: om ôm ơm",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 36",
+    "words": [
+      "đom đóm",
+      "chó đốm",
+      "mâm cơm"
+    ],
+    "sentences": [
+      "Hương cốm thơm thôn xóm.",
+      "Hôm qua, cô Mơ ở xóm Hạ đến thăm nhà Hà.",
+      "Hà chọn quả cam to phần bố."
+    ],
+    "paragraph": "Hôm qua, cô Mơ ở xóm Hạ đến thăm nhà Hà. Cô cho Hà giỏ cam. Hà chọn quả cam to phần bố. Mẹ khen và thơm lên má Hà.",
+    "reward": 15
+  },
+  {
+    "id": "b37",
+    "week": "Tuần 8",
+    "title": "Bài 37: em êm im um",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 37",
+    "words": [
+      "tem thư",
+      "thềm nhà",
+      "tủm tỉm"
+    ],
+    "sentences": [
+      "Chị em Hà chơi trốn tìm. Hà tủm tỉm đếm: một, hai, ba,...",
+      "Chim ri cần cù tìm cỏ khô về làm tổ.",
+      "Chim ri cảm ơn sẻ và sơn ca."
+    ],
+    "paragraph": "Chim ri cần cù tìm cỏ khô về làm tổ. Đêm qua, nó bị ốm. Chim sẻ và chim sơn ca đến thăm, đem cho nó túm rơm. Chim ri cảm ơn sẻ và sơn ca.",
+    "reward": 15
+  },
+  {
+    "id": "b38",
+    "week": "Tuần 8",
+    "title": "Bài 38: ai ay ây",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 38",
+    "words": [
+      "chùm vải",
+      "máy cày",
+      "đám mây"
+    ],
+    "sentences": [
+      "Hai bạn thi nhảy dây.",
+      "Nai con nhìn thấy con gì bé nhỏ, thân đầy gai nhọn trên bãi cỏ.",
+      "Nai mẹ tủm tỉm: \"Bạn nhím đấy, con ạ\"."
+    ],
+    "paragraph": "Nai con nhìn thấy con gì bé nhỏ, thân đầy gai nhọn trên bãi cỏ. Nó chạy về nhà, hổn hển kể cho mẹ nghe. Nai mẹ tủm tỉm: \"Bạn nhím đấy, con ạ\".",
+    "reward": 15
+  },
+  {
+    "id": "b39",
+    "week": "Tuần 8",
+    "title": "Bài 39: oi ôi ơi",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 39",
+    "words": [
+      "chim bói cá",
+      "thổi còi",
+      "đồ chơi"
+    ],
+    "sentences": [
+      "Voi con mời bạn đi xem hội.",
+      "Mẹ ơi, mạ lớn lên gọi là lúa.",
+      "Lớn lên, con vẫn là con gái nhỏ của mẹ."
+    ],
+    "paragraph": "Hà hỏi mẹ:\n– Mẹ ơi, mạ lớn lên gọi là lúa. Bê lớn lên gọi là bò. Còn con lớn lên thì gọi là gì ạ?\nMẹ ôm Hà rồi nói:\n– Lớn lên, con vẫn là con gái nhỏ của mẹ.",
+    "reward": 15
+  },
+  {
+    "id": "b40",
+    "week": "Tuần 8",
+    "title": "Bài 40: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 40",
+    "words": [
+      "chói lọi",
+      "cày cấy",
+      "chúm chím",
+      "sớm tối",
+      "gió nồm",
+      "lom khom",
+      "ngõ hẻm",
+      "bơi lội"
+    ],
+    "sentences": [
+      "Voi con có vòi dài.",
+      "Nhím con ra bãi cỏ tìm cái ăn.",
+      "Cả hai quay lại, ăn đến no nê."
+    ],
+    "paragraph": "Nhím con ra bãi cỏ tìm cái ăn. Nó phấn chấn khi thấy vô số quả chín thơm ngon. Nhím vội chạy về gọi bạn chồn. Cả hai quay lại, ăn đến no nê.",
+    "reward": 15
+  },
+  {
+    "id": "b41",
+    "week": "Tuần 9",
+    "title": "Bài 41: ui ưi",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 41",
+    "words": [
+      "dãy núi",
+      "bụi cỏ",
+      "gửi thư"
+    ],
+    "sentences": [
+      "Bà gửi cho Hà túi kẹo.",
+      "Lan gửi thư cho Hà kể về quê Lan.",
+      "Lan mời Hà lên thăm quê Lan."
+    ],
+    "paragraph": "Lan gửi thư cho Hà kể về quê Lan. Ở đó, có nhà sàn nằm ven đồi. Mùa này, chim ca rộn rã, sim nở rộ tím cả núi đồi. Lan mời Hà lên thăm quê Lan.",
+    "reward": 15
+  },
+  {
+    "id": "b42",
+    "week": "Tuần 9",
+    "title": "Bài 42: ao eo",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 42",
+    "words": [
+      "ngôi sao",
+      "quả táo",
+      "cái kẹo",
+      "ao bèo"
+    ],
+    "sentences": [
+      "Ao thu lạnh lẽo nước trong veo.",
+      "Trên cây cao, đàn chào mào bay đi, bay lại.",
+      "Chú tha rơm khô về khéo léo làm tổ."
+    ],
+    "paragraph": "Trên cây cao, đàn chào mào bay đi, bay lại. Mấy chú sáo đen vui ca véo von. Còn chim ri vẫn chăm chỉ. Chú tha rơm khô về khéo léo làm tổ.",
+    "reward": 15
+  },
+  {
+    "id": "b43",
+    "week": "Tuần 9",
+    "title": "Bài 43: au âu êu",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 43",
+    "words": [
+      "rau củ",
+      "con trâu",
+      "chú tễu"
+    ],
+    "sentences": [
+      "Đàn sẻ nâu kêu ríu rít ở sau nhà.",
+      "Nhà dì Tư ở quê có cây cau, giàn trầu.",
+      "Sau nhà có rau cải, rau dền và cả dưa hấu."
+    ],
+    "paragraph": "Nhà dì Tư ở quê có cây cau, giàn trầu. Sau nhà có rau cải, rau dền và cả dưa hấu. Gần nhà dì có cây cầu tre nhỏ. Xa xa là dãy núi cao.",
+    "reward": 15
+  },
+  {
+    "id": "b44",
+    "week": "Tuần 9",
+    "title": "Bài 44: iu ưu",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 44",
+    "words": [
+      "cái rìu",
+      "cái địu",
+      "quả lựu",
+      "con cừu"
+    ],
+    "sentences": [
+      "Bà đã nghỉ hưu mà luôn bận bịu.",
+      "Ngày ngày, bà đi chợ, nấu ăn và chăm lo cho con cháu.",
+      "Mỗi lần đưa bé đi dạo, bà hay kể về ngày xưa."
+    ],
+    "paragraph": "Bà đã nghỉ hưu. Ngày ngày, bà đi chợ, nấu ăn và chăm lo cho con cháu. Mỗi lần đưa bé đi dạo, bà hay kể về ngày xưa. Lời bà dịu êm.",
+    "reward": 15
+  },
+  {
+    "id": "b45",
+    "week": "Tuần 9",
+    "title": "Bài 45: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 45",
+    "words": [
+      "khâu vá",
+      "gửi quà",
+      "ngôi sao",
+      "kéo co",
+      "vui vẻ",
+      "kêu gọi",
+      "chịu khó",
+      "cây cau"
+    ],
+    "sentences": [
+      "Tàu neo đậu ven bờ.",
+      "Nghỉ hè, nhà Hà đi Tam Đảo.",
+      "Mùa hè ở Tam Đảo quả là dễ chịu."
+    ],
+    "paragraph": "Nghỉ hè, nhà Hà đi Tam Đảo. Khi tán cây, ngọn cỏ còn thiu thiu ngủ, Hà đã dậy ngắm mây mù. Đến trưa, trời như vào thu. Mùa hè ở Tam Đảo quả là dễ chịu.",
+    "reward": 15
+  },
+  {
+    "id": "b46",
+    "week": "Tuần 10",
+    "title": "Bài 46: ac ăc âc",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 46",
+    "words": [
+      "bác sĩ",
+      "mắc áo",
+      "quả gấc"
+    ],
+    "sentences": [
+      "Tây Bắc có ruộng bậc thang, có thác nước.",
+      "Nếu lên Tây Bắc, bạn hãy đến Sa Pa.",
+      "Vào mùa hè, mỗi ngày ở đây như có bốn mùa."
+    ],
+    "paragraph": "Nếu lên Tây Bắc, bạn hãy đến Sa Pa. Vào mùa hè, mỗi ngày ở đây như có bốn mùa. Sa Pa có Thác Bạc, có Cầu Mây, có các bản Tả Van, Tả Phìn, Sín Chải.",
+    "reward": 15
+  },
+  {
+    "id": "b47",
+    "week": "Tuần 10",
+    "title": "Bài 47: oc ôc uc ưc",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 47",
+    "words": [
+      "con sóc",
+      "cái cốc",
+      "máy xúc",
+      "con mực"
+    ],
+    "sentences": [
+      "Ở góc vườn, cạnh gốc cau, khóm cúc nở hoa vàng rực.",
+      "Đi học về, Hà thấy mấy khóm cúc đã nở rực rỡ.",
+      "Mẹ tấm tắc khen Hà khéo tay."
+    ],
+    "paragraph": "Đi học về, Hà thấy mấy khóm cúc đã nở rực rỡ. Hà hái cúc, cắm vào cốc rồi để ngay ngắn trên bàn học. Mẹ tấm tắc khen Hà khéo tay.",
+    "reward": 15
+  },
+  {
+    "id": "b48",
+    "week": "Tuần 10",
+    "title": "Bài 48: at ăt ât",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 48",
+    "words": [
+      "bãi cát",
+      "mặt trời",
+      "bật lửa"
+    ],
+    "sentences": [
+      "Nam bắt nhịp cho tất cả các bạn hát.",
+      "Hè đến, nhà Nam đi nghỉ mát ở Cát Bà.",
+      "Nam rất vui khi đi chơi xa với cả nhà."
+    ],
+    "paragraph": "Hè đến, nhà Nam đi nghỉ mát ở Cát Bà. Mẹ và Nam bỏ áo bơi, bàn chải, khăn mặt vào ba lô. Nam rất vui khi đi chơi xa với cả nhà.",
+    "reward": 15
+  },
+  {
+    "id": "b49",
+    "week": "Tuần 10",
+    "title": "Bài 49: ot ôt ơt",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 49",
+    "words": [
+      "quả nhót",
+      "lá lốt",
+      "quả ớt"
+    ],
+    "sentences": [
+      "Vườn nhà bà có ớt, rau ngót và cà rốt.",
+      "Sớm nay thức dậy, Nam chợt thấy một chú chim sâu.",
+      "Chim hớn hở như chào Nam."
+    ],
+    "paragraph": "Sớm nay thức dậy, Nam chợt thấy một chú chim sâu. Chim hớn hở như chào Nam. Nó nhảy nhót một hồi rồi bay qua bay lại, tìm bắt sâu bọ cho cây.",
+    "reward": 15
+  },
+  {
+    "id": "b50",
+    "week": "Tuần 10",
+    "title": "Bài 50: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 50",
+    "words": [
+      "bật lửa",
+      "lọ mực",
+      "cột mốc",
+      "hạt thóc",
+      "xúc xắc",
+      "gót chân",
+      "đôi mắt",
+      "lác đác"
+    ],
+    "sentences": [
+      "Hạt thóc nảy mầm.",
+      "Gà mẹ dẫn đàn con đi ăn.",
+      "Gà mẹ ủ ấm cho các con."
+    ],
+    "paragraph": "Gà mẹ dẫn đàn con đi ăn. Chốc chốc, tìm thấy mồi, gà mẹ \"tục... tục...\" gọi con. Đàn gà con chạy lại, chen chúc nhau ăn rồi rúc vào bên mẹ. Gà mẹ ủ ấm cho các con.",
+    "reward": 15
+  },
+  {
+    "id": "b51",
+    "week": "Tuần 11",
+    "title": "Bài 51: et êt it",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 51",
+    "words": [
+      "con vẹt",
+      "bồ kết",
+      "quả mít"
+    ],
+    "sentences": [
+      "Đôi vẹt ríu rít mãi không hết chuyện.",
+      "Tết đến thật gần.",
+      "Mấy cây đào đã chi chít lộc non."
+    ],
+    "paragraph": "Tết đến thật gần. Cái rét vẫn đậm. Mấy cây đào đã chi chít lộc non. Vài nụ tròn đỏ thắm vừa hé nở. Rồi trời ấm dần, đàn én nhỏ lại ríu rít bay về, náo nức đón chào năm mới.",
+    "reward": 15
+  },
+  {
+    "id": "b52",
+    "week": "Tuần 11",
+    "title": "Bài 52: ut ưt",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 52",
+    "words": [
+      "bút chì",
+      "mứt dừa",
+      "nứt nẻ"
+    ],
+    "sentences": [
+      "Cầu thủ số 7 thu hút khán giả bằng một cú sút dứt điểm.",
+      "Trận đấu thật gay cấn.",
+      "Phút chót, số 7 lại bứt phá ghi bàn."
+    ],
+    "paragraph": "Trận đấu thật gay cấn. Lúc đầu, đội bạn chơi rất hay, đội nhà bị dẫn một bàn. Bất ngờ, cầu thủ số 7 sút xa, tỉ số là một đều. Phút chót, số 7 lại bứt phá ghi bàn. Khán giả hò reo, nhảy múa.",
+    "reward": 15
+  },
+  {
+    "id": "b53",
+    "week": "Tuần 11",
+    "title": "Bài 53: ap ăp âp",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 53",
+    "words": [
+      "xe đạp",
+      "cặp da",
+      "cá mập"
+    ],
+    "sentences": [
+      "Mẹ đạp xe đưa Hà đến lớp.",
+      "Khắp phố tấp nập.",
+      "Thức dậy, tôi có thể đưa bạn chu du khắp nơi, khám phá thế giới hấp dẫn, đầy ắp sắc màu."
+    ],
+    "paragraph": "Khi ngủ, tôi nằm im lìm, mặt đen sẫm. Thức dậy, tôi có thể đưa bạn chu du khắp nơi, khám phá thế giới hấp dẫn, đầy ắp sắc màu. Bạn có thể xem phim, nghe nhạc để có phút giây thư giãn, ấm áp. Tôi là ai?",
+    "reward": 15
+  },
+  {
+    "id": "b54",
+    "week": "Tuần 11",
+    "title": "Bài 54: op ôp ơp",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 54",
+    "words": [
+      "con cọp",
+      "lốp xe",
+      "tia chớp"
+    ],
+    "sentences": [
+      "Mưa rào lộp độp, ếch nhái tụ họp thi hát, cá cờ há miệng đớp mưa.",
+      "Họ nhà nhái tụ họp thi hát đón cơn mưa đầu mùa.",
+      "Đàn cá cờ lóp ngóp bơi đến, lâu lâu lại ngoi lên đớp mưa."
+    ],
+    "paragraph": "Mưa rào lộp độp. Họ nhà nhái tụ họp thi hát đón cơn mưa đầu mùa. Mặt ao ran ran bài ca ì ọp, ì ọp. Đàn cá cờ lóp ngóp bơi đến, lâu lâu lại ngoi lên đớp mưa.",
+    "reward": 15
+  },
+  {
+    "id": "b55",
+    "week": "Tuần 11",
+    "title": "Bài 55: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 55",
+    "words": [
+      "nét chữ",
+      "nết na",
+      "gặp gỡ",
+      "tấp nập",
+      "xe đạp",
+      "gom góp",
+      "hồi hộp",
+      "mứt sen"
+    ],
+    "sentences": [
+      "Trời xám xịt, mưa sầm sập như trút.",
+      "Một lúc sau, mưa lộp độp rồi dứt hẳn.",
+      "Gần hồ có ngọn tháp cao vút."
+    ],
+    "paragraph": "Trời xám xịt, mưa sầm sập như trút. Sấm sét ì ầm xa xa. Cây cỏ ngả rạp vào nhau. Một lúc sau, mưa lộp độp rồi dứt hẳn. Mặt trời ló khỏi chân mây. Vạn vật như thức dậy, đầy ắp sắc màu.",
+    "reward": 15
+  },
+  {
+    "id": "b56",
+    "week": "Tuần 12",
+    "title": "Bài 56: ep êp ip up",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 56",
+    "words": [
+      "đôi dép",
+      "đầu bếp",
+      "bìm bịp",
+      "búp sen"
+    ],
+    "sentences": [
+      "Trong bếp, lũ cún con múp míp nép vào bên mẹ.",
+      "Dịp nghỉ lễ, nhà Hà có chú Tư và cô Lan đến chơi.",
+      "Hà giúp mẹ rửa rau quả và sắp xếp bát đĩa."
+    ],
+    "paragraph": "Dịp nghỉ lễ, nhà Hà có chú Tư và cô Lan đến chơi. Mẹ nấu súp gà, cơm nếp và rán cá chép. Hà giúp mẹ rửa rau quả và sắp xếp bát đĩa. Bố thì dọn dẹp nhà cửa. Nhà Hà hôm nay thật là vui.",
+    "reward": 15
+  },
+  {
+    "id": "b57",
+    "week": "Tuần 12",
+    "title": "Bài 57: anh ênh inh",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 57",
+    "words": [
+      "quả chanh",
+      "bờ kênh",
+      "kính râm"
+    ],
+    "sentences": [
+      "Con kênh xinh xinh chảy qua cánh đồng.",
+      "Nhà vịt ở gần một con kênh xinh xinh.",
+      "Hôm nay trời đẹp, bố mẹ cho vịt con ra kênh tập bơi."
+    ],
+    "paragraph": "Nhà vịt ở gần một con kênh xinh xinh. Hôm nay trời đẹp, bố mẹ cho vịt con ra kênh tập bơi. Mới tập mà vịt con đã bơi rất nhanh. Vịt bố vịt mẹ vui quá, kêu cạp cạp. Gia đình vịt làm xôn xao cả mặt kênh.",
+    "reward": 15
+  },
+  {
+    "id": "b58",
+    "week": "Tuần 12",
+    "title": "Bài 58: ach êch ich",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 58",
+    "words": [
+      "sách vở",
+      "chênh lệch",
+      "tờ lịch"
+    ],
+    "sentences": [
+      "Ếch con thích đọc sách.",
+      "Có một hôm ếch cốm tinh nghịch nấp bờ ao.",
+      "Mải rình bắt cào cào, quên sách bên bờ cỏ."
+    ],
+    "paragraph": "Ếch cốm\nCó một hôm ếch cốm\nTinh nghịch nấp bờ ao\nMải rình bắt cào cào\nQuên sách bên bờ cỏ.\nTới lớp cô hỏi nhỏ:\n– Sách đâu em học bài?\nCậu gãi đầu, gãi tai:\n– Thưa cô, em xin lỗi.\n(Mộc Miên)",
+    "reward": 15
+  },
+  {
+    "id": "b59",
+    "week": "Tuần 12",
+    "title": "Bài 59: ang ăng âng",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 59",
+    "words": [
+      "cá vàng",
+      "măng tre",
+      "nhà tầng"
+    ],
+    "sentences": [
+      "Vầng trăng sáng lấp ló sau rặng tre.",
+      "Hôm nay trời nắng chang chang, mèo con đi học chẳng mang thứ gì.",
+      "Chỉ mang một cái bút chì và mang một mẩu bánh mì con con."
+    ],
+    "paragraph": "Mèo con đi học\nHôm nay trời nắng chang chang\nMèo con đi học chẳng mang thứ gì\nChỉ mang một cái bút chì\nVà mang một mẩu bánh mì con con.\n(Phan Thị Vàng Anh)",
+    "reward": 15
+  },
+  {
+    "id": "b60",
+    "week": "Tuần 12",
+    "title": "Bài 60: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 60",
+    "words": [
+      "xinh đẹp",
+      "sạch sẽ",
+      "thếp giấy",
+      "kịp thời",
+      "nhanh nhẹn",
+      "vâng lời",
+      "thích thú",
+      "giúp đỡ"
+    ],
+    "sentences": [
+      "Hà rất thích con gà bà cho.",
+      "Sáng sáng, Hà dậy sớm chờ gà gáy ò ó o.",
+      "Em vẽ vầng trăng sáng."
+    ],
+    "paragraph": "Hà rất thích con gà bà cho. Sáng sáng, Hà dậy sớm chờ gà gáy ò ó o. Vậy mà mãi nó chẳng gáy. Một hôm, Hà tỉnh giấc nghe gà cục ta cục tác. Giờ Hà đã rõ vì sao con gà chẳng gáy.",
+    "reward": 15
+  },
+  {
+    "id": "b61",
+    "week": "Tuần 13",
+    "title": "Bài 61: ong ông ung ưng",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 61",
+    "words": [
+      "chong chóng",
+      "bông súng",
+      "bánh chưng"
+    ],
+    "sentences": [
+      "Những bông hồng rung rinh trong gió.",
+      "Nam theo mẹ đi chợ.",
+      "Nam thích lắm vì lần đầu cùng mẹ đi chợ."
+    ],
+    "paragraph": "Nam theo mẹ đi chợ. Chợ đông vui và bán đủ thứ. Ngay từ cổng là những dãy hàng đồ dùng gia đình. Bên trong là hàng rau, thịt và cá. Nam thích lắm vì lần đầu cùng mẹ đi chợ.",
+    "reward": 15
+  },
+  {
+    "id": "b62",
+    "week": "Tuần 13",
+    "title": "Bài 62: iêc iên iêp",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 62",
+    "words": [
+      "xanh biếc",
+      "bờ biển",
+      "sò điệp"
+    ],
+    "sentences": [
+      "Biển xanh biếc. Những hòn đảo lớn nhỏ trùng điệp.",
+      "Vịnh Hạ Long là một kì quan thiên nhiên.",
+      "Du khách thích đến đây ngắm cảnh, tắm mát và đi dạo trên những bãi biển."
+    ],
+    "paragraph": "Vịnh Hạ Long là một kì quan thiên nhiên. Nơi đây có những hòn đảo lớn nhỏ trùng điệp, soi bóng trên mặt biển xanh biếc. Du khách thích đến đây ngắm cảnh, tắm mát và đi dạo trên những bãi biển.",
+    "reward": 15
+  },
+  {
+    "id": "b63",
+    "week": "Tuần 13",
+    "title": "Bài 63: iêng iêm yên",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 63",
+    "words": [
+      "sầu riêng",
+      "cá kiếm",
+      "tổ yến"
+    ],
+    "sentences": [
+      "Yến phụng có bộ lông tím biêng biếc, trông rất diêm dúa.",
+      "Hà theo bố đến sân chim.",
+      "Sau một ngày đi kiếm ăn, từng đàn chim ríu rít về tổ, trông thật yên bình."
+    ],
+    "paragraph": "Hà theo bố đến sân chim. Sân chim có cò, diệc, sáo, bồ nông,... Hà chăm chú nhìn những đàn cò trắng, diệc xám bay liệng, đậu kín trên những ngọn cây. Sau một ngày đi kiếm ăn, từng đàn chim ríu rít về tổ, trông thật yên bình.",
+    "reward": 15
+  },
+  {
+    "id": "b64",
+    "week": "Tuần 13",
+    "title": "Bài 64: iêt iêu yêu",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 64",
+    "words": [
+      "nhiệt kế",
+      "con diều",
+      "yêu chiều"
+    ],
+    "sentences": [
+      "Em yêu sách. Nhờ có sách, em biết nhiều điều hay.",
+      "Bố cho Nam và em chơi thả diều.",
+      "Hai anh em thích thú ngắm nhìn những cánh diều sặc sỡ, đáng yêu chao liệng trên bầu trời."
+    ],
+    "paragraph": "Bố cho Nam và em chơi thả diều. Bố dạy Nam biết cách vừa chạy vừa kéo căng dây và giật giật để con diều có thể bay cao. Hai anh em thích thú ngắm nhìn những cánh diều sặc sỡ, đáng yêu chao liệng trên bầu trời.",
+    "reward": 15
+  },
+  {
+    "id": "b65",
+    "week": "Tuần 13",
+    "title": "Bài 65: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 65",
+    "words": [
+      "xung phong",
+      "hiểu biết",
+      "xanh biếc",
+      "trùng điệp",
+      "yêu mến",
+      "yên tĩnh",
+      "khiêm tốn",
+      "rong biển"
+    ],
+    "sentences": [
+      "Trái đất của chúng ta vô cùng rộng lớn.",
+      "Sự sống không ngừng sinh sôi, nảy nở.",
+      "Cánh diều chao liệng trên bầu trời."
+    ],
+    "paragraph": "Trái đất của chúng ta vô cùng rộng lớn. Núi rừng trùng điệp. Đồng xanh bao la. Bầu trời cao rộng. Biển cả mênh mông. Sự sống không ngừng sinh sôi, nảy nở. Chúng ta cần biết yêu quý, giữ gìn và bảo vệ sự sống trên trái đất này.",
+    "reward": 15
+  },
+  {
+    "id": "b66",
+    "week": "Tuần 14",
+    "title": "Bài 66: uôi uôm",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 66",
+    "words": [
+      "con suối",
+      "buổi sáng",
+      "quả muỗm"
+    ],
+    "sentences": [
+      "Thuyền buồm xuôi theo chiều gió.",
+      "Buổi sớm mai, ông mặt trời nhô lên từ biển.",
+      "Phía bến cảng, những chiếc tàu cá nối đuôi nhau vào bờ."
+    ],
+    "paragraph": "Buổi sớm mai, ông mặt trời nhô lên từ biển. Mặt biển sáng lấp lánh. Đàn hải âu sải cánh bay liệng trên bầu trời. Xa xa là những cánh buồm căng gió. Phía bến cảng, những chiếc tàu cá nối đuôi nhau vào bờ.",
+    "reward": 15
+  },
+  {
+    "id": "b67",
+    "week": "Tuần 14",
+    "title": "Bài 67: uôc uôt",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 67",
+    "words": [
+      "ngọn đuốc",
+      "viên thuốc",
+      "con chuột"
+    ],
+    "sentences": [
+      "Mẹ vuốt tóc và buộc nơ cho Hà.",
+      "Mẹ cho Hà đi công viên. Cô bé rất thích thú và háo hức.",
+      "Mẹ bảo Hà khi đi chơi cần ăn mặc gọn gàng, lịch sự."
+    ],
+    "paragraph": "Mẹ cho Hà đi công viên. Cô bé rất thích thú và háo hức. Hà mặc váy trắng, đi giày màu hồng. Mẹ còn vuốt tóc và buộc nơ cho Hà. Mẹ bảo Hà khi đi chơi cần ăn mặc gọn gàng, lịch sự.",
+    "reward": 15
+  },
+  {
+    "id": "b68",
+    "week": "Tuần 14",
+    "title": "Bài 68: uôn uông",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 68",
+    "words": [
+      "cuộn chỉ",
+      "buồng chuối",
+      "quả chuông"
+    ],
+    "sentences": [
+      "Chuồn chuồn bay qua các luống rau.",
+      "Trời sắp mưa. Chuồn chuồn bay thấp.",
+      "Mưa tạnh, những hạt mưa long lanh đọng trên các cuống lá."
+    ],
+    "paragraph": "Trời sắp mưa. Chuồn chuồn bay thấp. Bầu trời đen kịt. Gió thổi mạnh cuốn theo những đám lá khô. Rồi mưa ào ào trút xuống.\nMưa tạnh, những hạt mưa long lanh đọng trên các cuống lá. Bầu trời trong xanh, không khí mát mẻ.",
+    "reward": 15
+  },
+  {
+    "id": "b69",
+    "week": "Tuần 14",
+    "title": "Bài 69: ươi, ươu",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 69",
+    "words": [
+      "tươi cười",
+      "quả bưởi",
+      "ốc bươu"
+    ],
+    "sentences": [
+      "Chim khướu biết bắt chước tiếng người.",
+      "Lạc đà là con vật đặc biệt.",
+      "Lạc đà giúp con người băng qua những vùng sa mạc khô cằn."
+    ],
+    "paragraph": "Lạc đà là con vật đặc biệt. Nó có cái bướu to trên lưng. Bướu của lạc đà là nơi dự trữ chất béo. Nhờ thế, nó có thể sống qua nhiều ngày mà không cần ăn uống. Lạc đà giúp con người băng qua những vùng sa mạc khô cằn.",
+    "reward": 15
+  },
+  {
+    "id": "b70",
+    "week": "Tuần 14",
+    "title": "Bài 70: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 70",
+    "words": [
+      "vuốt ve",
+      "cưỡi ngựa",
+      "tuổi thơ",
+      "nhuộm vải",
+      "nướu răng",
+      "lem luốc",
+      "luống cuống",
+      "muôn màu"
+    ],
+    "sentences": [
+      "Đôi chim khướu hót vang.",
+      "Ông trồng nhiều cây ăn trái.",
+      "Chú mèo cuộn tròn sưởi nắng bên thềm."
+    ],
+    "paragraph": "Ông trồng nhiều cây ăn trái. Khóm chuối xanh tươi đã trổ buồng. Hàng bưởi ra bông trắng muốt. Mấy cây đu đủ quả chín vàng ruộm. Ông còn nuôi nhiều con vật rất đáng yêu. Gà mẹ, gà con ríu rít. Đôi chim khướu hót vang. Chú mèo cuộn tròn sưởi nắng bên thềm.",
+    "reward": 15
+  },
+  {
+    "id": "b71",
+    "week": "Tuần 15",
+    "title": "Bài 71: ươc, ươt",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 71",
+    "words": [
+      "thước kẻ",
+      "dược sĩ",
+      "lướt ván"
+    ],
+    "sentences": [
+      "Hà ước được lướt sóng biển.",
+      "Lúc học hát, Nam ước làm ca sĩ.",
+      "Nhìn lên bầu trời, Nam lại ước làm phi công."
+    ],
+    "paragraph": "Lúc học hát, Nam ước làm ca sĩ. Lúc nghe mẹ đọc thơ, Nam lại ước trở thành nhà thơ. Khi ra biển, Nam ước là người lái tàu, vượt qua những con sóng lớn. Nhìn lên bầu trời, Nam lại ước làm phi công. Nam tự hỏi: \"Bao giờ mình mới lớn nhỉ?\".",
+    "reward": 15
+  },
+  {
+    "id": "b72",
+    "week": "Tuần 15",
+    "title": "Bài 72: ươm, ươp",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 72",
+    "words": [
+      "con bướm",
+      "nườm nượp",
+      "giàn mướp"
+    ],
+    "sentences": [
+      "Hoa mướp vàng ươm, bướm bay rập rờn.",
+      "Nắng vàng ươm như mật trải khắp sân.",
+      "Chú mèo mướp thảnh thơi nằm sưởi nắng bên thềm."
+    ],
+    "paragraph": "Nắng vàng ươm như mật trải khắp sân. Chú mèo mướp thảnh thơi nằm sưởi nắng bên thềm. Mắt chú lim dim ra điều thích thú. Mấy sợi ria mép rung rinh. Đừng thấy mèo ta hay nằm dài mà nghĩ chú lười. Sưởi nắng giúp mèo dẻo dai hơn đấy.",
+    "reward": 15
+  },
+  {
+    "id": "b73",
+    "week": "Tuần 15",
+    "title": "Bài 73: ươn, ương",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 73",
+    "words": [
+      "khu vườn",
+      "hạt sương",
+      "con đường"
+    ],
+    "sentences": [
+      "Đường tới trường lượn theo sườn đồi.",
+      "Buổi sáng, tiếng gà gọi mặt trời thức dậy.",
+      "Làng quê rộn ràng những âm thanh của cuộc sống."
+    ],
+    "paragraph": "Buổi sáng, tiếng gà gọi mặt trời thức dậy. Bầu trời phía đông ửng hồng. Nắng xua tan màn sương. Cây lá bừng tỉnh sau một giấc ngủ dài, vươn mình đón những tia nắng đầu tiên của ngày mới. Làng quê rộn ràng những âm thanh của cuộc sống. Em tới lớp. Mẹ đi làm.",
+    "reward": 15
+  },
+  {
+    "id": "b74",
+    "week": "Tuần 16",
+    "title": "Bài 74: oa, oe",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 74",
+    "words": [
+      "đoá hoa",
+      "váy xoè",
+      "chích choè"
+    ],
+    "sentences": [
+      "Các loài hoa đua nhau khoe sắc.",
+      "Tết đến, hoa đào khoe sắc hồng tươi, hoa mai vàng nở rộ.",
+      "Những sắc hoa, hương hoa làm đẹp thêm cho cuộc sống."
+    ],
+    "paragraph": "Tết đến, hoa đào khoe sắc hồng tươi, hoa mai vàng nở rộ. Hè sang, hoa phượng bừng lửa đỏ, cháy rực cả góc trời. Cuối thu, hương hoa sữa nồng nàn, ngát thơm từng góc phố. Cuối đông, hoa cải trải thảm vàng rực rỡ bên sông. Những sắc hoa, hương hoa làm đẹp thêm cho cuộc sống.",
+    "reward": 15
+  },
+  {
+    "id": "b75",
+    "week": "Tuần 16",
+    "title": "Bài 75: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 75",
+    "words": [
+      "lướt sóng",
+      "ước mơ",
+      "mèo mướp",
+      "hạt cườm",
+      "bay lượn",
+      "nụ hoa",
+      "vàng hoe",
+      "toả hương"
+    ],
+    "sentences": [
+      "Khắp vườn, hoa toả hương ngào ngạt.",
+      "Mặt trời tỉnh giấc, hai má ửng hồng.",
+      "Cô gió mang cả hương hoa ùa vào lớp học."
+    ],
+    "paragraph": "Buổi sớm\nMặt trời tỉnh giấc\nHai má ửng hồng,\nTung đám mây bông\nVươn vai thức dậy.\n\nCô gió thi chạy\nTrong cánh rừng xa,\nMang cả hương hoa\nÙa vào lớp học.\n(Hoàng Minh Ngọc)",
+    "reward": 15
+  },
+  {
+    "id": "b76",
+    "week": "Tuần 16",
+    "title": "Bài 76: oan, oăn, oat, oăt",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 76",
+    "words": [
+      "hoa xoan",
+      "tóc xoăn",
+      "hoạt hình",
+      "nhọn hoắt"
+    ],
+    "sentences": [
+      "Trên phim hoạt hình, voi bước khoan thai, thỏ chạy thoăn thoắt.",
+      "Trong vườn, cây xoan và cây khế đã trổ hoa hàng loạt.",
+      "Chúng thoăn thoắt nhảy từ cành này sang cành khác."
+    ],
+    "paragraph": "Trong vườn, cây xoan và cây khế đã trổ hoa hàng loạt. Vườn cây ngập tràn sắc tím. Mỗi buổi sáng, khu vườn rộn ràng với những tiếng lích ra lích rích của mấy chú chích bông. Chúng thoăn thoắt nhảy từ cành này sang cành khác. Vừa nhảy nhót, chúng vừa trêu đùa nhau, vui thật là vui.",
+    "reward": 15
+  },
+  {
+    "id": "b77",
+    "week": "Tuần 16",
+    "title": "Bài 77: oai, uê, uy",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 77",
+    "words": [
+      "khoai sọ",
+      "vạn tuế",
+      "tàu thuỷ"
+    ],
+    "sentences": [
+      "Quê ngoại của Hà có luỹ tre xanh, có cây trái xum xuê.",
+      "Ngày nghỉ, Hà thoải mái vui đùa với hoa trái vườn nhà.",
+      "Em đưa tay vuốt ve những cánh thuỷ tiên đang thi nhau khoe sắc."
+    ],
+    "paragraph": "Ngày nghỉ, Hà thoải mái vui đùa với hoa trái vườn nhà. Hà thì thầm với cây xoài lúc lỉu quả. Hà cúi trêu đám dây khoai lang đang bò trên mặt đất. Em cùng gió nô giỡn bên những bông huệ trắng. Em đưa tay vuốt ve những cánh thuỷ tiên đang thi nhau khoe sắc.",
+    "reward": 15
+  },
+  {
+    "id": "b78",
+    "week": "Tuần 16",
+    "title": "Bài 78: uân, uât",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 78",
+    "words": [
+      "tuần tra",
+      "mùa xuân",
+      "võ thuật"
+    ],
+    "sentences": [
+      "Chúng em xem chương trình nghệ thuật chào xuân.",
+      "Gần Tết, bố và Hà đi chợ hoa mua đào và quất.",
+      "Cả nhà cùng vui đón xuân."
+    ],
+    "paragraph": "Gần Tết, bố và Hà đi chợ hoa mua đào và quất. Cành đào chi chít lộc non, những nụ hoa phớt hồng đang e ấp nở. Cây quất xum xuê, quả vàng óng. Mẹ nhìn bố và Hà nói: \"Hai bố con đem cả mùa xuân về nhà rồi đấy\". Cả nhà cùng vui đón xuân.",
+    "reward": 15
+  },
+  {
+    "id": "b79",
+    "week": "Tuần 16",
+    "title": "Bài 79: uyên, uyêt",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 79",
+    "words": [
+      "con thuyền",
+      "trăng khuyết",
+      "truyền thuyết"
+    ],
+    "sentences": [
+      "Bà kể chuyện hay tuyệt.",
+      "Sân nhà em sáng quá / Nhờ ánh trăng sáng ngời.",
+      "Những hôm nào trăng khuyết, / Trông giống con thuyền trôi."
+    ],
+    "paragraph": "Trăng sáng\nSân nhà em sáng quá\nNhờ ánh trăng sáng ngời.\nTrăng tròn như cái đĩa\nLơ lửng mà không rơi.\n\nNhững hôm nào trăng khuyết,\nTrông giống con thuyền trôi.\nEm đi trăng theo bước\nNhư muốn cùng đi chơi.\n(Nhược Thuỷ)",
+    "reward": 15
+  },
+  {
+    "id": "b80",
+    "week": "Tuần 16",
+    "title": "Bài 80: Ôn tập và kể chuyện",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 80",
+    "words": [
+      "ngoan ngoãn",
+      "tuyệt vời",
+      "thoăn thoắt",
+      "lưu loát",
+      "ngoái lại",
+      "vành khuyên",
+      "xum xuê",
+      "tuần lễ"
+    ],
+    "sentences": [
+      "Xuân về, đào nở thắm, quất trĩu quả.",
+      "Mỗi lần về quê, Hà lại được bà kể cho nghe nhiều câu chuyện hay.",
+      "Giọng kể của bà trầm ấm."
+    ],
+    "paragraph": "Mỗi lần về quê, Hà lại được bà kể cho nghe nhiều câu chuyện hay. Nào là truyền thuyết về Lạc Long Quân, truyền thuyết Thánh Gióng, truyền thuyết về hồ Hoàn Kiếm. Nào là sự tích cây quất, sự tích cây xoài,... Giọng kể của bà trầm ấm. Hà bị cuốn vào các câu chuyện suốt từ đầu cho đến cuối.",
+    "reward": 15
+  },
+  {
+    "id": "b81",
+    "week": "Tuần 17",
+    "title": "Bài 81: Ôn tập",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 81",
+    "words": [
+      "hoa đào",
+      "hoa mai",
+      "câu đối",
+      "tranh gà",
+      "tươi sáng",
+      "nở hoa"
+    ],
+    "sentences": [
+      "Hoa đào trước ngõ / Cười tươi sáng hồng.",
+      "Mẹ phơi áo hoa / Em dán tranh gà / Ông treo câu đối",
+      "Tết đang vào nhà / Sắp thêm một tuổi / Đất trời nở hoa."
+    ],
+    "paragraph": "Tết đang vào nhà\nHoa đào trước ngõ\nCười tươi sáng hồng\nHoa mai trong vườn\nLung linh cánh trắng\n\nSân nhà đầy nắng\nMẹ phơi áo hoa\nEm dán tranh gà\nÔng treo câu đối\n\nTết đang vào nhà\nSắp thêm một tuổi\nĐất trời nở hoa.\n(Nguyễn Hồng Kiên)",
+    "reward": 15
+  },
+  {
+    "id": "b82",
+    "week": "Tuần 17",
+    "title": "Bài 82: Ôn tập",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 82",
+    "words": [
+      "mùa xuân",
+      "bầu trời",
+      "nắng vàng",
+      "hoa bưởi",
+      "chích choè",
+      "trầm ngâm"
+    ],
+    "sentences": [
+      "Bầu trời ngày một thêm xanh.",
+      "Vườn cây lại đâm chồi nảy lộc.",
+      "Vườn cây lại rộn rã tiếng chim."
+    ],
+    "paragraph": "Mùa xuân đến\nBầu trời ngày một thêm xanh. Nắng vàng ngày càng rực rỡ. Vườn cây lại đâm chồi nảy lộc. Rồi vườn cây ra hoa. Hoa bưởi nồng nàn. Hoa nhãn ngọt. Hoa cau thơm dịu. Vườn cây lại rộn rã tiếng chim. Những anh chích choè nhanh nhảu. Những chú khướu lắm điều. Những bác cu gáy trầm ngâm.\n(Theo Nguyễn Kiên)",
+    "reward": 15
+  },
+  {
+    "id": "b83",
+    "week": "Tuần 18",
+    "title": "Bài 83: Ôn tập",
+    "source": "SGK Tiếng Việt 1 Tập 1 - Bài 83",
+    "words": [
+      "thi tài",
+      "lễ phép",
+      "nắng hồng",
+      "cầu vồng",
+      "mênh mông",
+      "luỹ tre"
+    ],
+    "sentences": [
+      "Khỉ bày mưu giúp voi.",
+      "Thấy voi to lớn mà sợ một con vật nhỏ bé, hổ sợ quá, liền bỏ chạy.",
+      "Làng tôi có luỹ tre xanh / Có dòng sông nhỏ uốn quanh xóm làng."
+    ],
+    "paragraph": "Voi, hổ và khỉ\nThua hổ trong một cuộc thi tài, voi phải nộp mạng cho hổ. Khỉ bày mưu giúp voi. Khỉ cưỡi voi đi gặp hổ. Đến điểm hẹn, khỉ quát lớn:\n– Hổ ở đâu?\nVoi tỏ vẻ lễ phép:\n– Thưa ông, hổ sắp tới rồi ạ.\nHổ ngồi trong bụi cây nhìn ra. Thấy voi to lớn mà sợ một con vật nhỏ bé, hổ sợ quá, liền bỏ chạy.\n(Phỏng theo Truyện cổ dân gian Khơ-me)",
+    "reward": 15
   }
 ];
 
