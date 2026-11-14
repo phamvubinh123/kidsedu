@@ -491,16 +491,19 @@
   };
 
   // ---------------------------------------------------------
-  // 2. DỮ LIỆU GAME: chế độ chơi, huy hiệu, nhân vật cửa hàng
+  // 2. DỮ LIỆU GAME: chế độ chơi, huy hiệu, nhân vật cửa hàng (Đọc từ PROJECT_CONFIG)
   // ---------------------------------------------------------
-  var MODES = [
+  var CFG = (typeof PROJECT_CONFIG !== "undefined" && PROJECT_CONFIG) ? PROJECT_CONFIG : {};
+  var STORE_PREFIX = CFG.storagePrefix || "vqtt";
+
+  var MODES = CFG.modes || [
     { id: "quiz", name: "Phiến Đá Bí Ẩn", icon: "📜", reward: 10, desc: "Chọn đáp án đúng" },
     { id: "match", name: "Ghép Đôi Nhanh", icon: "🧩", reward: 15, desc: "Chạm nối cặp đúng" },
     { id: "memory", name: "Lật Thẻ Thần Kỳ", icon: "🃏", reward: 15, desc: "Tìm cặp giống nhau" },
     { id: "balloon", name: "Bóng Bay Tri Thức", icon: "🎈", reward: 20, desc: "Bắn bóng đáp án" }
   ];
 
-  var BADGES = [
+  var BADGES = CFG.badges || [
     { icon: "🌱", name: "Mầm Non", need: 4 },
     { icon: "🥉", name: "Huy Hiệu Đồng", need: 14 },
     { icon: "🥈", name: "Huy Hiệu Bạc", need: 28 },
@@ -509,9 +512,9 @@
     { icon: "👑", name: "Vua Tri Thức", need: 70 }
   ];
 
-  var LEVELS = ["Mầm Non Chăm Chỉ", "Bé Ngoan Hiếu Học", "Ong Nhỏ Thông Thái", "Nhà Thám Hiểm Nhí", "Ngôi Sao Lớp 1", "Kiện Tướng Tri Thức", "Siêu Trí Tuệ Nhí"];
+  var LEVELS = CFG.levels || ["Mầm Non Chăm Chỉ", "Bé Ngoan Hiếu Học", "Ong Nhỏ Thông Thái", "Nhà Thám Hiểm Nhí", "Ngôi Sao Lớp 1", "Kiện Tướng Tri Thức", "Siêu Trí Tuệ Nhí"];
 
-  var AVATARS = [
+  var AVATARS = CFG.avatars || [
     { id: "hero", name: "Hiệp Sĩ Nhí", price: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
     { id: "sword", name: "Hiệp Sĩ Kiếm Bạc", price: 20, emoji: "⚔️" },
     { id: "shield", name: "Hiệp Sĩ Khiên Vàng", price: 30, emoji: "🛡️" },
@@ -526,7 +529,7 @@
     { id: "king", name: "Vua Hiệp Sĩ", price: 220, emoji: "👑" }
   ];
 
-  var PRAISE = [
+  var PRAISE = CFG.praiseMessages || [
     "Hoan hô! Tuyệt đỉnh luôn! 🎉",
     "Bé tính siêu quá! 🌟",
     "Thông minh tuyệt vời! 💯",
@@ -540,7 +543,7 @@
     "Tuyệt lắm! Mảnh ngọc sáng lên rồi kìa! 💎",
     "Yeah! Mở rương kho báu thôi nào! 🎁"
   ];
-  var RETRY = [
+  var RETRY = CFG.retryMessages || [
     "Suýt đúng rồi, bé thử lại lần nữa nhé! 💪",
     "Đừng lo, có Rồng Con ở đây cùng bạn! 🐲",
     "Ồ, mình nhìn kỹ lại một chút nào! 👀",
@@ -553,22 +556,22 @@
   // ---------------------------------------------------------
   // 3. TRẠNG THÁI, HỒ SƠ BÉ & ĐỒNG BỘ ĐÁM MÂY (Firebase)
   // ---------------------------------------------------------
-  var OLD_STORE_KEY = "vqtt_state_v1";
-  var PROFILES_KEY = "vqtt_profiles_v1";
-  var ACTIVE_PROFILE_KEY = "vqtt_active_profile_v1";
+  var OLD_STORE_KEY = STORE_PREFIX + "_state_v1";
+  var PROFILES_KEY = STORE_PREFIX + "_profiles_v1";
+  var ACTIVE_PROFILE_KEY = STORE_PREFIX + "_active_profile_v1";
 
-  var profiles = [
+  var profiles = CFG.defaultProfiles ? CFG.defaultProfiles.slice() : [
     { id: "hoanglong", name: "HOÀNG LONG", avatar: "hero" }
   ];
-  var currentProfileId = "hoanglong";
+  var currentProfileId = CFG.defaultProfileId || "hoanglong";
 
-  var DEFAULT_REAL_REWARDS = [
+  var DEFAULT_REAL_REWARDS = CFG.realRewards || [
     { id: "rw_icecream", icon: "🍦", img: "assets/rw-icecream.jpg", name: "Kem / Bánh kẹo", cost: 150 },
     { id: "rw_swim", icon: "🏊", name: "Đi bơi / Chơi nhà banh", cost: 450 },
     { id: "rw_car", icon: "🏎️", img: "assets/rw-car.jpg", name: "Xe đồ chơi", cost: 600 },
     { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng hồ trẻ em", cost: 1000 }
   ];
-  var STREAK_MILESTONES = [
+  var STREAK_MILESTONES = CFG.streakMilestones || [
     { days: 3, coins: 15, label: "3 ngày liên tiếp" },
     { days: 7, coins: 45, label: "7 ngày chăm chỉ" },
     { days: 14, coins: 60, label: "14 ngày siêu sao" },
@@ -611,7 +614,7 @@
     streak: { count: 0, lastDate: "", best: 0, claimedMilestones: {} },
     dailyQuest: { date: "", math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 },
     realRewards: cloneDefaultRewards(),
-    pinnedRewardId: "rw_icecream",
+    pinnedRewardId: CFG.defaultPinnedRewardId || "rw_icecream",
     rewardTickets: [],
     updatedAt: 0
   };
@@ -702,7 +705,7 @@
   }
 
   function profileStoreKey(pid) {
-    return "vqtt_state_" + (pid || currentProfileId);
+    return STORE_PREFIX + "_state_" + (pid || currentProfileId);
   }
 
   function getProfileState(pid) {
@@ -1233,7 +1236,7 @@
     return SUBJECTS[0];
   }
 
-  var MAP_POINTS_BY_SUBJ = {
+  var MAP_POINTS_BY_SUBJ = CFG.mapPointsBySubj || {
     math: [
       { x: 60, y: 30 },
       { x: 24, y: 36, via: [[46, 29], [31, 31]] },
@@ -2946,7 +2949,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v44 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Cập nhật ảnh Xe HotWheels & sửa tắt nhạc nền BGM tức thì.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> ' + esc(CFG.appVersion || "v45 (14/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức") + '</div></div>';
 
     $("infoBody").innerHTML = html;
 
