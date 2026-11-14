@@ -2796,6 +2796,82 @@
     openOverlay("infoOverlay");
   }
 
+  function attemptedSubjectSummary(subj) {
+    var units = UNITS[subj] || [];
+    var playedStages = 0;
+    var totalStages = 0;
+    var playedCards = 0;
+    var totalCards = 0;
+    var earnedCardStars = 0;
+    var maxCardStars = 0;
+    var sumCorrect = 0;
+    var sumTotal = 0;
+    var weakPlayed = [];
+    var passagesRead = 0;
+
+    for (var u = 0; u < units.length; u++) {
+      var unit = units[u];
+      if (unit.topic === "passages") {
+        if (state.passages) {
+          for (var pk in state.passages) {
+            if (state.passages.hasOwnProperty(pk) && state.passages[pk] > 0) passagesRead++;
+          }
+        }
+        continue;
+      }
+      totalStages++;
+      totalCards += MODES.length;
+      var p = state.progress[unitKey(subj, unit.topic)] || {};
+      var stats = p.stats || {};
+      var uCards = 0, uCorrect = 0, uTotal = 0, uCardStars = 0;
+
+      for (var m = 0; m < MODES.length; m++) {
+        var mId = MODES[m].id;
+        var st = stats[mId];
+        var cardStar = p[mId] || 0;
+        var attempted = (st && st.total > 0) || cardStar > 0;
+        if (!attempted) continue;
+
+        uCards++;
+        playedCards++;
+        uCardStars += cardStar;
+        earnedCardStars += cardStar;
+        maxCardStars += 3;
+
+        var mTotal = (st && st.total > 0) ? st.total : expectedModeTotal(subj, unit.topic, mId);
+        var mCorrect = 0;
+        if (st && typeof st.correct === "number") {
+          mCorrect = Math.min(mTotal, Math.max(0, st.correct));
+        } else if (cardStar > 0 && mTotal > 0) {
+          mCorrect = cardStar >= 3 ? mTotal : cardStar === 2 ? Math.round(mTotal * 0.7) : Math.round(mTotal * 0.4);
+        }
+        uCorrect += mCorrect;
+        uTotal += mTotal;
+      }
+
+      if (uCards > 0) {
+        playedStages++;
+        sumCorrect += uCorrect;
+        sumTotal += uTotal;
+        var uAcc = uTotal > 0 ? Math.round((uCorrect / uTotal) * 100) : 0;
+        var uMaxStars = uCards * 3;
+        if (uAcc < 65 || uCardStars < uMaxStars * 0.55) {
+          weakPlayed.push(unit.title + " (" + uCardStars + "/" + uMaxStars + " sao, đúng " + uAcc + "% trên " + uCards + " thẻ đã làm)");
+        }
+      }
+    }
+
+    var accPct = sumTotal > 0 ? Math.round((sumCorrect / sumTotal) * 100) : null;
+    return {
+      playedStages: playedStages + "/" + totalStages,
+      playedCards: playedCards + "/" + totalCards,
+      earnedStarsOnPlayedCards: playedCards > 0 ? (earnedCardStars + "/" + maxCardStars) : "Chưa làm thẻ nào",
+      accuracyPctOnPlayedCards: accPct !== null ? (accPct + "%") : "Chưa có dữ liệu",
+      passagesRead: subj === "viet" ? passagesRead : undefined,
+      weakPlayedTopics: weakPlayed
+    };
+  }
+
   function callAICoach(outputEl, btnEl, needWorkList) {
     var cfg = getAIConfig();
     if (!cfg.apiKey && !cfg.proxyUrl) {
@@ -2805,28 +2881,33 @@
     }
 
     var behavior = analyzeLearningBehavior();
-    var weakNames = [];
-    for (var i = 0; i < Math.min(5, (needWorkList || []).length); i++) {
-      weakNames.push(needWorkList[i].subjName + ": " + needWorkList[i].title + " (" + needWorkList[i].stars + "/3 sao)");
-    }
+    var mathSum = attemptedSubjectSummary("math");
+    var vietSum = attemptedSubjectSummary("viet");
+    var engSum = attemptedSubjectSummary("eng");
+    var weakPlayedAll = []
+      .concat(mathSum.weakPlayedTopics.map(function (t) { return "Toán: " + t; }))
+      .concat(vietSum.weakPlayedTopics.map(function (t) { return "T.Việt: " + t; }))
+      .concat(engSum.weakPlayedTopics.map(function (t) { return "T.Anh: " + t; }))
+      .slice(0, 6);
 
     var promptText = "Bạn là chuyên gia sư phạm Tiểu học (Lớp 1, chương trình Kết Nối Tri Thức 2026). " +
       "Hãy phân tích dữ liệu học tập ẩn danh dưới đây của bé 6 tuổi và trả lời ngắn gọn bằng tiếng Việt (tối đa 160 chữ), chia 3 gạch đầu dòng rõ ràng:\n" +
-      "1) Độ khó hiện tại (môn nào cần TĂNG, môn nào cần GIẢM, môn nào vừa sức)\n" +
+      "1) Độ khó hiện tại (môn nào cần TĂNG, môn nào cần GIẢM, môn nào vừa sức). " +
+      "LƯU Ý QUAN TRỌNG: CHỈ đánh giá độ khó dựa trên số thẻ và số chặng bé ĐÃ LÀM (attemptedPerformance và zpd), TUYỆT ĐỐI KHÔNG cộng các thẻ/chặng bé chưa làm vào mẫu số để kết luận yếu.\n" +
       "2) Thói quen học (tốc độ phản hồi, đoán mò hay tập trung)\n" +
       "3) Gợi ý 1 hoạt động 5 phút tối nay để ba mẹ kèm con tại nhà.\n\n" +
       "Dữ liệu JSON: " + JSON.stringify({
-        subjectStars: {
-          math: subjectStars("math") + "/" + (UNITS.math.length * 3),
-          viet: subjectStars("viet") + "/" + (UNITS.viet.length * 3),
-          eng: subjectStars("eng") + "/" + (UNITS.eng.length * 3)
+        attemptedPerformance: {
+          math: mathSum,
+          viet: vietSum,
+          eng: engSum
         },
         zpd: behavior.zpd,
         bestWindow: behavior.bestWindow,
         totalSessions: behavior.totalSessions,
         totalFastGuesses: behavior.totalFastGuesses,
         totalAudioReplays: behavior.totalAudioReplays,
-        weakTopics: weakNames
+        weakPlayedTopics: weakPlayedAll
       });
 
     btnEl.disabled = true;
