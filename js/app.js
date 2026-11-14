@@ -192,7 +192,7 @@
         } catch (e) {}
       }
     },
-    tone: function (freq, type, start, dur, vol, slideTo) {
+    tone: function (freq, type, start, dur, vol, slideTo, destNode) {
       if (!state.sound) return;
       this.init();
       if (!this.ctx) return;
@@ -205,7 +205,7 @@
       g.gain.setValueAtTime(0.0001, t);
       g.gain.exponentialRampToValueAtTime(vol || 0.25, t + 0.015);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(this.ctx.destination);
+      o.connect(g); g.connect(destNode || this.ctx.destination);
       o.onended = function () {
         try { o.disconnect(); g.disconnect(); } catch (e) {}
       };
@@ -261,6 +261,17 @@
       if (!state.bgm || !state.sound || this.bgmPlaying) return;
       this.init();
       if (!this.ctx) return;
+      if (this.bgmTimer) {
+        clearInterval(this.bgmTimer);
+        this.bgmTimer = null;
+      }
+      if (!this.bgmGain) {
+        this.bgmGain = this.ctx.createGain();
+        this.bgmGain.gain.value = 1;
+        this.bgmGain.connect(this.ctx.destination);
+      } else {
+        try { this.bgmGain.gain.setValueAtTime(1, this.ctx.currentTime); } catch (e) {}
+      }
       this.bgmPlaying = true;
       var self = this;
 
@@ -306,23 +317,23 @@
 
         // 1. Giai điệu chính mềm mại (sine ấm + hài âm nhẹ)
         if (l > 0) {
-          self.tone(l, "sine", 0, 0.42, 0.045);
-          self.tone(l * 2, "sine", 0.01, 0.20, 0.012);
+          self.tone(l, "sine", 0, 0.42, 0.045, 0, self.bgmGain);
+          self.tone(l * 2, "sine", 0.01, 0.20, 0.012, 0, self.bgmGain);
         }
 
         // 2. Hợp âm rải kiểu guitar/kalimba êm dịu
         if (a > 0) {
-          self.tone(a, "triangle", 0, 0.28, 0.022);
+          self.tone(a, "triangle", 0, 0.28, 0.022, 0, self.bgmGain);
         }
 
         // 3. Tiếng bass bossa-nova ấm
         if (b > 0) {
-          self.tone(b, "sine", 0, 0.36, 0.052);
+          self.tone(b, "sine", 0, 0.36, 0.052, 0, self.bgmGain);
         }
 
         // 4. Nhịp gõ gỗ nhẹ (soft clave) ở phách 1 và 4
         if (step % 8 === 0 || step % 8 === 3) {
-          self.tone(420, "sine", 0, 0.03, 0.014, 240);
+          self.tone(420, "sine", 0, 0.03, 0.014, 240, self.bgmGain);
         }
 
         self.bgmStep++;
@@ -333,6 +344,13 @@
       if (this.bgmTimer) {
         clearInterval(this.bgmTimer);
         this.bgmTimer = null;
+      }
+      if (this.bgmGain && this.ctx) {
+        try {
+          this.bgmGain.gain.setValueAtTime(0, this.ctx.currentTime);
+          this.bgmGain.disconnect();
+        } catch (e) {}
+        this.bgmGain = null;
       }
     },
     toggleBGM: function () {
@@ -547,7 +565,7 @@
   var DEFAULT_REAL_REWARDS = [
     { id: "rw_icecream", icon: "🍦", img: "assets/rw-icecream.jpg", name: "Kem / Bánh kẹo", cost: 150 },
     { id: "rw_swim", icon: "🏊", name: "Đi bơi / Chơi nhà banh", cost: 450 },
-    { id: "rw_car", icon: "🏎️", name: "Xe đồ chơi", cost: 600 },
+    { id: "rw_car", icon: "🏎️", img: "assets/rw-car.jpg", name: "Xe đồ chơi", cost: 600 },
     { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng hồ trẻ em", cost: 1000 }
   ];
   var STREAK_MILESTONES = [
@@ -2928,7 +2946,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v43 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Loa tròn xanh/đỏ trong khung trắng ở cả Trang chủ (bỏ Đám mây), mốc chuỗi 7 ngày = 45 xu.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v44 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Cập nhật ảnh Xe HotWheels & sửa tắt nhạc nền BGM tức thì.</div></div>';
 
     $("infoBody").innerHTML = html;
 
@@ -3038,9 +3056,16 @@
     }, supportsPassive ? { passive: false } : false);
 
     // Mở khóa âm thanh iOS & tự động bật BGM ở lần chạm đầu tiên
-    function unlockAudio() {
+    function isBgmBtnTarget(node) {
+      while (node && node !== document) {
+        if (node.className && String(node.className).indexOf("bgm-btn") > -1) return true;
+        node = node.parentNode;
+      }
+      return false;
+    }
+    function unlockAudio(e) {
       Sound.init();
-      if (state.bgm && !Sound.bgmPlaying) {
+      if (state.bgm && !Sound.bgmPlaying && !(e && isBgmBtnTarget(e.target))) {
         Sound.startBGM();
       }
       document.removeEventListener("touchstart", unlockAudio, false);
@@ -3052,7 +3077,8 @@
     // Gắn sự kiện các nút BGM
     var bgmBtns = document.querySelectorAll(".bgm-btn");
     for (var b = 0; b < bgmBtns.length; b++) {
-      onTap(bgmBtns[b], function () {
+      onTap(bgmBtns[b], function (e) {
+        if (e && e.stopPropagation) e.stopPropagation();
         Sound.toggleBGM();
       });
     }
