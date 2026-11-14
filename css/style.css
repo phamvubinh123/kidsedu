@@ -847,16 +847,19 @@ body.in-subscreen .cloud-layer { display: none; }
 }
 
 
-/* ---------- Nút BGM (Loa nhạc nền) ---------- */
+/* ---------- Nút BGM (Loa nhạc nền tròn xanh/đỏ) ---------- */
 .bgm-btn {
-  font-size: 22px;
+  width: 36px; height: 36px; padding: 0; border: none; border-radius: 50%;
+  background: transparent; cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
   position: relative;
   display: -webkit-inline-flex; display: inline-flex;
   -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
   transition: transform 0.15s;
 }
-.bgm-btn svg { width: 24px; height: 24px; display: block; }
+.bgm-btn:active { -webkit-transform: scale(0.92); transform: scale(0.92); }
+.bgm-btn svg { width: 36px; height: 36px; display: block; }
 .bgm-btn.on {
   animation: bgmPulse 2.4s ease-in-out infinite;
 }

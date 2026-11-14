@@ -552,7 +552,7 @@
   ];
   var STREAK_MILESTONES = [
     { days: 3, coins: 15, label: "3 ngày liên tiếp" },
-    { days: 7, coins: 40, label: "7 ngày chăm chỉ" },
+    { days: 7, coins: 45, label: "7 ngày chăm chỉ" },
     { days: 14, coins: 60, label: "14 ngày siêu sao" },
     { days: 30, coins: 120, label: "30 ngày quán quân" }
   ];
@@ -1482,16 +1482,21 @@
   // ---------------------------------------------------------
   // 8B. QUẢN LÝ BGM & PHÒNG LUYỆN ĐỌC ĐOẠN VĂN
   // ---------------------------------------------------------
-  var SPEAKER_ON_SVG = '<svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true">' +
-    '<path d="M5 12h6l8-6v20l-8-6H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" fill="#38bdf8" stroke="#0369a1" stroke-width="2" stroke-linejoin="round"/>' +
-    '<path d="M22 10.5c2.2 2.2 2.2 8.8 0 11" fill="none" stroke="#f97316" stroke-width="2.6" stroke-linecap="round"/>' +
-    '<path d="M25.5 7.5c3.8 4.2 3.8 12.8 0 17" fill="none" stroke="#fbbf24" stroke-width="2.6" stroke-linecap="round"/>' +
+  var SPEAKER_ON_SVG = '<svg viewBox="0 0 48 48" width="36" height="36" aria-hidden="true">' +
+    '<circle cx="24" cy="24" r="23" fill="#22b14c"/>' +
+    '<rect x="9" y="18" width="6" height="12" rx="3" fill="#ffffff"/>' +
+    '<polygon points="14,18 24,10 24,38 14,30" fill="#ffffff"/>' +
+    '<path d="M28 17c3.2 3.2 3.2 10.8 0 14" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>' +
+    '<path d="M33 13c5.2 5.4 5.2 16.6 0 22" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>' +
   '</svg>';
-  var SPEAKER_OFF_SVG = '<svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true">' +
-    '<path d="M5 12h6l8-6v20l-8-6H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" fill="#38bdf8" stroke="#0369a1" stroke-width="2" stroke-linejoin="round"/>' +
-    '<path d="M22 10.5c2.2 2.2 2.2 8.8 0 11" fill="none" stroke="#f97316" stroke-width="2.4" stroke-linecap="round" opacity="0.5"/>' +
-    '<line x1="5" y1="27" x2="27" y2="5" stroke="#ffffff" stroke-width="5.2" stroke-linecap="round"/>' +
-    '<line x1="5" y1="27" x2="27" y2="5" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>' +
+  var SPEAKER_OFF_SVG = '<svg viewBox="0 0 48 48" width="36" height="36" aria-hidden="true">' +
+    '<circle cx="24" cy="24" r="23" fill="#ed1c24"/>' +
+    '<rect x="9" y="18" width="6" height="12" rx="3" fill="#ffffff"/>' +
+    '<polygon points="14,18 24,10 24,38 14,30" fill="#ffffff"/>' +
+    '<path d="M28 17c3.2 3.2 3.2 10.8 0 14" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>' +
+    '<path d="M33 13c5.2 5.4 5.2 16.6 0 22" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"/>' +
+    '<line x1="12" y1="12" x2="36" y2="36" stroke="#ed1c24" stroke-width="5.5" stroke-linecap="round"/>' +
+    '<line x1="12" y1="12" x2="36" y2="36" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round"/>' +
   '</svg>';
 
   function updateBgmButtons() {
@@ -2923,7 +2928,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v42 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Yêu cầu phụ huynh xác nhận phép nhân khi bấm "Bé đã đọc xong".</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v43 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Loa tròn xanh/đỏ trong khung trắng ở cả Trang chủ (bỏ Đám mây), mốc chuỗi 7 ngày = 45 xu.</div></div>';
 
     $("infoBody").innerHTML = html;
 
@@ -3091,7 +3096,7 @@
     onTap($("profileBtn"), function () { openProfileModal(); });
     onTap($("homeAvatar"), function () { openProfileModal(); });
     if ($("topReportBtn")) onTap($("topReportBtn"), function () { openReport(); });
-    onTap($("syncPill"), function () {
+    if ($("syncPill")) onTap($("syncPill"), function () {
       Sound.click();
       if (CloudSync.db) {
         window.alert("🟢 Trạng thái: Đã kết nối đám mây Firebase!\nMọi tiến độ của bé Hoàng Long và các bé khác sẽ tự động đồng bộ giữa iPad và iPhone.");

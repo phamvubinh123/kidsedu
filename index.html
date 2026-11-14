@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/mascot.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=42">
+  <link rel="stylesheet" href="css/style.css?v=43">
 </head>
 <body>
 
@@ -33,8 +33,8 @@
         <div class="tb-name">Chào <span id="kidName">HOÀNG LONG</span> <span class="tb-caret">▾</span></div>
         <div class="tb-level" id="kidLevel">Cấp 1 • Mầm Non Chăm Chỉ</div>
       </div>
-      <div class="sync-pill" id="syncPill" title="Trạng thái đồng bộ đám mây"><span id="syncDot" class="sync-dot"></span><span id="syncLabel">Đám mây</span></div>
       <div class="coin-pill"><span id="coinCount">0</span><i class="coin"></i></div>
+      <button class="bgm-btn on" id="homeBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền" style="margin-left:8px"></button>
     </div>
 
     <!-- Thanh Nhiệm Vụ Ngày & Mục Tiêu Quà Thật -->
@@ -73,8 +73,8 @@
       <div class="pill-white map-header-pill">
         <span id="mapSubjName">ĐẢO: TOÁN 1</span>
         <span class="map-header-stars"><span id="mapStars">0/0</span> ⭐</span>
+        <button class="bgm-btn on" id="mapBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền" style="margin-left:8px"></button>
       </div>
-      <button class="icon-btn bgm-btn on" id="mapBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền" style="margin-left:6px">🎵</button>
     </div>
     <div class="map-accordion" id="mapAccordion">
       <div class="map-sizer" aria-hidden="true"><div class="map-sizer-inner"></div></div>
@@ -115,7 +115,7 @@
       <div class="hud-pill gold"><span class="hud-trophy">🏆</span>
         <div class="hud-bar"><div class="hud-bar-fill" id="hudBar"></div></div>
       </div>
-      <button class="icon-btn bgm-btn on" id="gameBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền" style="margin-right:6px">🎵</button>
+      <button class="bgm-btn on" id="gameBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền" style="margin-right:6px"></button>
       <button class="pause-btn" id="pauseBtn" aria-label="Tạm dừng">❚❚</button>
     </div>
 
@@ -147,7 +147,7 @@
         <div class="read-badge-tag" id="readWeekTag">Tuần 7</div>
         <div class="read-lesson-name" id="readLessonTitle">Về quê thăm bà</div>
       </div>
-      <button class="icon-btn bgm-btn on" id="readBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền">🎵</button>
+      <button class="bgm-btn on" id="readBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền"></button>
     </div>
 
     <!-- Thanh lọc cụm tuần, tuần & chọn bài -->
@@ -266,9 +266,9 @@
   <!-- Firebase SDK v8 (Tương thích 100% cú pháp ES5 cho iPadOS 12.5.8 đến iOS 18) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/firebase-config.js?v=42"></script>
-  <script src="js/data.js?v=42"></script>
-  <script src="js/audio-manifest.js?v=42"></script>
-  <script src="js/app.js?v=42"></script>
+  <script src="js/firebase-config.js?v=43"></script>
+  <script src="js/data.js?v=43"></script>
+  <script src="js/audio-manifest.js?v=43"></script>
+  <script src="js/app.js?v=43"></script>
 </body>
 </html>
