@@ -345,21 +345,25 @@
       }
     },
     good: function () {
-      // Hợp âm chiến thắng tươi vui + hiệu ứng chuông gió lấp lánh (sparkles)
-      var n = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
-      for (var i = 0; i < n.length; i++) {
-        this.tone(n[i], "triangle", i * 0.06, 0.22, 0.22);
-        this.tone(n[i] * 1.5, "sine", i * 0.06 + 0.02, 0.15, 0.09);
-      }
-      this.tone(2093.00, "sine", 0.36, 0.35, 0.22);
-      this.tone(2637.02, "sine", 0.44, 0.28, 0.16);
-    },
-    bad: function () {
-      // Âm thanh hoạt hình lò xo boing-boing ngộ nghĩnh, vui tai, không gây nản chí
+      // Nhạc vui nhộn tươi sáng + chuông gió lấp lánh khi bé chọn đúng
       this.init();
       if (!this.ctx || !state.sound) return;
-      this.tone(320, "triangle", 0, 0.14, 0.22, 540);
-      this.tone(220, "sine", 0.13, 0.16, 0.18, 140);
+      var notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+      var times = [0, 0.07, 0.14, 0.21, 0.30];
+      for (var i = 0; i < notes.length; i++) {
+        this.tone(notes[i], "triangle", times[i], i === notes.length - 1 ? 0.34 : 0.16, 0.24);
+        this.tone(notes[i] * 1.5, "sine", times[i] + 0.02, 0.14, 0.09);
+      }
+      this.tone(1567.98, "sine", 0.36, 0.32, 0.20);
+    },
+    bad: function () {
+      // Nhạc buồn đi xuống nhẹ nhàng (sad wah-wah) khi bé chọn sai
+      this.init();
+      if (!this.ctx || !state.sound) return;
+      this.tone(392.00, "triangle", 0.00, 0.18, 0.22, 370.00);
+      this.tone(349.23, "triangle", 0.18, 0.18, 0.22, 329.63);
+      this.tone(311.13, "triangle", 0.36, 0.38, 0.24, 246.94);
+      this.tone(196.00, "sine", 0.36, 0.38, 0.14, 164.81);
     },
     fanfare: function () {
       var n = [523.25, 523.25, 659.25, 783.99, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
@@ -563,11 +567,11 @@
 
   var BADGES = CFG.badges || [
     { icon: "🌱", name: "Mầm Non", need: 4 },
-    { icon: "🥉", name: "Huy Hiệu Đồng", need: 14 },
-    { icon: "🥈", name: "Huy Hiệu Bạc", need: 28 },
-    { icon: "🥇", name: "Huy Hiệu Vàng", need: 45 },
-    { icon: "🏆", name: "Cúp Vô Địch", need: 60 },
-    { icon: "👑", name: "Vua Tri Thức", need: 70 }
+    { icon: "🥉", name: "Huy Hiệu Đồng", need: 12 },
+    { icon: "🥈", name: "Huy Hiệu Bạc", need: 22 },
+    { icon: "🥇", name: "Huy Hiệu Vàng", need: 32 },
+    { icon: "🏆", name: "Cúp Vô Địch", need: 42 },
+    { icon: "👑", name: "Vua Tri Thức", need: 50 }
   ];
 
   var LEVELS = CFG.levels || ["Mầm Non Chăm Chỉ", "Bé Ngoan Hiếu Học", "Ong Nhỏ Thông Thái", "Nhà Thám Hiểm Nhí", "Ngôi Sao Lớp 1", "Kiện Tướng Tri Thức", "Siêu Trí Tuệ Nhí"];
@@ -1118,7 +1122,7 @@
       totalQuestions += mTotal;
     }
     var ratio = totalQuestions > 0 ? (totalCorrect / totalQuestions) : 0;
-    var stars = ratio >= 0.9 ? 5 : ratio >= 0.72 ? 4 : ratio >= 0.52 ? 3 : ratio >= 0.3 ? 2 : ratio > 0 ? 1 : 0;
+    var stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : ratio > 0 ? 1 : 0;
     return { correct: totalCorrect, total: totalQuestions, ratio: ratio, stars: stars };
   }
 
@@ -1130,7 +1134,7 @@
           if (state.passages.hasOwnProperty(k) && state.passages[k] > 0) count++;
         }
       }
-      return count >= 50 ? 5 : count >= 35 ? 4 : count >= 20 ? 3 : count >= 8 ? 2 : count >= 1 ? 1 : 0;
+      return count >= 40 ? 3 : count >= 18 ? 2 : count >= 1 ? 1 : 0;
     }
     return stageStats(subj, topic).stars;
   }
@@ -1146,7 +1150,7 @@
   }
   function maxTotalStars() {
     var t = 0;
-    for (var i = 0; i < SUBJECTS.length; i++) t += UNITS[SUBJECTS[i].id].length * 5;
+    for (var i = 0; i < SUBJECTS.length; i++) t += UNITS[SUBJECTS[i].id].length * 3;
     return t;
   }
   function unitGamesDone(subj, topic) {
@@ -1164,7 +1168,7 @@
     if (u && u.topic === "passages") return true;
     var prevTopic = UNITS[subj][idx - 1].topic;
     if (prevTopic === "passages") return unitStars(subj, prevTopic) >= 1;
-    return unitStars(subj, prevTopic) >= 3;
+    return unitStars(subj, prevTopic) >= 2;
   }
   function getAvatar(id) {
     for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i].id === id) return AVATARS[i];
@@ -1310,7 +1314,7 @@
       map += '<div class="island" data-subj="' + sj.id + '">' +
         '<div class="island-pic"><div class="island-fallback">' + sj.emoji + '</div>' +
         '<img src="' + sj.img + '" alt="" onerror="this.style.display=\'none\'"></div>' +
-        '<div class="island-label">' + sj.name + '<small>⭐ ' + subjectStars(sj.id) + "/" + (UNITS[sj.id].length * 5) + "</small></div>" +
+        '<div class="island-label">' + sj.name + '<small>⭐ ' + subjectStars(sj.id) + "/" + (UNITS[sj.id].length * 3) + "</small></div>" +
         "</div>";
     }
     $("islandMap").innerHTML = map;
@@ -1386,7 +1390,7 @@
 
   function starsHTML(n) {
     var h = "";
-    for (var i = 0; i < 5; i++) h += '<span class="' + (i < n ? "" : "off") + '">⭐</span>';
+    for (var i = 0; i < 3; i++) h += '<span class="' + (i < n ? "" : "off") + '">⭐</span>';
     return h;
   }
 
@@ -1398,7 +1402,7 @@
     var sj = subjectById(curSubj);
     var units = UNITS[curSubj];
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
-    $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 5);
+    $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 3);
 
     var cards = document.querySelectorAll("#mapAccordion .map-card");
     for (var ci = 0; ci < cards.length; ci++) {
@@ -1535,7 +1539,7 @@
       var sId = MAP_ORDER[mi];
       renderSingleIslandMap(sId, $(MAP_PATH_IDS[sId]));
       var stripEl = $(MAP_STRIP_STAR_IDS[sId]);
-      if (stripEl) stripEl.innerHTML = subjectStars(sId) + "/" + (UNITS[sId].length * 5) + " ⭐";
+      if (stripEl) stripEl.innerHTML = subjectStars(sId) + "/" + (UNITS[sId].length * 3) + " ⭐";
     }
     bindMapControlsOnce();
     slideToSubject(curSubj, !!instant);
@@ -1554,7 +1558,7 @@
     var u = UNITS[curSubj][curUnitIdx];
     var stInfo = stageStats(curSubj, u.topic);
     $("modeTitle").innerHTML = "Bài " + (curUnitIdx + 1) + ": " + u.icon + " " + u.title +
-      '<div style="font-size:12px;font-weight:700;color:#b45309;margin-top:2px">⭐ ' + stInfo.stars + '/5 sao • Đúng ' + stInfo.correct + '/' + stInfo.total + ' câu (' + Math.round(stInfo.ratio * 100) + '%)</div>';
+      '<div style="font-size:12px;font-weight:700;color:#b45309;margin-top:2px">⭐ ' + stInfo.stars + '/3 sao • Đúng ' + stInfo.correct + '/' + stInfo.total + ' câu (' + Math.round(stInfo.ratio * 100) + '%)</div>';
     var p = state.progress[unitKey(curSubj, u.topic)] || {};
     var html = "";
     for (var i = 0; i < MODES.length; i++) {
@@ -2103,12 +2107,26 @@
     }
   }
 
+  function flashFeedback(isGood) {
+    var st = $("gameStage");
+    if (!st) return;
+    removeClass(st, "flash-good");
+    removeClass(st, "flash-bad");
+    void st.offsetWidth;
+    addClass(st, isGood ? "flash-good" : "flash-bad");
+    setTimeout(function () {
+      removeClass(st, "flash-good");
+      removeClass(st, "flash-bad");
+    }, 650);
+  }
+
   function answerQuiz(btn, q) {
     if (game.locked || hasClass(btn, "disabled")) return;
     game.locked = true; // Chỉ 1 cơ hội duy nhất, khóa ngay lập tức!
     var val = btn.getAttribute("data-val");
     if (val === q.answer) {
       addClass(btn, "correct");
+      flashFeedback(true);
       var pts = 10;
       game.score += pts;
       updateHud();
@@ -2122,6 +2140,7 @@
     } else {
       // CHỌN SAI -> FAILED NGAY LẬP TỨC!
       addClass(btn, "wrong");
+      flashFeedback(false);
       Sound.bad();
       var all = $("gameStage").querySelectorAll(".stone");
       for (var i = 0; i < all.length; i++) {
@@ -2211,6 +2230,7 @@
       star.innerHTML = "🌟";
       arena.appendChild(star);
       addClass(el, "ok");
+      flashFeedback(true);
       Sound.pop();
       later(function () { addClass(el, "popped"); Sound.good(); }, 150);
       var pts = 10;
@@ -2226,6 +2246,7 @@
       star.innerHTML = "💨";
       arena.appendChild(star);
       addClass(el, "popped");
+      flashFeedback(false);
       Sound.pop();
       later(function () { Sound.bad(); }, 100);
       say("Chưa đúng rồi! Đáp án đúng là: <b>" + esc(q.answer) + "</b> 🎈", "bad");
@@ -2346,6 +2367,7 @@
       later(function () {
         removeClass(a, "flipped"); removeClass(b, "flipped");
         addClass(a, "matched"); addClass(b, "matched");
+        flashFeedback(true);
         game.matched++;
         game.score += 10;
         updateHud();
@@ -2365,6 +2387,7 @@
       }, 450);
     } else {
       game.misses++;
+      flashFeedback(false);
       later(function () {
         Sound.bad();
         say(pick(["Chưa khớp rồi! Thử lại nha 🙂", "Nhớ vị trí thẻ nhé bé!", "Gần đúng rồi đó! 💪"]), "bad");
@@ -2435,6 +2458,7 @@
     if (leftId === rightId) {
       removeClass(leftEl, "selected"); removeClass(rightEl, "selected");
       addClass(leftEl, "matched"); addClass(rightEl, "matched");
+      flashFeedback(true);
       game.matched++;
       game.score += 10;
       updateHud();
@@ -2453,6 +2477,7 @@
       }
     } else {
       game.misses++;
+      flashFeedback(false);
       Sound.bad();
       addClass(leftEl, "wrong"); addClass(rightEl, "wrong");
       say(pick(["Chưa khớp rồi! Bé chọn cặp khác nhé 🙂", "Gần đúng rồi, thử lại nha! 💪"]), "bad");
@@ -2468,7 +2493,7 @@
   function finishGame() {
     clearTimers();
     var ratio = game.max ? game.score / game.max : 0;
-    var stars = ratio >= 0.9 ? 3 : ratio >= 0.65 ? 2 : ratio >= 0.35 ? 1 : 0;
+    var stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : ratio > 0 ? 1 : 0;
     var mode = null;
     for (var i = 0; i < MODES.length; i++) if (MODES[i].id === game.mode) mode = MODES[i];
     var coins = stars > 0 ? Math.round(mode.reward * stars / 3) : 2;
@@ -2529,9 +2554,9 @@
   function buildReportHTML() {
     var ts = totalStars();
     var maxS = maxTotalStars();
-    var mathS = subjectStars("math"), mathMax = UNITS.math.length * 5;
-    var vietS = subjectStars("viet"), vietMax = UNITS.viet.length * 5;
-    var engS = subjectStars("eng"), engMax = UNITS.eng.length * 5;
+    var mathS = subjectStars("math"), mathMax = UNITS.math.length * 3;
+    var vietS = subjectStars("viet"), vietMax = UNITS.viet.length * 3;
+    var engS = subjectStars("eng"), engMax = UNITS.eng.length * 3;
 
     var mathPct = Math.round(mathS / mathMax * 100);
     var vietPct = Math.round(vietS / vietMax * 100);
@@ -2556,7 +2581,7 @@
           icon: unit.icon,
           stars: stars
         };
-        if (stars <= 2) {
+        if (stars <= 1) {
           needWork.push(itemData);
         } else {
           mastered.push(itemData);

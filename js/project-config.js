@@ -6,7 +6,7 @@
 var PROJECT_CONFIG = {
   // 1. Định danh dự án & Bộ nhớ lưu trữ (Đổi storagePrefix khi tạo dự án mới để không trùng dữ liệu)
   appTitle: "Đảo Tri Thức",
-  appVersion: "v47 (14/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: Đánh giá 5 sao theo tỉ lệ câu đúng trên tổng câu của cả 4 thẻ.",
+  appVersion: "v48 (14/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: Thang 3 sao theo tỉ lệ đúng (chặng & thẻ), nhạc & hiệu ứng xanh/đỏ.",
   storagePrefix: "vqtt",
   firebaseRoot: "kidsedu_vqtt",
 
@@ -24,14 +24,14 @@ var PROJECT_CONFIG = {
     { id: "balloon", name: "Bóng Bay Tri Thức", icon: "🎈", reward: 20, desc: "Bắn bóng đáp án" }
   ],
 
-  // 4. Hệ thống Huy hiệu & Cấp độ theo Tổng số Sao
+  // 4. Hệ thống Huy hiệu & Cấp độ theo Tổng số Sao (tối đa 54 sao)
   badges: [
     { icon: "🌱", name: "Mầm Non", need: 4 },
-    { icon: "🥉", name: "Huy Hiệu Đồng", need: 14 },
-    { icon: "🥈", name: "Huy Hiệu Bạc", need: 28 },
-    { icon: "🥇", name: "Huy Hiệu Vàng", need: 45 },
-    { icon: "🏆", name: "Cúp Vô Địch", need: 60 },
-    { icon: "👑", name: "Vua Tri Thức", need: 70 }
+    { icon: "🥉", name: "Huy Hiệu Đồng", need: 12 },
+    { icon: "🥈", name: "Huy Hiệu Bạc", need: 22 },
+    { icon: "🥇", name: "Huy Hiệu Vàng", need: 32 },
+    { icon: "🏆", name: "Cúp Vô Địch", need: 42 },
+    { icon: "👑", name: "Vua Tri Thức", need: 50 }
   ],
   levels: [
     "Mầm Non Chăm Chỉ",
