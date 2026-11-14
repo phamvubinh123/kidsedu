@@ -681,6 +681,7 @@
     realRewards: cloneDefaultRewards(),
     pinnedRewardId: CFG.defaultPinnedRewardId || "rw_icecream",
     rewardTickets: [],
+    telemetry: [],
     updatedAt: 0
   };
 
@@ -713,6 +714,7 @@
       state.pinnedRewardId = state.realRewards[0].id;
     }
     if (!Array.isArray(state.rewardTickets)) state.rewardTickets = [];
+    if (!Array.isArray(state.telemetry)) state.telemetry = [];
 
     // Đảm bảo avatar thuộc danh sách 12 hiệp sĩ hiện tại
     var validAvatar = false;
@@ -860,6 +862,7 @@
     state.realRewards = cloneDefaultRewards();
     state.pinnedRewardId = "rw_car";
     state.rewardTickets = [];
+    state.telemetry = [];
     state.updatedAt = 0;
   }
 
@@ -996,6 +999,7 @@
           realRewards: Array.isArray(data.realRewards) ? data.realRewards : cloneDefaultRewards(),
           pinnedRewardId: data.pinnedRewardId || "rw_car",
           rewardTickets: Array.isArray(data.rewardTickets) ? data.rewardTickets : [],
+          telemetry: Array.isArray(data.telemetry) ? data.telemetry.slice(-80) : [],
           updatedAt: data.updatedAt || Date.now()
         };
         this.db.ref("kidsedu/profiles/" + pid).set(payload, function (err) {
@@ -1959,7 +1963,20 @@
     Sound.stopSpeak();
     var u = UNITS[curSubj][curUnitIdx];
     var qs = shuffle(unitQuestions(curSubj, u.topic).slice());
-    game = { subj: curSubj, topic: u.topic, mode: curMode, score: 0, max: 0, idx: 0, list: [], tries: 0, locked: false, lang: curSubj === "eng" ? "en-US" : "vi-VN" };
+    // Điều chỉnh thứ tự câu hỏi thích ứng (ZPD): nếu bé đang gặp khó, xếp câu ngắn/dễ lên đầu; nếu quá dễ, ưu tiên câu dài hơn
+    if (typeof analyzeSubjectZPD === "function" && qs.length > 3) {
+      var zpd = analyzeSubjectZPD(curSubj);
+      if (zpd.status === "hard") {
+        qs.sort(function (a, b) { return String(a.prompt || "").length - String(b.prompt || "").length; });
+      } else if (zpd.status === "easy") {
+        qs.sort(function (a, b) { return String(b.prompt || "").length - String(a.prompt || "").length; });
+      }
+    }
+    game = {
+      subj: curSubj, topic: u.topic, mode: curMode, score: 0, max: 0, idx: 0, list: [], tries: 0, locked: false,
+      lang: curSubj === "eng" ? "en-US" : "vi-VN",
+      startTs: Date.now(), qStartTs: Date.now(), totalRtMs: 0, rtCount: 0, fastGuessCount: 0, audioReplays: 0, correctCount: 0, finalized: false
+    };
 
     $("mascotImg").innerHTML = mascotHTML();
     $("hudScore").innerHTML = "0";
@@ -2056,6 +2073,7 @@
     var q = game.list[game.idx];
     game.tries = 0;
     game.locked = false;
+    game.qStartTs = Date.now();
     $("boardHead").innerHTML = "Câu " + (game.idx + 1) + "/" + game.list.length;
     $("boardPrompt").innerHTML = esc(q.prompt);
     if (game.mode === "balloon") renderBalloon(q); else renderQuiz(q);
@@ -2141,7 +2159,11 @@
     if (game.locked || hasClass(btn, "disabled")) return;
     game.locked = true; // Chỉ 1 cơ hội duy nhất, khóa ngay lập tức!
     var val = btn.getAttribute("data-val");
+    var rt = Math.min(60000, Math.max(200, Date.now() - (game.qStartTs || game.startTs || Date.now())));
+    game.totalRtMs = (game.totalRtMs || 0) + rt;
+    game.rtCount = (game.rtCount || 0) + 1;
     if (val === q.answer) {
+      game.correctCount = (game.correctCount || 0) + 1;
       addClass(btn, "correct");
       flashFeedback(true);
       var pts = 10;
@@ -2156,6 +2178,7 @@
       later(function () { game.idx++; nextQuestion(); }, 1500);
     } else {
       // CHỌN SAI -> FAILED NGAY LẬP TỨC!
+      if (rt < 1200) game.fastGuessCount = (game.fastGuessCount || 0) + 1;
       addClass(btn, "wrong");
       flashFeedback(false);
       Sound.bad();
@@ -2237,6 +2260,9 @@
     if (game.locked || hasClass(el, "popped")) return;
     game.locked = true; // Chỉ 1 cơ hội duy nhất, khóa ngay lập tức!
     var val = el.getAttribute("data-val");
+    var rt = Math.min(60000, Math.max(200, Date.now() - (game.qStartTs || game.startTs || Date.now())));
+    game.totalRtMs = (game.totalRtMs || 0) + rt;
+    game.rtCount = (game.rtCount || 0) + 1;
     var arena = $("arena");
     var r = el.getBoundingClientRect(), ar = arena.getBoundingClientRect();
     var star = document.createElement("div");
@@ -2244,6 +2270,7 @@
     star.style.left = (r.left - ar.left + r.width / 2 - 20) + "px";
     star.style.top = (r.top - ar.top + 20) + "px";
     if (val === q.answer) {
+      game.correctCount = (game.correctCount || 0) + 1;
       star.innerHTML = "🌟";
       arena.appendChild(star);
       addClass(el, "ok");
@@ -2260,6 +2287,7 @@
       later(function () { game.idx++; nextQuestion(); }, 1600);
     } else {
       // BẮN SAI BÓNG -> FAILED NGAY LẬP TỨC!
+      if (rt < 1200) game.fastGuessCount = (game.fastGuessCount || 0) + 1;
       star.innerHTML = "💨";
       arena.appendChild(star);
       addClass(el, "popped");
@@ -2509,6 +2537,7 @@
   // ===== KẾT THÚC & PHẦN THƯỞNG =====
   function finishGame() {
     clearTimers();
+    if (game) game.finalized = true;
     var ratio = game.max ? game.score / game.max : 0;
     var stars = ratioToHalfStars(ratio);
     var mode = null;
@@ -2542,6 +2571,7 @@
     }
     state.coins += coins;
     var actRes = stars > 0 ? recordDailyActivity(game.subj) : { bonusCoins: 0, bonusNotes: [] };
+    if (typeof recordTelemetry === "function") recordTelemetry(true);
     saveState();
     var newBadge = countBadges() > badgesBefore;
 
@@ -2569,6 +2599,270 @@
     var ts = totalStars(), n = 0;
     for (var i = 0; i < BADGES.length; i++) if (ts >= BADGES[i].need) n++;
     return n;
+  }
+
+  // ---------------------------------------------------------
+  // 10A. HỆ THỐNG AI TRACKING HÀNH VI & PHÂN TÍCH ĐỘ KHÓ (PHA 1 + PHA 2)
+  // ---------------------------------------------------------
+  function recordTelemetry(completed) {
+    if (!game) return;
+    if (!Array.isArray(state.telemetry)) state.telemetry = [];
+    var totalQ = (game.mode === "match" || game.mode === "memory")
+      ? (game.pairs ? game.pairs.length : 0)
+      : (game.list ? game.list.length : 0);
+    if (!totalQ) totalQ = 1;
+    var ratio = game.max ? Math.min(1, Math.max(0, game.score / game.max)) : 0;
+    var correct = (game.mode === "quiz" || game.mode === "balloon")
+      ? (game.correctCount || Math.round(ratio * totalQ))
+      : Math.round(ratio * totalQ);
+    var avgMs = game.rtCount > 0
+      ? Math.round(game.totalRtMs / game.rtCount)
+      : Math.round((Date.now() - (game.startTs || Date.now())) / totalQ);
+    avgMs = Math.min(45000, Math.max(300, avgMs));
+
+    state.telemetry.push({
+      ts: Date.now(),
+      subj: game.subj,
+      topic: game.topic,
+      mode: game.mode,
+      correct: Math.min(totalQ, Math.max(0, correct)),
+      total: totalQ,
+      avgMs: avgMs,
+      fastGuessCount: game.fastGuessCount || 0,
+      audioReplays: game.audioReplays || 0,
+      completed: !!completed
+    });
+    if (state.telemetry.length > 80) {
+      state.telemetry = state.telemetry.slice(state.telemetry.length - 80);
+    }
+  }
+
+  function analyzeSubjectZPD(subj) {
+    var list = [];
+    var raw = Array.isArray(state.telemetry) ? state.telemetry : [];
+    for (var i = 0; i < raw.length; i++) {
+      if (raw[i] && raw[i].subj === subj) list.push(raw[i]);
+    }
+    if (list.length === 0) {
+      return {
+        subj: subj, status: "nodata", label: "⚪ Chưa đủ dữ liệu", cls: "nodata",
+        avgAcc: 0, avgSec: 0, sessions: 0, fastGuesses: 0, replays: 0, abandons: 0,
+        advice: "Bé hãy chơi thêm 1–2 ván để AI đo tốc độ & độ phù hợp."
+      };
+    }
+    var recent = list.slice(-8);
+    var sumC = 0, sumT = 0, sumMs = 0, fastG = 0, rep = 0, aban = 0;
+    for (var j = 0; j < recent.length; j++) {
+      var r = recent[j];
+      sumC += (r.correct || 0);
+      sumT += (r.total || 1);
+      sumMs += (r.avgMs || 4000);
+      fastG += (r.fastGuessCount || 0);
+      rep += (r.audioReplays || 0);
+      if (!r.completed) aban++;
+    }
+    var avgAcc = sumT > 0 ? Math.round((sumC / sumT) * 100) : 0;
+    var avgMs = Math.round(sumMs / recent.length);
+    var avgSec = Math.round(avgMs / 100) / 10;
+
+    var status = "optimal";
+    var label = "🟡 Vừa sức (Tối ưu)";
+    var cls = "optimal";
+    var advice = "Độ khó đang rất phù hợp! Duy trì nhịp học hiện tại.";
+
+    if (avgAcc < 50 && fastG >= 3) {
+      status = "guessing";
+      label = "⚠️ Bấm nhanh đoán mò";
+      cls = "warn";
+      advice = "Bé bấm nhanh (" + avgSec + "s/câu) khi chưa nghe hết đề. Ba mẹ nhắc bé nghe hết loa rồi chọn nhé!";
+    } else if (avgAcc < 58 || avgMs > 12000 || (aban / recent.length) > 0.3) {
+      status = "hard";
+      label = "🔴 Hơi khó • Cần GIẢM";
+      cls = "hard";
+      advice = "Đúng " + avgAcc + "% (" + avgSec + "s/câu). Nên ôn lại chặng nền & dùng Phiến Đá trước khi qua Bóng Bay.";
+    } else if (avgAcc >= 90 && avgMs <= 3800 && recent.length >= 2) {
+      status = "easy";
+      label = "🟢 Quá dễ • Nên TĂNG";
+      cls = "easy";
+      advice = "Đúng tới " + avgAcc + "% chỉ trong " + avgSec + "s/câu! Nên cho bé nhảy chặng hoặc chơi Bóng Bay tăng tốc.";
+    }
+
+    return {
+      subj: subj, status: status, label: label, cls: cls,
+      avgAcc: avgAcc, avgSec: avgSec, sessions: recent.length,
+      fastGuesses: fastG, replays: rep, abandons: aban, advice: advice
+    };
+  }
+
+  function analyzeLearningBehavior() {
+    var zpdMap = {
+      math: analyzeSubjectZPD("math"),
+      viet: analyzeSubjectZPD("viet"),
+      eng: analyzeSubjectZPD("eng")
+    };
+
+    var raw = Array.isArray(state.telemetry) ? state.telemetry : [];
+    var buckets = {
+      morning: { label: "Buổi sáng (6h–11h)", c: 0, t: 0, n: 0 },
+      afternoon: { label: "Buổi trưa/chiều (12h–17h)", c: 0, t: 0, n: 0 },
+      evening: { label: "Buổi tối (18h–22h)", c: 0, t: 0, n: 0 }
+    };
+    var totalFast = 0, totalRep = 0;
+    for (var i = 0; i < raw.length; i++) {
+      var r = raw[i];
+      totalFast += (r.fastGuessCount || 0);
+      totalRep += (r.audioReplays || 0);
+      var hr = new Date(r.ts || Date.now()).getHours();
+      var bk = (hr >= 6 && hr < 12) ? buckets.morning : (hr >= 12 && hr < 18) ? buckets.afternoon : buckets.evening;
+      bk.c += (r.correct || 0);
+      bk.t += (r.total || 0);
+      bk.n++;
+    }
+    var bestWindow = null, bestAcc = -1;
+    var bKeys = ["morning", "afternoon", "evening"];
+    for (var bi = 0; bi < bKeys.length; bi++) {
+      var b = buckets[bKeys[bi]];
+      if (b.n >= 2 && b.t > 0) {
+        var acc = Math.round((b.c / b.t) * 100);
+        if (acc > bestAcc) { bestAcc = acc; bestWindow = b.label + " (" + acc + "% đúng)"; }
+      }
+    }
+
+    return {
+      zpd: zpdMap,
+      totalSessions: raw.length,
+      bestWindow: bestWindow,
+      totalFastGuesses: totalFast,
+      totalAudioReplays: totalRep
+    };
+  }
+
+  function aiConfigStoreKey() { return STORE_PREFIX + "_ai_coach_v1"; }
+  function aiCacheStoreKey() { return STORE_PREFIX + "_ai_last_" + currentProfileId; }
+
+  function getAIConfig() {
+    try {
+      var raw = localStorage.getItem(aiConfigStoreKey());
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return { apiKey: "", proxyUrl: "" };
+  }
+  function saveAIConfig(cfg) {
+    try { localStorage.setItem(aiConfigStoreKey(), JSON.stringify(cfg || {})); } catch (e) {}
+  }
+
+  function openAIConfigModal() {
+    var cfg = getAIConfig();
+    var masked = cfg.apiKey ? (cfg.apiKey.slice(0, 6) + "••••••" + cfg.apiKey.slice(-4)) : "Chưa cài đặt";
+    var html = '<div style="margin-bottom:10px;"><button class="small-btn" id="backToSetFromAiBtn">‹ Quay lại Cài đặt</button></div>' +
+      '<div class="guide-item"><span class="gi-ic">🔐</span><div>Key AI chỉ lưu <b>riêng trên máy Ba Mẹ</b> (không đẩy lên GitHub hay máy khác). Ba Mẹ có thể lấy Gemini API Key miễn phí tại <b>aistudio.google.com</b> hoặc dùng Cloudflare Worker Proxy.</div></div>' +
+      '<div class="set-section-title" style="margin-top:10px;">🤖 Gemini API Key (Trạng thái: ' + esc(masked) + ')</div>' +
+      '<input class="parent-rw-input" id="aiKeyInput" type="password" style="width:100%;margin-bottom:10px;" placeholder="Dán Gemini API Key (AIza...) nếu muốn đổi mới">' +
+      '<div class="set-section-title">🌐 Hoặc Proxy URL (Tùy chọn)</div>' +
+      '<input class="parent-rw-input" id="aiProxyInput" type="url" style="width:100%;margin-bottom:12px;" value="' + esc(cfg.proxyUrl || "") + '" placeholder="https://your-worker.workers.dev">' +
+      '<div style="display:-webkit-flex;display:flex;gap:8px;">' +
+        '<button type="button" class="small-btn" id="saveAiCfgBtn" style="flex:1;height:40px;">💾 Lưu cấu hình AI</button>' +
+        '<button type="button" class="small-btn red" id="clearAiCfgBtn" style="height:40px;">🗑️ Xóa Key</button>' +
+      '</div>';
+
+    $("infoTitle").innerHTML = "🤖 Cấu Hình Trợ Lý AI";
+    $("infoBody").innerHTML = html;
+
+    onTap($("backToSetFromAiBtn"), function () { Sound.click(); openSettings(); });
+    onTap($("saveAiCfgBtn"), function () {
+      var nextKey = ($("aiKeyInput").value || "").trim();
+      var nextProxy = ($("aiProxyInput").value || "").trim();
+      var cur = getAIConfig();
+      saveAIConfig({
+        apiKey: nextKey ? nextKey : (cur.apiKey || ""),
+        proxyUrl: nextProxy
+      });
+      Sound.good();
+      window.alert("✅ Đã lưu cấu hình Trợ lý AI! Ba Mẹ có thể vào mục Báo Cáo để bấm 'AI Tư Vấn Sâu'.");
+      openSettings();
+    });
+    onTap($("clearAiCfgBtn"), function () {
+      saveAIConfig({ apiKey: "", proxyUrl: "" });
+      Sound.click();
+      window.alert("Đã xóa API Key khỏi máy.");
+      openAIConfigModal();
+    });
+    openOverlay("infoOverlay");
+  }
+
+  function callAICoach(outputEl, btnEl, needWorkList) {
+    var cfg = getAIConfig();
+    if (!cfg.apiKey && !cfg.proxyUrl) {
+      outputEl.innerHTML = '<div style="color:#b45309;font-size:13px;line-height:1.5">' +
+        '🔑 <b>Chưa gắn Gemini API Key.</b> Ba Mẹ vào <b>Cài đặt ➜ Trợ lý AI Phân tích (Gemini)</b> để dán Key miễn phí từ Google AI Studio nhé!</div>';
+      return;
+    }
+
+    var behavior = analyzeLearningBehavior();
+    var weakNames = [];
+    for (var i = 0; i < Math.min(5, (needWorkList || []).length); i++) {
+      weakNames.push(needWorkList[i].subjName + ": " + needWorkList[i].title + " (" + needWorkList[i].stars + "/3 sao)");
+    }
+
+    var promptText = "Bạn là chuyên gia sư phạm Tiểu học (Lớp 1, chương trình Kết Nối Tri Thức 2026). " +
+      "Hãy phân tích dữ liệu học tập ẩn danh dưới đây của bé 6 tuổi và trả lời ngắn gọn bằng tiếng Việt (tối đa 160 chữ), chia 3 gạch đầu dòng rõ ràng:\n" +
+      "1) Độ khó hiện tại (môn nào cần TĂNG, môn nào cần GIẢM, môn nào vừa sức)\n" +
+      "2) Thói quen học (tốc độ phản hồi, đoán mò hay tập trung)\n" +
+      "3) Gợi ý 1 hoạt động 5 phút tối nay để ba mẹ kèm con tại nhà.\n\n" +
+      "Dữ liệu JSON: " + JSON.stringify({
+        zpd: behavior.zpd,
+        bestWindow: behavior.bestWindow,
+        totalSessions: behavior.totalSessions,
+        totalFastGuesses: behavior.totalFastGuesses,
+        totalAudioReplays: behavior.totalAudioReplays,
+        weakTopics: weakNames
+      });
+
+    btnEl.disabled = true;
+    btnEl.innerHTML = "⏳ AI đang phân tích...";
+    outputEl.innerHTML = '<div style="color:#475569;font-size:13px;">🤖 Đang tổng hợp hành vi học tập của bé...</div>';
+
+    var endpoint = cfg.proxyUrl
+      ? cfg.proxyUrl
+      : ("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(cfg.apiKey));
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.timeout = 20000;
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      btnEl.disabled = false;
+      btnEl.innerHTML = "🤖 AI Tư Vấn Sâu Cho Ba Mẹ";
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          var res = JSON.parse(xhr.responseText);
+          var txt = "";
+          if (res && res.candidates && res.candidates[0] && res.candidates[0].content && res.candidates[0].content.parts) {
+            txt = res.candidates[0].content.parts[0].text || "";
+          } else if (res && res.reply) {
+            txt = res.reply;
+          }
+          if (!txt) throw new Error("Empty AI reply");
+          var formatted = esc(txt).replace(/\*\*(.*?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
+          try { localStorage.setItem(aiCacheStoreKey(), formatted); } catch (e) {}
+          outputEl.innerHTML = '<div class="ai-coach-reply">' + formatted + '</div>';
+          Sound.good();
+        } catch (err) {
+          outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⚠️ Không đọc được phản hồi từ AI. Vui lòng thử lại.</div>';
+        }
+      } else {
+        outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⚠️ Lỗi kết nối AI (Mã ' + xhr.status + '). Ba mẹ kiểm tra lại API Key hoặc mạng nhé.</div>';
+      }
+    };
+    xhr.ontimeout = function () {
+      btnEl.disabled = false;
+      btnEl.innerHTML = "🤖 AI Tư Vấn Sâu Cho Ba Mẹ";
+      outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⏳ Kết nối AI quá thời gian. Vui lòng thử lại!</div>';
+    };
+    xhr.send(JSON.stringify({
+      contents: [{ parts: [{ text: promptText }] }]
+    }));
   }
 
   // ---------------------------------------------------------
@@ -2637,6 +2931,34 @@
           '<div style="font-size:11px;color:#64748b;margin-top:4px">' + engPct + '%</div>' +
         '</div>' +
       '</div>' +
+    '</div>';
+
+    // Phần AI Phân Tích Hành Vi & Độ Khó (Pha 1 + Pha 2)
+    var behavior = analyzeLearningBehavior();
+    var cachedAI = "";
+    try { cachedAI = localStorage.getItem(aiCacheStoreKey()) || ""; } catch (e) {}
+    html += '<div class="ai-insight-card">' +
+      '<div class="ai-insight-head"><span>🤖 AI Theo Dõi Hành Vi & Độ Khó (ZPD)</span><small>' + behavior.totalSessions + ' phiên đã đo</small></div>' +
+      '<div class="ai-zpd-grid">';
+    var sList = [{ id: "math", name: "🏰 Toán" }, { id: "viet", name: "📚 T.Việt" }, { id: "eng", name: "🎈 T.Anh" }];
+    for (var si = 0; si < sList.length; si++) {
+      var z = behavior.zpd[sList[si].id];
+      html += '<div class="ai-zpd-item ' + z.cls + '">' +
+        '<div class="ai-zpd-top"><b>' + sList[si].name + '</b><span>' + z.label + '</span></div>' +
+        '<div class="ai-zpd-adv">' + esc(z.advice) + '</div>' +
+      '</div>';
+    }
+    html += '</div>';
+    if (behavior.bestWindow) {
+      html += '<div class="ai-meta-line">⏰ <b>Khung giờ vàng:</b> ' + esc(behavior.bestWindow) + '</div>';
+    }
+    if (behavior.totalAudioReplays >= 5) {
+      html += '<div class="ai-meta-line">🔊 Bé bấm nghe lại câu hỏi ' + behavior.totalAudioReplays + ' lần — có thể bật tốc độ đọc chậm hơn hoặc ngồi nghe cùng bé.</div>';
+    }
+    html += '<div class="ai-coach-actions">' +
+      '<button type="button" class="ai-coach-btn" id="aiCoachBtn">🤖 AI Tư Vấn Sâu Cho Ba Mẹ</button>' +
+      '</div>' +
+      '<div id="aiCoachOutput" class="ai-coach-output">' + (cachedAI ? ('<div class="ai-coach-reply">' + cachedAI + '</div>') : '') + '</div>' +
     '</div>';
 
     // Phần 1: Cần ôn tập bổ sung
@@ -2735,6 +3057,23 @@
             openModePicker();
           }
         }
+      });
+    }
+
+    // Gắn sự kiện nút "AI Tư Vấn Sâu Cho Ba Mẹ"
+    var aiBtn = $("aiCoachBtn");
+    if (aiBtn) {
+      onTap(aiBtn, function () {
+        Sound.click();
+        var needWork = [];
+        for (var s = 0; s < SUBJECTS.length; s++) {
+          var sj = SUBJECTS[s], units = UNITS[sj.id];
+          for (var u = 0; u < units.length; u++) {
+            var st = unitStars(sj.id, units[u].topic);
+            if (st <= 1) needWork.push({ subjName: sj.short, title: units[u].title, stars: st });
+          }
+        }
+        callAICoach($("aiCoachOutput"), aiBtn, needWork);
       });
     }
 
@@ -3096,6 +3435,8 @@
     // 2. CÀI ĐẶT CHO PHỤ HUYNH
     html += '<div class="set-section-title">👨‍👩‍👧 Cài Đặt Dành Cho Bố Mẹ</div>';
     html += '<div class="set-row"><span>🎟️ Duyệt phiếu quà đã đổi' + (pendingCnt ? ' <b style="color:#dc2626">(' + pendingCnt + ' chờ duyệt)</b>' : '') + '</span><button class="small-btn" id="manageRewardsBtn">' + (pendingCnt ? 'Duyệt ngay' : 'Quản lý') + '</button></div>';
+    var aiCfgNow = getAIConfig();
+    html += '<div class="set-row"><span>🤖 Trợ lý AI Phân tích (Gemini): <b>' + ((aiCfgNow.apiKey || aiCfgNow.proxyUrl) ? 'Đã gắn' : 'Chưa gắn') + '</b></span><button class="small-btn" id="configAiBtn">Cấu hình</button></div>';
     html += '<div class="set-row"><span>☁️ Đồng bộ đám mây: <b id="setCloudStatus">' + (CloudSync.db ? 'Đã kết nối' : 'Lưu trên máy') + '</b></span><button class="small-btn" id="setCloudBtn">Xem</button></div>';
     html += '<div class="set-row"><span>🔓 Mở khóa tất cả bài</span><button class="toggle' + (state.unlockAll ? " on" : "") + '" data-key="unlockAll"></button></div>';
     html += '<div class="set-row"><span>📋 Sao lưu mã tiến độ</span><button class="small-btn" id="exportBtn">Lấy mã</button></div>';
@@ -3150,6 +3491,13 @@
       if (!askParentalGate("Quản lý Quà Thật & Duyệt Phiếu")) return;
       openParentRewardsModal();
     });
+    if ($("configAiBtn")) {
+      onTap($("configAiBtn"), function () {
+        Sound.click();
+        if (!askParentalGate("Cấu hình Trợ lý AI")) return;
+        openAIConfigModal();
+      });
+    }
     onTap($("setCloudBtn"), function () {
       Sound.click();
       if (CloudSync.db) {
@@ -3345,6 +3693,7 @@
     onTap($("speakBtn"), function () {
       Sound.click();
       if (!game) return;
+      game.audioReplays = (game.audioReplays || 0) + 1;
       if (game.mode === "memory") { Sound.speak("Lật hai thẻ để tìm cặp đi cùng nhau", "vi-VN"); return; }
       if (game.mode === "match") { Sound.speak("Chạm một thẻ bên trái và một thẻ bên phải để ghép thành cặp đúng", "vi-VN"); return; }
       var q = game.list[game.idx];
@@ -3376,6 +3725,10 @@
     });
     onTap($("quitBtn"), function () {
       Sound.click(); clearTimers(); Sound.stopSpeak();
+      if (game && !game.finalized && (game.rtCount > 0 || (Date.now() - (game.startTs || Date.now())) > 4000)) {
+        game.finalized = true;
+        if (typeof recordTelemetry === "function") { recordTelemetry(false); saveState(); }
+      }
       closeOverlay("pauseOverlay");
       renderMap(); showScreen("screenMap");
     });

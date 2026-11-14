@@ -1204,6 +1204,49 @@ body.in-subscreen .cloud-layer { display: none; }
 .report-subj-box.viet .report-subj-fill { background: #22c55e; }
 .report-subj-box.eng .report-subj-fill { background: #f59e0b; }
 
+/* AI Behavioral Insights & Parent Coach */
+.ai-insight-card {
+  background: linear-gradient(180deg, #f5f3ff 0%, #eef2ff 100%);
+  border: 2px solid #c7d2fe; border-radius: 18px; padding: 12px 14px; margin-bottom: 14px;
+}
+.ai-insight-head {
+  display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between;
+  -webkit-align-items: center; align-items: center; margin-bottom: 10px;
+  font-size: 14px; font-weight: 800; color: #312e81;
+}
+.ai-insight-head small { font-size: 11px; color: #6366f1; font-weight: 700; }
+.ai-zpd-grid { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 7px; }
+.ai-zpd-item {
+  background: #ffffff; border-radius: 12px; padding: 8px 10px;
+  border-left: 4px solid #94a3b8; font-size: 12px;
+}
+.ai-zpd-item.easy { border-left-color: #22c55e; }
+.ai-zpd-item.optimal { border-left-color: #f59e0b; }
+.ai-zpd-item.hard { border-left-color: #ef4444; }
+.ai-zpd-item.warn { border-left-color: #f97316; }
+.ai-zpd-top {
+  display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between;
+  font-weight: 800; color: #1e293b; margin-bottom: 2px;
+}
+.ai-zpd-adv { font-size: 12px; color: #475569; line-height: 1.35; }
+.ai-meta-line {
+  margin-top: 8px; padding: 6px 10px; border-radius: 10px;
+  background: rgba(255,255,255,0.75); font-size: 12px; color: #334155;
+}
+.ai-coach-actions { margin-top: 10px; text-align: center; }
+.ai-coach-btn {
+  width: 100%; padding: 10px 14px; border: 0; border-radius: 14px;
+  background: linear-gradient(180deg, #6366f1 0%, #4338ca 100%);
+  color: #ffffff; font-size: 14px; font-weight: 800;
+  box-shadow: 0 3px 0 #312e81; cursor: pointer;
+}
+.ai-coach-btn:active { -webkit-transform: translateY(2px); transform: translateY(2px); box-shadow: 0 1px 0 #312e81; }
+.ai-coach-output { margin-top: 8px; }
+.ai-coach-reply {
+  background: #ffffff; border: 2px solid #c7d2fe; border-radius: 12px;
+  padding: 10px 12px; font-size: 13px; color: #1e293b; line-height: 1.5;
+}
+
 .report-section-title {
   font-size: 15px; font-weight: 800; color: #1e293b; margin: 14px 0 8px;
   display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
