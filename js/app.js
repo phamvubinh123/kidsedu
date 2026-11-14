@@ -3089,27 +3089,10 @@
     return html;
   }
 
-  var curAchieveTab = "report";
-  function openAchievements(tab) {
-    if (tab === "report" || tab === "badges") curAchieveTab = tab;
+  function openAchievements() {
     var body = $("reportBody");
     if (!body) return;
-
-    var tabsHtml = '<div class="shop-tabs" style="margin-bottom:14px">' +
-      '<button class="shop-tab' + (curAchieveTab === "report" ? " active" : "") + '" data-atab="report">📊 Tiến độ</button>' +
-      '<button class="shop-tab' + (curAchieveTab === "badges" ? " active" : "") + '" data-atab="badges">🏅 Huy hiệu</button>' +
-    '</div>';
-
-    var contentHtml = curAchieveTab === "badges" ? renderBadgesHTML() : buildReportHTML();
-    body.innerHTML = tabsHtml + contentHtml;
-
-    var tabBtns = body.querySelectorAll("[data-atab]");
-    for (var t = 0; t < tabBtns.length; t++) {
-      onTap(tabBtns[t], function () {
-        Sound.click();
-        openAchievements(this.getAttribute("data-atab"));
-      });
-    }
+    body.innerHTML = buildReportHTML();
 
     // Gắn sự kiện "Ôn ngay" từ tab Tiến độ
     var actionBtns = body.querySelectorAll(".report-item-btn");
@@ -3162,7 +3145,7 @@
 
   function openBadges() {
     Sound.click();
-    openAchievements("badges");
+    openShop("badges");
   }
 
   function openDailyQuestModal() {
@@ -3211,12 +3194,15 @@
   var curShopTab = "rewards";
   function openShop(tab) {
     ensureGamificationState();
-    if (tab === "rewards" || tab === "avatars") curShopTab = tab;
+    if (tab === "rewards" || tab === "avatars" || tab === "badges") curShopTab = tab;
     var html = '<div class="shop-tabs">' +
       '<button type="button" class="shop-tab' + (curShopTab === "rewards" ? " active" : "") + '" data-stab="rewards">🎁 Quà Của Bé</button>' +
       '<button type="button" class="shop-tab' + (curShopTab === "avatars" ? " active" : "") + '" data-stab="avatars">🦸 Nhân Vật</button>' +
+      '<button type="button" class="shop-tab' + (curShopTab === "badges" ? " active" : "") + '" data-stab="badges">🏅 Huy Hiệu</button>' +
       '</div>';
-    html += '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đang có <b>' + state.coins + '</b> <i class="coin sm"></i></div>';
+    if (curShopTab !== "badges") {
+      html += '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đang có <b>' + state.coins + '</b> <i class="coin sm"></i></div>';
+    }
 
     if (curShopTab === "rewards") {
       html += '<div class="reward-list">';
@@ -3254,6 +3240,9 @@
         }
       }
       $("infoTitle").innerHTML = "🎁 Đổi Quà Thật";
+    } else if (curShopTab === "badges") {
+      html += renderBadgesHTML();
+      $("infoTitle").innerHTML = "🏅 Huy Hiệu Của Bé";
     } else {
       html += '<div class="grid-cards">';
       for (var i = 0; i < AVATARS.length; i++) {
@@ -3316,7 +3305,7 @@
           openShop("rewards");
         });
       }
-    } else {
+    } else if (curShopTab === "avatars") {
       var cards = $("infoBody").querySelectorAll(".shop-card");
       for (var k = 0; k < cards.length; k++) {
         onTap(cards[k], function () {
