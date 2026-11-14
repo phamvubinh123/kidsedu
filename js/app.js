@@ -2884,7 +2884,7 @@
             if (state.realRewards[x].id === rid) { reward = state.realRewards[x]; break; }
           }
           if (!reward || state.coins < reward.cost) { Sound.bad(); return; }
-          if (!window.confirm("Bé muốn đổi " + reward.cost + " xu để lấy " + reward.icon + " " + reward.name + " nhé?")) return;
+          if (!askParentalGate("Đổi quà " + reward.name + " (" + reward.cost + " xu)")) return;
           state.coins -= reward.cost;
           state.rewardTickets.push({
             id: "tk_" + Date.now(),
@@ -2979,19 +2979,29 @@
     var html = '<div style="margin-bottom:10px;"><button class="small-btn" id="backToSetBtn">‹ Quay lại Cài đặt</button></div>';
 
     var pendingList = [];
+    var deliveredList = [];
     for (var ti = state.rewardTickets.length - 1; ti >= 0; ti--) {
       if (state.rewardTickets[ti].status === "pending") pendingList.push({ idx: ti, tk: state.rewardTickets[ti] });
+      else deliveredList.push({ idx: ti, tk: state.rewardTickets[ti] });
     }
-    html += '<div class="set-section-title">🎟️ Phiếu Quà Chờ Duyệt (' + pendingList.length + ')</div>';
+    html += '<div class="set-section-title">🎟️ Phiếu Quà Chờ Ba Mẹ Duyệt (' + pendingList.length + ')</div>';
     if (pendingList.length === 0) {
       html += '<div style="font-size:13px;color:#64748b;margin-bottom:10px;">Hiện chưa có phiếu quà nào chờ duyệt.</div>';
     } else {
       for (var pi = 0; pi < pendingList.length; pi++) {
         var item = pendingList[pi];
         html += '<div class="ticket-row">' +
-          '<span>' + esc(item.tk.icon || "🎁") + ' <b>' + esc(item.tk.rewardName) + '</b> (' + item.tk.cost + ' <i class="coin sm"></i>)</span>' +
-          '<span><button type="button" class="small-btn" data-deliver="' + item.idx + '">✅ Đã trao</button> ' +
+          '<span>' + esc(item.tk.icon || "🎁") + ' <b>' + esc(item.tk.rewardName) + '</b> (' + item.tk.cost + ' <i class="coin sm"></i> · ' + esc(item.tk.date || "") + ')</span>' +
+          '<span><button type="button" class="small-btn" data-deliver="' + item.idx + '">✅ Duyệt trao</button> ' +
           '<button type="button" class="small-btn red" data-refund="' + item.idx + '">↩️ Hoàn xu</button></span></div>';
+      }
+    }
+    if (deliveredList.length > 0) {
+      html += '<div class="set-section-title" style="margin-top:10px;">✅ Quà Đã Duyệt & Trao (' + deliveredList.length + ')</div>';
+      for (var li = 0; li < Math.min(5, deliveredList.length); li++) {
+        var dItem = deliveredList[li];
+        html += '<div class="ticket-row"><span>' + esc(dItem.tk.icon || "🎁") + ' <b>' + esc(dItem.tk.rewardName) + '</b> (' + esc(dItem.tk.date || "") + ')</span>' +
+          '<span class="ticket-status delivered">✅ Đã duyệt</span></div>';
       }
     }
 
@@ -3085,7 +3095,7 @@
 
     // 2. CÀI ĐẶT CHO PHỤ HUYNH
     html += '<div class="set-section-title">👨‍👩‍👧 Cài Đặt Dành Cho Bố Mẹ</div>';
-    html += '<div class="set-row"><span>🎁 Quà thật & Duyệt phiếu' + (pendingCnt ? ' <b style="color:#dc2626">(' + pendingCnt + ' chờ)</b>' : '') + '</span><button class="small-btn" id="manageRewardsBtn">Quản lý</button></div>';
+    html += '<div class="set-row"><span>🎟️ Duyệt phiếu quà đã đổi' + (pendingCnt ? ' <b style="color:#dc2626">(' + pendingCnt + ' chờ duyệt)</b>' : '') + '</span><button class="small-btn" id="manageRewardsBtn">' + (pendingCnt ? 'Duyệt ngay' : 'Quản lý') + '</button></div>';
     html += '<div class="set-row"><span>☁️ Đồng bộ đám mây: <b id="setCloudStatus">' + (CloudSync.db ? 'Đã kết nối' : 'Lưu trên máy') + '</b></span><button class="small-btn" id="setCloudBtn">Xem</button></div>';
     html += '<div class="set-row"><span>🔓 Mở khóa tất cả bài</span><button class="toggle' + (state.unlockAll ? " on" : "") + '" data-key="unlockAll"></button></div>';
     html += '<div class="set-row"><span>📋 Sao lưu mã tiến độ</span><button class="small-btn" id="exportBtn">Lấy mã</button></div>';
