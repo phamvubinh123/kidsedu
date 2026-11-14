@@ -545,10 +545,10 @@
   var currentProfileId = "hoanglong";
 
   var DEFAULT_REAL_REWARDS = [
-    { id: "rw_tv", icon: "📺", img: "assets/rw-tv.jpg", name: "Xem TV / Chơi game 30'", cost: 100 },
-    { id: "rw_sticker", icon: "🍦", img: "assets/rw-icecream.jpg", name: "Kem / Sticker Siêu Nhân", cost: 150 },
-    { id: "rw_car", icon: "🏎️", name: "Xe Đồ Chơi HotWheels", cost: 600 },
-    { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng Hồ Trẻ Em", cost: 1200 }
+    { id: "rw_icecream", icon: "🍦", img: "assets/rw-icecream.jpg", name: "Kem / Bánh kẹo", cost: 150 },
+    { id: "rw_swim", icon: "🏊", name: "Đi bơi / Chơi nhà banh", cost: 450 },
+    { id: "rw_car", icon: "🏎️", name: "Xe đồ chơi", cost: 600 },
+    { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng hồ trẻ em", cost: 1000 }
   ];
   var STREAK_MILESTONES = [
     { days: 3, coins: 15, label: "3 ngày liên tiếp" },
@@ -593,7 +593,7 @@
     streak: { count: 0, lastDate: "", best: 0, claimedMilestones: {} },
     dailyQuest: { date: "", math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 },
     realRewards: cloneDefaultRewards(),
-    pinnedRewardId: "rw_car",
+    pinnedRewardId: "rw_icecream",
     rewardTickets: [],
     updatedAt: 0
   };
@@ -610,28 +610,20 @@
     if (!Array.isArray(state.realRewards) || state.realRewards.length === 0) {
       state.realRewards = cloneDefaultRewards();
     } else {
-      // Đồng bộ hình ảnh mới và thay rw_book -> rw_tv lên đầu cho hồ sơ đã lưu
-      var hasTv = false;
-      var bookIdx = -1;
+      // Đồng bộ bộ quà chuẩn (Kem/Bánh kẹo -> Đi bơi/Nhà banh -> Xe đồ chơi -> Đồng hồ) + giữ quà ba mẹ tự thêm
+      var legacyIds = { rw_book: 1, rw_tv: 1, rw_sticker: 1, rw_icecream: 1, rw_swim: 1, rw_car: 1, rw_watch: 1 };
+      var customRewards = [];
       for (var ri = 0; ri < state.realRewards.length; ri++) {
         var rw = state.realRewards[ri];
-        if (rw.id === "rw_tv") hasTv = true;
-        if (rw.id === "rw_book") bookIdx = ri;
-        for (var di = 0; di < DEFAULT_REAL_REWARDS.length; di++) {
-          if (DEFAULT_REAL_REWARDS[di].id === rw.id && DEFAULT_REAL_REWARDS[di].img) {
-            rw.img = DEFAULT_REAL_REWARDS[di].img;
-          }
-        }
+        if (rw && rw.id && !legacyIds[rw.id]) customRewards.push(rw);
       }
-      if (bookIdx > -1) {
-        state.realRewards.splice(bookIdx, 1);
-      }
-      if (!hasTv && bookIdx > -1) {
-        var tv = DEFAULT_REAL_REWARDS[0];
-        state.realRewards.unshift({ id: tv.id, icon: tv.icon, img: tv.img, name: tv.name, cost: tv.cost });
-      }
+      state.realRewards = cloneDefaultRewards().concat(customRewards);
     }
-    if (!state.pinnedRewardId && state.realRewards.length > 0) {
+    var pinnedExists = false;
+    for (var pi = 0; pi < state.realRewards.length; pi++) {
+      if (state.realRewards[pi].id === state.pinnedRewardId) { pinnedExists = true; break; }
+    }
+    if (!pinnedExists && state.realRewards.length > 0) {
       state.pinnedRewardId = state.realRewards[0].id;
     }
     if (!Array.isArray(state.rewardTickets)) state.rewardTickets = [];
@@ -1174,7 +1166,7 @@
         questSubEl.innerHTML = "✅ Đã xong 3/3 hôm nay";
         removeClass(questSubEl, "ready");
       } else {
-        questSubEl.innerHTML = "Nhiệm vụ: " + doneQ + "/3 (+15🪙)";
+        questSubEl.innerHTML = "Nhiệm vụ: " + doneQ + "/3 (+15 <i class='coin sm'></i>)";
         removeClass(questSubEl, "ready");
       }
     }
@@ -1182,7 +1174,10 @@
     var goalBtn = $("gqGoalBtn");
     if (pinned && $("gqGoalName") && $("gqGoalNum") && $("gqGoalFill")) {
       var pct = Math.min(100, Math.round((state.coins / (pinned.cost || 1)) * 100));
-      $("gqGoalName").innerHTML = pinned.icon + " " + esc(pinned.name);
+      var goalVisual = pinned.img
+        ? '<img class="gq-goal-thumb" src="' + esc(pinned.img) + '" alt="">'
+        : esc(pinned.icon) + " ";
+      $("gqGoalName").innerHTML = goalVisual + esc(pinned.name);
       $("gqGoalNum").innerHTML = state.coins + "/" + pinned.cost;
       $("gqGoalFill").style.width = pct + "%";
       if (goalBtn) {
@@ -1487,15 +1482,27 @@
   // ---------------------------------------------------------
   // 8B. QUẢN LÝ BGM & PHÒNG LUYỆN ĐỌC ĐOẠN VĂN
   // ---------------------------------------------------------
+  var SPEAKER_ON_SVG = '<svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true">' +
+    '<path d="M5 12h6l8-6v20l-8-6H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" fill="#38bdf8" stroke="#0369a1" stroke-width="2" stroke-linejoin="round"/>' +
+    '<path d="M22 10.5c2.2 2.2 2.2 8.8 0 11" fill="none" stroke="#f97316" stroke-width="2.6" stroke-linecap="round"/>' +
+    '<path d="M25.5 7.5c3.8 4.2 3.8 12.8 0 17" fill="none" stroke="#fbbf24" stroke-width="2.6" stroke-linecap="round"/>' +
+  '</svg>';
+  var SPEAKER_OFF_SVG = '<svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true">' +
+    '<path d="M5 12h6l8-6v20l-8-6H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" fill="#38bdf8" stroke="#0369a1" stroke-width="2" stroke-linejoin="round"/>' +
+    '<path d="M22 10.5c2.2 2.2 2.2 8.8 0 11" fill="none" stroke="#f97316" stroke-width="2.4" stroke-linecap="round" opacity="0.5"/>' +
+    '<line x1="5" y1="27" x2="27" y2="5" stroke="#ffffff" stroke-width="5.2" stroke-linecap="round"/>' +
+    '<line x1="5" y1="27" x2="27" y2="5" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>' +
+  '</svg>';
+
   function updateBgmButtons() {
     var btns = document.querySelectorAll(".bgm-btn");
     for (var i = 0; i < btns.length; i++) {
       if (state.bgm) {
-        btns[i].innerHTML = "🎵";
+        btns[i].innerHTML = SPEAKER_ON_SVG;
         removeClass(btns[i], "off");
         addClass(btns[i], "on");
       } else {
-        btns[i].innerHTML = "🔇";
+        btns[i].innerHTML = SPEAKER_OFF_SVG;
         removeClass(btns[i], "on");
         addClass(btns[i], "off");
       }
@@ -1779,7 +1786,7 @@
 
     var totalEarned = rewardCoins + (actRes.bonusCoins || 0);
     if (totalEarned > 0) {
-      floatPoints("+" + totalEarned + " 🪙", $("btnReadFinish"));
+      floatPoints("+" + totalEarned + " <i class='coin sm'></i>", $("btnReadFinish"));
       setTimeout(function () { Sound.coin(); }, 900);
     }
 
@@ -2567,17 +2574,17 @@
     var dq = state.dailyQuest;
     var doneQ = (dq.math ? 1 : 0) + (dq.viet ? 1 : 0) + (dq.eng ? 1 : 0);
     var html = '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#d97706;font-size:16px">🔥 Chuỗi học liên tiếp: <b>' + (state.streak.count || 0) + '</b> ngày (Kỷ lục: ' + (state.streak.best || 0) + ')</div>';
-    html += '<div class="quest-row' + (dq.math ? ' done' : '') + '"><span>' + (dq.math ? '✅' : '🧮') + ' Chơi 1 lượt Toán 1</span><span class="quest-reward">' + (dq.math ? 'Đã nhận +5 🪙' : '+5 🪙') + '</span></div>';
-    html += '<div class="quest-row' + (dq.viet ? ' done' : '') + '"><span>' + (dq.viet ? '✅' : '📖') + ' Chơi / Đọc 1 bài Tiếng Việt</span><span class="quest-reward">' + (dq.viet ? 'Đã nhận +5 🪙' : '+5 🪙') + '</span></div>';
-    html += '<div class="quest-row' + (dq.eng ? ' done' : '') + '"><span>' + (dq.eng ? '✅' : '🌍') + ' Chơi 1 lượt Tiếng Anh</span><span class="quest-reward">' + (dq.eng ? 'Đã nhận +5 🪙' : '+5 🪙') + '</span></div>';
+    html += '<div class="quest-row' + (dq.math ? ' done' : '') + '"><span>' + (dq.math ? '✅' : '🧮') + ' Chơi 1 lượt Toán 1</span><span class="quest-reward">' + (dq.math ? 'Đã nhận +5 <i class="coin sm"></i>' : '+5 <i class="coin sm"></i>') + '</span></div>';
+    html += '<div class="quest-row' + (dq.viet ? ' done' : '') + '"><span>' + (dq.viet ? '✅' : '📖') + ' Chơi / Đọc 1 bài Tiếng Việt</span><span class="quest-reward">' + (dq.viet ? 'Đã nhận +5 <i class="coin sm"></i>' : '+5 <i class="coin sm"></i>') + '</span></div>';
+    html += '<div class="quest-row' + (dq.eng ? ' done' : '') + '"><span>' + (dq.eng ? '✅' : '🌍') + ' Chơi 1 lượt Tiếng Anh</span><span class="quest-reward">' + (dq.eng ? 'Đã nhận +5 <i class="coin sm"></i>' : '+5 <i class="coin sm"></i>') + '</span></div>';
 
     html += '<div style="text-align:center;margin-top:14px;">';
     if (doneQ >= 3 && !dq.claimed) {
-      html += '<button class="btn-green" id="claimDailyChestBtn">🎁 Mở Rương Ngày (+15 🪙)</button>';
+      html += '<button class="btn-green" id="claimDailyChestBtn">🎁 Mở Rương Ngày (+15 <i class="coin sm"></i>)</button>';
     } else if (dq.claimed) {
       html += '<div style="font-weight:800;color:#15803d;padding:10px;background:#dcfce7;border-radius:14px;">🎉 Bé đã mở Rương Ngày hôm nay rồi!</div>';
     } else {
-      html += '<div style="font-weight:700;color:#475569;font-size:13px;">Hoàn thành cả 3 nhiệm vụ (' + doneQ + '/3) để mở Rương Ngày nhận thêm <b>+15 🪙</b>!</div>';
+      html += '<div style="font-weight:700;color:#475569;font-size:13px;">Hoàn thành cả 3 nhiệm vụ (' + doneQ + '/3) để mở Rương Ngày nhận thêm <b>+15 <i class="coin sm"></i></b>!</div>';
     }
     html += '</div>';
 
@@ -2585,7 +2592,7 @@
     for (var mi = 0; mi < STREAK_MILESTONES.length; mi++) {
       var ms = STREAK_MILESTONES[mi];
       var got = !!(state.streak.claimedMilestones && state.streak.claimedMilestones[String(ms.days)]);
-      html += '<div class="quest-row' + (got ? ' done' : '') + '"><span>' + (got ? '✅' : '🔥') + ' ' + ms.label + '</span><span class="quest-reward">+' + ms.coins + ' 🪙</span></div>';
+      html += '<div class="quest-row' + (got ? ' done' : '') + '"><span>' + (got ? '✅' : '🔥') + ' ' + ms.label + '</span><span class="quest-reward">+' + ms.coins + ' <i class="coin sm"></i></span></div>';
     }
 
     $("infoTitle").innerHTML = "🎯 Nhiệm Vụ & Chuỗi Ngày";
@@ -2630,7 +2637,7 @@
           '<div class="rw-ic">' + rwIconHtml + '</div>' +
           '<div class="rw-mid">' +
             '<div class="rw-name">' + esc(r.name) + '</div>' +
-            '<div class="rw-meta">' + r.cost + ' 🪙 · ' + (canBuy ? 'Đủ xu đổi rồi! 🎉' : 'Còn thiếu ' + needMore + ' xu') + '</div>' +
+            '<div class="rw-meta">' + r.cost + ' <i class="coin sm"></i> · ' + (canBuy ? 'Đủ xu đổi rồi! 🎉' : 'Còn thiếu ' + needMore + ' xu') + '</div>' +
             '<div class="rw-bar"><div class="rw-bar-fill" style="width:' + pct + '%"></div></div>' +
           '</div>' +
           '<div class="rw-actions">' +
@@ -2646,7 +2653,7 @@
           var tk = state.rewardTickets[ti];
           var stCls = tk.status === "delivered" ? "delivered" : "pending";
           var stTxt = tk.status === "delivered" ? "✅ Đã nhận" : "⏳ Chờ Ba Mẹ";
-          html += '<div class="ticket-row"><span>' + esc(tk.icon || "🎁") + ' <b>' + esc(tk.rewardName) + '</b> (' + tk.cost + ' 🪙 · ' + esc(tk.date || "") + ')</span>' +
+          html += '<div class="ticket-row"><span>' + esc(tk.icon || "🎁") + ' <b>' + esc(tk.rewardName) + '</b> (' + tk.cost + ' <i class="coin sm"></i> · ' + esc(tk.date || "") + ')</span>' +
             '<span class="ticket-status ' + stCls + '">' + stTxt + '</span></div>';
         }
       }
@@ -2761,7 +2768,7 @@
         '<div class="profile-avatar">' + avHTML + '</div>' +
         '<div class="profile-info">' +
           '<div class="profile-name">' + esc(p.name) + '</div>' +
-          '<div class="profile-meta">⭐ ' + stars + ' sao • 🪙 ' + coins + ' xu</div>' +
+          '<div class="profile-meta">⭐ ' + stars + ' sao • <i class="coin sm"></i> ' + coins + ' xu</div>' +
         '</div>' +
         '<div class="profile-tag">' + (isActive ? 'Đang học ✅' : 'Chọn') + '</div>' +
         (profiles.length > 1 ? '<button type="button" class="profile-del" data-del-pid="' + esc(p.id) + '" title="Xóa hồ sơ">🗑️</button>' : '') +
@@ -2800,7 +2807,7 @@
       for (var pi = 0; pi < pendingList.length; pi++) {
         var item = pendingList[pi];
         html += '<div class="ticket-row">' +
-          '<span>' + esc(item.tk.icon || "🎁") + ' <b>' + esc(item.tk.rewardName) + '</b> (' + item.tk.cost + ' 🪙)</span>' +
+          '<span>' + esc(item.tk.icon || "🎁") + ' <b>' + esc(item.tk.rewardName) + '</b> (' + item.tk.cost + ' <i class="coin sm"></i>)</span>' +
           '<span><button type="button" class="small-btn" data-deliver="' + item.idx + '">✅ Đã trao</button> ' +
           '<button type="button" class="small-btn red" data-refund="' + item.idx + '">↩️ Hoàn xu</button></span></div>';
       }
@@ -2809,7 +2816,7 @@
     html += '<div class="set-section-title" style="margin-top:12px;">🎁 Danh Sách Quà Thật</div>';
     for (var ri = 0; ri < state.realRewards.length; ri++) {
       var r = state.realRewards[ri];
-      html += '<div class="ticket-row"><span>' + esc(r.icon) + ' <b>' + esc(r.name) + '</b> — ' + r.cost + ' 🪙</span>' +
+      html += '<div class="ticket-row"><span>' + esc(r.icon) + ' <b>' + esc(r.name) + '</b> — ' + r.cost + ' <i class="coin sm"></i></span>' +
         '<button type="button" class="small-btn red" data-delrw="' + esc(r.id) + '">Xóa</button></div>';
     }
 
@@ -2915,7 +2922,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v39 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Nạp đầy đủ toàn bộ 83 bài học (Bài 1 → Bài 83) từ PDF SGK Tiếng Việt 1 Tập 1, lọc theo Cụm tuần / Tuần / Bài.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v41 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Biểu tượng loa hoạt hình sáng màu (chéo đỏ khi tắt), đồng xu vàng đồng bộ toàn app, cập nhật bộ quà & ảnh mục tiêu trang chủ.</div></div>';
 
     $("infoBody").innerHTML = html;
 

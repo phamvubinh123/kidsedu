@@ -88,7 +88,12 @@ body.in-subscreen .cloud-layer { display: none; }
   vertical-align: middle; margin-left: 4px; position: relative; top: -1px;
 }
 .coin.big { width: 34px; height: 34px; }
-.coin.sm { width: 18px; height: 18px; border-width: 1.5px; }
+.coin.sm { width: 16px; height: 16px; border-width: 1.5px; vertical-align: -3px; margin: 0 2px; }
+.gq-goal-thumb {
+  width: 22px; height: 22px; border-radius: 6px; object-fit: cover;
+  vertical-align: middle; margin-right: 5px; border: 1.5px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
 
 /* ---------- Thanh trên cùng ---------- */
 .topbar {
@@ -433,8 +438,10 @@ body.in-subscreen .cloud-layer { display: none; }
 .board-prompt { font-size: 22px; font-weight: 800; color: #4a2a10; text-align: center; line-height: 1.25; -webkit-flex: 1; flex: 1; }
 .speak-btn {
   width: 46px; height: 46px; border-radius: 50%; font-size: 22px; margin-left: 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  display: -webkit-inline-flex; display: inline-flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
   background: radial-gradient(circle at 40% 35%, #fff59d, #ffca28); border: 3px solid #e09b00; box-shadow: 0 3px 0 #b07800;
 }
+.speak-btn svg { width: 26px; height: 26px; display: block; }
 .speak-btn:active { -webkit-transform: translateY(2px); transform: translateY(2px); box-shadow: none; }
 
 /* --- Thẻ hiển thị hình minh họa --- */
@@ -840,18 +847,21 @@ body.in-subscreen .cloud-layer { display: none; }
 }
 
 
-/* ---------- Nút BGM (Nhạc nền) ---------- */
+/* ---------- Nút BGM (Loa nhạc nền) ---------- */
 .bgm-btn {
-  font-size: 24px;
+  font-size: 22px;
   position: relative;
-  transition: transform 0.15s, opacity 0.2s;
+  display: -webkit-inline-flex; display: inline-flex;
+  -webkit-align-items: center; align-items: center;
+  -webkit-justify-content: center; justify-content: center;
+  transition: transform 0.15s;
 }
+.bgm-btn svg { width: 24px; height: 24px; display: block; }
 .bgm-btn.on {
   animation: bgmPulse 2.4s ease-in-out infinite;
 }
 .bgm-btn.off {
-  opacity: 0.55;
-  filter: grayscale(80%);
+  opacity: 1;
 }
 @-webkit-keyframes bgmPulse {
   0%, 100% { transform: scale(1); }
