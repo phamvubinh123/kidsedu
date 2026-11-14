@@ -1083,6 +1083,45 @@
   }
 
   function unitKey(subj, topic) { return subj + "|" + topic; }
+  function expectedModeTotal(subj, topic, modeId) {
+    var qs = unitQuestions(subj, topic);
+    if (modeId === "quiz") return Math.min(8, qs.length);
+    if (modeId === "balloon") return Math.min(6, qs.length);
+    var pairsLen = (typeof buildPairs === "function") ? buildPairs(qs).length : 0;
+    if (pairsLen < 3 && typeof buildPairs === "function") {
+      pairsLen = buildPairs(QUESTION_BANK[subj] || []).length;
+    }
+    var maxPairs = modeId === "match" ? 5 : 6;
+    if (pairsLen <= 0) return maxPairs;
+    return pairsLen >= maxPairs ? maxPairs : Math.min(4, pairsLen);
+  }
+
+  function stageStats(subj, topic) {
+    var p = state.progress[unitKey(subj, topic)] || {};
+    var stats = p.stats || {};
+    var totalCorrect = 0;
+    var totalQuestions = 0;
+    for (var i = 0; i < MODES.length; i++) {
+      var mId = MODES[i].id;
+      var st = stats[mId];
+      var expected = expectedModeTotal(subj, topic, mId);
+      var mTotal = (st && st.total > 0) ? st.total : expected;
+      var mCorrect = 0;
+      if (st && typeof st.correct === "number") {
+        mCorrect = Math.min(mTotal, Math.max(0, st.correct));
+      } else if ((p[mId] || 0) > 0 && mTotal > 0) {
+        // Tương thích dữ liệu cũ chưa lưu stats: quy đổi từ số sao đã đạt ở thẻ đó
+        var oldS = p[mId];
+        mCorrect = oldS >= 3 ? mTotal : oldS === 2 ? Math.round(mTotal * 0.7) : Math.round(mTotal * 0.4);
+      }
+      totalCorrect += mCorrect;
+      totalQuestions += mTotal;
+    }
+    var ratio = totalQuestions > 0 ? (totalCorrect / totalQuestions) : 0;
+    var stars = ratio >= 0.9 ? 5 : ratio >= 0.72 ? 4 : ratio >= 0.52 ? 3 : ratio >= 0.3 ? 2 : ratio > 0 ? 1 : 0;
+    return { correct: totalCorrect, total: totalQuestions, ratio: ratio, stars: stars };
+  }
+
   function unitStars(subj, topic) {
     if (topic === "passages") {
       var count = 0;
@@ -1091,9 +1130,9 @@
           if (state.passages.hasOwnProperty(k) && state.passages[k] > 0) count++;
         }
       }
-      return count >= 40 ? 4 : count >= 20 ? 3 : count >= 8 ? 2 : count >= 1 ? 1 : 0;
+      return count >= 50 ? 5 : count >= 35 ? 4 : count >= 20 ? 3 : count >= 8 ? 2 : count >= 1 ? 1 : 0;
     }
-    return unitGamesDone(subj, topic);
+    return stageStats(subj, topic).stars;
   }
   function subjectStars(subj) {
     var units = UNITS[subj], t = 0;
@@ -1107,7 +1146,7 @@
   }
   function maxTotalStars() {
     var t = 0;
-    for (var i = 0; i < SUBJECTS.length; i++) t += UNITS[SUBJECTS[i].id].length * 4;
+    for (var i = 0; i < SUBJECTS.length; i++) t += UNITS[SUBJECTS[i].id].length * 5;
     return t;
   }
   function unitGamesDone(subj, topic) {
@@ -1125,7 +1164,7 @@
     if (u && u.topic === "passages") return true;
     var prevTopic = UNITS[subj][idx - 1].topic;
     if (prevTopic === "passages") return unitStars(subj, prevTopic) >= 1;
-    return unitGamesDone(subj, prevTopic) >= 3;
+    return unitStars(subj, prevTopic) >= 3;
   }
   function getAvatar(id) {
     for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i].id === id) return AVATARS[i];
@@ -1271,7 +1310,7 @@
       map += '<div class="island" data-subj="' + sj.id + '">' +
         '<div class="island-pic"><div class="island-fallback">' + sj.emoji + '</div>' +
         '<img src="' + sj.img + '" alt="" onerror="this.style.display=\'none\'"></div>' +
-        '<div class="island-label">' + sj.name + '<small>⭐ ' + subjectStars(sj.id) + "/" + (UNITS[sj.id].length * 4) + "</small></div>" +
+        '<div class="island-label">' + sj.name + '<small>⭐ ' + subjectStars(sj.id) + "/" + (UNITS[sj.id].length * 5) + "</small></div>" +
         "</div>";
     }
     $("islandMap").innerHTML = map;
@@ -1347,7 +1386,7 @@
 
   function starsHTML(n) {
     var h = "";
-    for (var i = 0; i < 4; i++) h += '<span class="' + (i < n ? "" : "off") + '">⭐</span>';
+    for (var i = 0; i < 5; i++) h += '<span class="' + (i < n ? "" : "off") + '">⭐</span>';
     return h;
   }
 
@@ -1359,7 +1398,7 @@
     var sj = subjectById(curSubj);
     var units = UNITS[curSubj];
     $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
-    $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 4);
+    $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 5);
 
     var cards = document.querySelectorAll("#mapAccordion .map-card");
     for (var ci = 0; ci < cards.length; ci++) {
@@ -1496,7 +1535,7 @@
       var sId = MAP_ORDER[mi];
       renderSingleIslandMap(sId, $(MAP_PATH_IDS[sId]));
       var stripEl = $(MAP_STRIP_STAR_IDS[sId]);
-      if (stripEl) stripEl.innerHTML = subjectStars(sId) + "/" + (UNITS[sId].length * 4) + " ⭐";
+      if (stripEl) stripEl.innerHTML = subjectStars(sId) + "/" + (UNITS[sId].length * 5) + " ⭐";
     }
     bindMapControlsOnce();
     slideToSubject(curSubj, !!instant);
@@ -1513,7 +1552,9 @@
   // ---------------------------------------------------------
   function openModePicker() {
     var u = UNITS[curSubj][curUnitIdx];
-    $("modeTitle").innerHTML = "Bài " + (curUnitIdx + 1) + ": " + u.icon + " " + u.title;
+    var stInfo = stageStats(curSubj, u.topic);
+    $("modeTitle").innerHTML = "Bài " + (curUnitIdx + 1) + ": " + u.icon + " " + u.title +
+      '<div style="font-size:12px;font-weight:700;color:#b45309;margin-top:2px">⭐ ' + stInfo.stars + '/5 sao • Đúng ' + stInfo.correct + '/' + stInfo.total + ' câu (' + Math.round(stInfo.ratio * 100) + '%)</div>';
     var p = state.progress[unitKey(curSubj, u.topic)] || {};
     var html = "";
     for (var i = 0; i < MODES.length; i++) {
@@ -2434,6 +2475,14 @@
 
     var key = unitKey(game.subj, game.topic);
     if (!state.progress[key]) state.progress[key] = {};
+    if (!state.progress[key].stats) state.progress[key].stats = {};
+    var modeTotal = (game.mode === "match" || game.mode === "memory") ? (game.pairs ? game.pairs.length : 0) : (game.list ? game.list.length : 0);
+    if (modeTotal > 0) {
+      var modeCorrect = Math.min(modeTotal, Math.max(0, Math.round(ratio * modeTotal)));
+      var prevStat = state.progress[key].stats[game.mode];
+      var bestCorrect = (prevStat && typeof prevStat.correct === "number") ? Math.max(prevStat.correct, modeCorrect) : modeCorrect;
+      state.progress[key].stats[game.mode] = { correct: bestCorrect, total: modeTotal };
+    }
     var oldBest = state.progress[key][game.mode] || 0;
     var badgesBefore = countBadges();
     if (stars > oldBest) state.progress[key][game.mode] = stars;
@@ -2480,9 +2529,9 @@
   function buildReportHTML() {
     var ts = totalStars();
     var maxS = maxTotalStars();
-    var mathS = subjectStars("math"), mathMax = UNITS.math.length * 4;
-    var vietS = subjectStars("viet"), vietMax = UNITS.viet.length * 4;
-    var engS = subjectStars("eng"), engMax = UNITS.eng.length * 4;
+    var mathS = subjectStars("math"), mathMax = UNITS.math.length * 5;
+    var vietS = subjectStars("viet"), vietMax = UNITS.viet.length * 5;
+    var engS = subjectStars("eng"), engMax = UNITS.eng.length * 5;
 
     var mathPct = Math.round(mathS / mathMax * 100);
     var vietPct = Math.round(vietS / vietMax * 100);

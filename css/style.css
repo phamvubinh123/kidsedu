@@ -342,7 +342,8 @@ body.in-subscreen .cloud-layer { display: none; }
   50% { -webkit-transform: translateY(-5px); transform: translateY(-5px); }
 }
 .unit-stars {
-  font-size: 11px; letter-spacing: 0.5px; line-height: 1.1; margin-top: 2px;
+  font-size: 10px; letter-spacing: 0; line-height: 1.1; margin-top: 2px;
+  white-space: nowrap;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 .unit-stars .off { opacity: 0.4; -webkit-filter: grayscale(100%); filter: grayscale(100%); }
@@ -828,7 +829,7 @@ body.in-subscreen .cloud-layer { display: none; }
   .unit-circle { width: 66px; height: 66px; font-size: 28px; border-width: 4px; }
   .unit-node.locked .unit-circle { width: 48px; height: 48px; font-size: 20px; }
   .unit-num { min-width: 22px; height: 22px; font-size: 12px; line-height: 18px; top: -7px; left: -7px; border-radius: 11px; border-width: 2px; }
-  .unit-stars { font-size: 18px; margin-top: 4px; letter-spacing: 1px; }
+  .unit-stars { font-size: 16px; margin-top: 4px; letter-spacing: 0.5px; }
   .unit-pill { font-size: 13px; max-width: 150px; padding: 3px 10px; border-width: 2px; border-radius: 11px; }
 
   /* Khung chơi game & Luyện đọc mở rộng hợp lý */
