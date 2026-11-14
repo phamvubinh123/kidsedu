@@ -1761,6 +1761,7 @@
     var p = READING_PASSAGES[curPassageIdx];
     if (!p) return;
     stopSampleReading();
+    if (!askParentalGate("Xác nhận bé đã đọc xong " + p.title)) return;
 
     Sound.fanfare();
     confetti(30);
@@ -1798,7 +1799,7 @@
     $("infoBody").innerHTML =
       '<div style="text-align:center;padding:10px 0">' +
       '<div style="font-size:54px;margin-bottom:8px">⭐ ⭐ ⭐</div>' +
-      '<div style="font-size:22px;font-weight:800;color:#15803d;margin-bottom:8px">Bé đã đọc xong bài ' + esc(p.week) + '!</div>' +
+      '<div style="font-size:22px;font-weight:800;color:#15803d;margin-bottom:8px">Bé đã đọc xong ' + esc(p.week + " — " + p.title) + '!</div>' +
       '<div style="font-size:17px;color:#4a3520;margin-bottom:12px">Bé đọc rất to, rõ ràng và truyền cảm.<br>' +
       (totalEarned > 0 ? 'Thưởng cho bé <b>+' + totalEarned + ' xu vàng</b> nhé!' : 'Bé chăm chỉ quá!') +
       bonusHtml + replayNote + '</div>' +
@@ -2922,7 +2923,7 @@
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
-    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v41 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Biểu tượng loa hoạt hình sáng màu (chéo đỏ khi tắt), đồng xu vàng đồng bộ toàn app, cập nhật bộ quà & ảnh mục tiêu trang chủ.</div></div>';
+    html += '<div class="guide-item" style="margin-top:8px;"><span class="gi-ic">🏷️</span><div><b>Phiên bản:</b> v42 (14/11/2026) · <b>SGK:</b> Kết Nối Tri Thức 2026 — Đảo Tri Thức: Yêu cầu phụ huynh xác nhận phép nhân khi bấm "Bé đã đọc xong".</div></div>';
 
     $("infoBody").innerHTML = html;
 
