@@ -2891,7 +2891,7 @@
       return;
     }
 
-    var models = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash"];
+    var models = ["gemini-3.8-flash", "gemini-3.8-flash-lite", "gemini-3.5-flash", "gemini-3.0-flash", "gemini-flash-latest", "gemini-2.5-flash", "gemini-2.0-flash"];
     var mIdx = 0;
 
     function discoverAndCallModel() {
@@ -2905,18 +2905,27 @@
           try {
             var data = JSON.parse(gx.responseText);
             var arr = (data && data.models) ? data.models : [];
-            var picked = "";
+            var candidates = [];
             for (var i = 0; i < arr.length; i++) {
               var m = arr[i];
               var methods = m.supportedGenerationMethods || [];
-              if (methods.indexOf("generateContent") > -1 && m.name) {
-                if (m.name.indexOf("flash") > -1) { picked = m.name; break; }
-                if (!picked) picked = m.name;
+              if (methods.indexOf("generateContent") > -1 && m.name && m.name.indexOf("embedding") === -1) {
+                if (m.name.indexOf("flash") > -1) candidates.unshift(m.name);
+                else candidates.push(m.name);
               }
             }
-            if (picked) {
-              var u = "https://generativelanguage.googleapis.com/v1beta/" + picked + ":generateContent?key=" + encodeURIComponent(cfg.apiKey);
-              postToEndpoint(u);
+            var dIdx = 0;
+            function tryDiscovered() {
+              if (dIdx >= candidates.length) {
+                showAIError(404, gx.responseText);
+                return;
+              }
+              var mFull = candidates[dIdx++];
+              var u = "https://generativelanguage.googleapis.com/v1beta/" + mFull + ":generateContent?key=" + encodeURIComponent(cfg.apiKey);
+              postToEndpoint(u, tryDiscovered);
+            }
+            if (candidates.length > 0) {
+              tryDiscovered();
               return;
             }
           } catch (e) {}
