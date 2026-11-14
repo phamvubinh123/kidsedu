@@ -470,13 +470,16 @@
       }
     },
     toggleBGM: function () {
-      state.bgm = !state.bgm;
+      var next = !(state.bgm || state.sound);
+      state.bgm = next;
+      state.sound = next;
       saveState();
       updateBgmButtons();
-      if (state.bgm) {
+      if (next) {
         this.startBGM();
       } else {
         this.stopBGM();
+        this.stopSpeak();
       }
     },
     speak: function (text, lang, rate) {
@@ -520,7 +523,7 @@
       }
     },
     playCue: function (cueId) {
-      if (!this.ctx || !this.spriteBuffer || typeof AUDIO_SPRITE_CONFIG === "undefined" || !AUDIO_SPRITE_CONFIG.sprite) return false;
+      if (!state.sound || !this.ctx || !this.spriteBuffer || typeof AUDIO_SPRITE_CONFIG === "undefined" || !AUDIO_SPRITE_CONFIG.sprite) return false;
       var cue = AUDIO_SPRITE_CONFIG.sprite[cueId];
       if (!cue) return false;
       this.stopCue();
@@ -1122,8 +1125,15 @@
       totalQuestions += mTotal;
     }
     var ratio = totalQuestions > 0 ? (totalCorrect / totalQuestions) : 0;
-    var stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : ratio > 0 ? 1 : 0;
+    var stars = ratioToHalfStars(ratio);
     return { correct: totalCorrect, total: totalQuestions, ratio: ratio, stars: stars };
+  }
+
+  function ratioToHalfStars(ratio) {
+    if (!ratio || ratio <= 0) return 0;
+    if (ratio >= 0.9) return 3;
+    var s = Math.round(ratio * 6) / 2;
+    return s < 0.5 ? 0.5 : s;
   }
 
   function unitStars(subj, topic) {
@@ -1134,19 +1144,19 @@
           if (state.passages.hasOwnProperty(k) && state.passages[k] > 0) count++;
         }
       }
-      return count >= 40 ? 3 : count >= 18 ? 2 : count >= 1 ? 1 : 0;
+      return ratioToHalfStars(Math.min(1, count / 45));
     }
     return stageStats(subj, topic).stars;
   }
   function subjectStars(subj) {
     var units = UNITS[subj], t = 0;
     for (var i = 0; i < units.length; i++) t += unitStars(subj, units[i].topic);
-    return t;
+    return Math.round(t * 10) / 10;
   }
   function totalStars() {
     var t = 0;
     for (var i = 0; i < SUBJECTS.length; i++) t += subjectStars(SUBJECTS[i].id);
-    return t;
+    return Math.round(t * 10) / 10;
   }
   function maxTotalStars() {
     var t = 0;
@@ -1167,8 +1177,8 @@
     var u = UNITS[subj][idx];
     if (u && u.topic === "passages") return true;
     var prevTopic = UNITS[subj][idx - 1].topic;
-    if (prevTopic === "passages") return unitStars(subj, prevTopic) >= 1;
-    return unitStars(subj, prevTopic) >= 2;
+    if (prevTopic === "passages") return unitStars(subj, prevTopic) >= 0.5;
+    return unitStars(subj, prevTopic) >= 1.5;
   }
   function getAvatar(id) {
     for (var i = 0; i < AVATARS.length; i++) if (AVATARS[i].id === id) return AVATARS[i];
@@ -1390,7 +1400,11 @@
 
   function starsHTML(n) {
     var h = "";
-    for (var i = 0; i < 3; i++) h += '<span class="' + (i < n ? "" : "off") + '">⭐</span>';
+    for (var i = 0; i < 3; i++) {
+      if (n >= i + 1) h += '<span>⭐</span>';
+      else if (n >= i + 0.5) h += '<span class="star-half"><span class="star-bg">⭐</span><span class="star-fg">⭐</span></span>';
+      else h += '<span class="off">⭐</span>';
+    }
     return h;
   }
 
@@ -1583,7 +1597,9 @@
   function starsMini(n) {
     var h = "";
     for (var i = 0; i < 3; i++) {
-      h += '<span class="' + (i < n ? "st-on" : "st-off") + '">★</span>';
+      if (n >= i + 1) h += '<span class="st-on">★</span>';
+      else if (n >= i + 0.5) h += '<span class="star-half"><span class="star-bg st-off">★</span><span class="star-fg st-on">★</span></span>';
+      else h += '<span class="st-off">★</span>';
     }
     return h;
   }
@@ -1625,8 +1641,9 @@
 
   function updateBgmButtons() {
     var btns = document.querySelectorAll(".bgm-btn");
+    var isOn = !!(state.bgm || state.sound);
     for (var i = 0; i < btns.length; i++) {
-      if (state.bgm) {
+      if (isOn) {
         btns[i].innerHTML = SPEAKER_ON_SVG;
         removeClass(btns[i], "off");
         addClass(btns[i], "on");
@@ -2493,10 +2510,10 @@
   function finishGame() {
     clearTimers();
     var ratio = game.max ? game.score / game.max : 0;
-    var stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : ratio > 0 ? 1 : 0;
+    var stars = ratioToHalfStars(ratio);
     var mode = null;
     for (var i = 0; i < MODES.length; i++) if (MODES[i].id === game.mode) mode = MODES[i];
-    var coins = stars > 0 ? Math.round(mode.reward * stars / 3) : 2;
+    var coins = stars > 0 ? Math.max(2, Math.round(mode.reward * stars / 3)) : 2;
 
     var key = unitKey(game.subj, game.topic);
     if (!state.progress[key]) state.progress[key] = {};
@@ -2528,17 +2545,23 @@
     saveState();
     var newBadge = countBadges() > badgesBefore;
 
-    $("resultTitle").innerHTML = stars === 3 ? "XUẤT SẮC!" : stars === 2 ? "GIỎI LẮM!" : stars === 1 ? "HOÀN THÀNH!" : "CỐ LÊN NÀO!";
+    $("resultTitle").innerHTML = stars >= 3 ? "XUẤT SẮC!" : stars >= 2 ? "GIỎI LẮM!" : stars >= 1 ? "HOÀN THÀNH!" : "CỐ LÊN NÀO!";
     var sh = "";
-    for (var s = 0; s < 3; s++) sh += '<span class="' + (s < stars ? "" : "off") + '" style="-webkit-animation-delay:' + (0.2 + s * 0.25) + 's;animation-delay:' + (0.2 + s * 0.25) + 's">⭐</span>';
+    for (var s = 0; s < 3; s++) {
+      var delay = 'style="-webkit-animation-delay:' + (0.2 + s * 0.25) + 's;animation-delay:' + (0.2 + s * 0.25) + 's"';
+      if (stars >= s + 1) sh += '<span ' + delay + '>⭐</span>';
+      else if (stars >= s + 0.5) sh += '<span class="star-half" ' + delay + '><span class="star-bg">⭐</span><span class="star-fg">⭐</span></span>';
+      else sh += '<span class="off" ' + delay + '>⭐</span>';
+    }
     $("resultStars").innerHTML = sh;
     var bonusHtml = actRes.bonusNotes.length ? "<br><small style='color:#15803d;font-weight:800'>" + actRes.bonusNotes.join(" • ") + "</small>" : "";
-    $("resultScore").innerHTML = "Điểm: " + game.score + " / " + game.max + (newBadge ? "<br>🏅 Bé nhận được huy hiệu mới!" : "") + bonusHtml + replayNote;
+    $("resultScore").innerHTML = "Điểm: " + game.score + " / " + game.max + " (" + stars + "/3 ⭐)" + (newBadge ? "<br>🏅 Bé nhận được huy hiệu mới!" : "") + bonusHtml + replayNote;
     $("resultCoins").innerHTML = "+" + (coins + actRes.bonusCoins) + ' <i class="coin big"></i>';
     openOverlay("resultOverlay");
     if (stars >= 2) { Sound.fanfare(); confetti(26); } else { Sound.good(); }
     later(function () { Sound.coin(); }, 900);
-    var msg = stars === 3 ? "Tuyệt vời! Bé đạt 3 sao!" : stars === 2 ? "Giỏi lắm! Bé đạt 2 sao!" : stars === 1 ? "Bé hoàn thành rồi! Chơi lại để được nhiều sao hơn nhé!" : "Không sao đâu, mình chơi lại nhé!";
+    var starText = String(stars).replace(".", " phẩy ");
+    var msg = stars >= 3 ? "Tuyệt vời! Bé đạt 3 sao!" : stars >= 1.5 ? ("Giỏi lắm! Bé đạt " + starText + " sao!") : stars > 0 ? ("Bé đạt " + starText + " sao! Chơi lại để được nhiều sao hơn nhé!") : "Không sao đâu, mình chơi lại nhé!";
     later(function () { if (state.autoRead) Sound.speak(msg, "vi-VN"); }, 1300);
   }
 
@@ -3096,6 +3119,9 @@
         if (state[k]) addClass(this, "on"); else removeClass(this, "on");
         if (k === "bgm") {
           if (state.bgm) Sound.startBGM(); else Sound.stopBGM();
+          updateBgmButtons();
+        } else if (k === "sound") {
+          if (!state.sound) Sound.stopSpeak();
           updateBgmButtons();
         }
         saveState(); Sound.click();

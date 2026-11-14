@@ -371,6 +371,10 @@ body.in-subscreen .cloud-layer { display: none; }
   40%, 80% { transform: translateX(7px); }
 }
 .unit-stars .off { opacity: 0.4; -webkit-filter: grayscale(100%); filter: grayscale(100%); }
+.star-half { position: relative; display: inline-block; line-height: 1; }
+.star-half .star-bg { opacity: 0.35; -webkit-filter: grayscale(100%); filter: grayscale(100%); }
+.star-half .star-fg { position: absolute; left: 0; top: 0; width: 50%; overflow: hidden; white-space: nowrap; }
+.mc-best .star-half .star-bg { opacity: 1; -webkit-filter: none; filter: none; }
 .unit-pill {
   display: inline-block; margin-top: 2px; padding: 2px 6px; border-radius: 9px;
   background: rgba(255, 255, 255, 0.98); border: 1.5px solid #f59e0b;
