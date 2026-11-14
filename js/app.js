@@ -679,6 +679,7 @@
     streak: { count: 0, lastDate: "", best: 0, claimedMilestones: {} },
     dailyQuest: { date: "", math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 },
     realRewards: cloneDefaultRewards(),
+    rewardsCustomized: false,
     pinnedRewardId: CFG.defaultPinnedRewardId || "rw_icecream",
     rewardTickets: [],
     telemetry: [],
@@ -695,16 +696,20 @@
       state.dailyQuest = { date: today, math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 };
     }
     if (!Array.isArray(state.realRewards) || state.realRewards.length === 0) {
-      state.realRewards = cloneDefaultRewards();
-    } else {
-      // Đồng bộ bộ quà chuẩn (Kem/Bánh kẹo -> Đi bơi/Nhà banh -> Xe đồ chơi -> Đồng hồ) + giữ quà ba mẹ tự thêm
-      var legacyIds = { rw_book: 1, rw_tv: 1, rw_sticker: 1, rw_icecream: 1, rw_swim: 1, rw_car: 1, rw_watch: 1 };
+      if (!state.rewardsCustomized) state.realRewards = cloneDefaultRewards();
+    } else if (!state.rewardsCustomized) {
+      // Chỉ tự động nâng cấp bộ quà cũ (rw_tv/rw_book) khi bố mẹ chưa tự chỉnh sửa danh sách quà
+      var oldLegacy = { rw_book: 1, rw_tv: 1, rw_sticker: 1 };
+      var hasOldLegacy = false;
       var customRewards = [];
       for (var ri = 0; ri < state.realRewards.length; ri++) {
         var rw = state.realRewards[ri];
-        if (rw && rw.id && !legacyIds[rw.id]) customRewards.push(rw);
+        if (rw && rw.id && oldLegacy[rw.id]) hasOldLegacy = true;
+        else if (rw && rw.id && rw.id !== "rw_icecream" && rw.id !== "rw_swim" && rw.id !== "rw_car" && rw.id !== "rw_watch") customRewards.push(rw);
       }
-      state.realRewards = cloneDefaultRewards().concat(customRewards);
+      if (hasOldLegacy) {
+        state.realRewards = cloneDefaultRewards().concat(customRewards);
+      }
     }
     var pinnedExists = false;
     for (var pi = 0; pi < state.realRewards.length; pi++) {
@@ -997,6 +1002,7 @@
           streak: data.streak || { count: 0, lastDate: "", best: 0, claimedMilestones: {} },
           dailyQuest: data.dailyQuest || { date: getTodayStr(0), math: false, viet: false, eng: false, claimed: false, replayCoinsCount: 0 },
           realRewards: Array.isArray(data.realRewards) ? data.realRewards : cloneDefaultRewards(),
+          rewardsCustomized: !!data.rewardsCustomized,
           pinnedRewardId: data.pinnedRewardId || "rw_car",
           rewardTickets: Array.isArray(data.rewardTickets) ? data.rewardTickets : [],
           telemetry: Array.isArray(data.telemetry) ? data.telemetry.slice(-80) : [],
@@ -3441,18 +3447,39 @@
       }
     }
 
-    html += '<div class="set-section-title" style="margin-top:12px;">🎁 Danh Sách Quà Thật</div>';
-    for (var ri = 0; ri < state.realRewards.length; ri++) {
-      var r = state.realRewards[ri];
-      html += '<div class="ticket-row"><span>' + esc(r.icon) + ' <b>' + esc(r.name) + '</b> — ' + r.cost + ' <i class="coin sm"></i></span>' +
-        '<button type="button" class="small-btn red" data-delrw="' + esc(r.id) + '">Xóa</button></div>';
+    var REWARD_ICONS = ["🎁", "🍦", "🏊", "🏎️", "⌚", "🎮", "🧸", "🚲", "📚", "🍕", "🎨", "⚽", "🦕", "🚀", "👑", "🧁"];
+    function iconSelectHTML(selId, curIcon, attrName) {
+      var opts = REWARD_ICONS.slice();
+      if (curIcon && opts.indexOf(curIcon) === -1) opts.unshift(curIcon);
+      var s = '<select class="parent-rw-input" ' + (selId ? 'id="' + selId + '" ' : '') + (attrName ? attrName + ' ' : '') + 'style="width:60px;text-align:center;font-size:18px;padding:4px;">';
+      for (var oi = 0; oi < opts.length; oi++) {
+        s += '<option value="' + esc(opts[oi]) + '"' + (opts[oi] === curIcon ? ' selected' : '') + '>' + esc(opts[oi]) + '</option>';
+      }
+      s += '</select>';
+      return s;
     }
 
-    html += '<div class="parent-rw-form">' +
-      '<input class="parent-rw-input" id="rwIconIn" value="🎁" maxlength="4" style="width:52px;text-align:center;" placeholder="Icon">' +
-      '<input class="parent-rw-input" id="rwNameIn" style="flex:1;min-width:140px;" placeholder="Tên quà (vd: Đồng hồ, Xe...)">' +
-      '<input class="parent-rw-input" id="rwCostIn" type="number" min="10" step="10" value="500" style="width:90px;" placeholder="Xu">' +
-      '<button type="button" class="small-btn" id="addRwBtn" style="height:36px;">+ Thêm quà</button>' +
+    html += '<div class="set-section-title" style="margin-top:12px;display:-webkit-flex;display:flex;-webkit-justify-content:space-between;justify-content:space-between;-webkit-align-items:center;align-items:center;">' +
+      '<span>🎁 Danh Sách Quà Thật (Sửa trực tiếp)</span>' +
+      '<button type="button" class="small-btn" id="resetRwDefaultBtn" style="font-size:11px;padding:3px 8px;">↺ Mặc định</button>' +
+    '</div>';
+    for (var ri = 0; ri < state.realRewards.length; ri++) {
+      var r = state.realRewards[ri];
+      html += '<div class="parent-rw-form" style="margin-bottom:6px;background:#f8fafc;padding:6px;border-radius:12px;border:1px solid #e2e8f0;">' +
+        iconSelectHTML("", r.icon || "🎁", 'data-edit-icon="' + esc(r.id) + '"') +
+        '<input class="parent-rw-input" data-edit-name="' + esc(r.id) + '" style="flex:1;min-width:110px;" value="' + esc(r.name) + '" placeholder="Tên quà">' +
+        '<input class="parent-rw-input" data-edit-cost="' + esc(r.id) + '" type="number" min="10" step="10" value="' + (r.cost || 100) + '" style="width:74px;" placeholder="Xu">' +
+        '<button type="button" class="small-btn" data-saverw="' + esc(r.id) + '" title="Lưu thay đổi">💾</button>' +
+        '<button type="button" class="small-btn red" data-delrw="' + esc(r.id) + '" title="Xóa quà">🗑️</button>' +
+      '</div>';
+    }
+
+    html += '<div class="set-section-title" style="margin-top:10px;">➕ Thêm Quà Mới</div>' +
+      '<div class="parent-rw-form">' +
+      iconSelectHTML("rwIconIn", "🎁", "") +
+      '<input class="parent-rw-input" id="rwNameIn" style="flex:1;min-width:120px;" placeholder="Tên quà (vd: Gấu bông...)">' +
+      '<input class="parent-rw-input" id="rwCostIn" type="number" min="10" step="10" value="300" style="width:78px;" placeholder="Xu">' +
+      '<button type="button" class="small-btn" id="addRwBtn" style="height:36px;">+ Thêm</button>' +
       '</div>';
 
     $("infoTitle").innerHTML = "🎁 Quản Lý Quà Thật";
@@ -3486,6 +3513,35 @@
         }
       });
     }
+    var saveRwBtns = $("infoBody").querySelectorAll("[data-saverw]");
+    for (var si = 0; si < saveRwBtns.length; si++) {
+      onTap(saveRwBtns[si], function () {
+        var rid = this.getAttribute("data-saverw");
+        var icEl = $("infoBody").querySelector('[data-edit-icon="' + rid + '"]');
+        var nmEl = $("infoBody").querySelector('[data-edit-name="' + rid + '"]');
+        var csEl = $("infoBody").querySelector('[data-edit-cost="' + rid + '"]');
+        var newIcon = icEl ? icEl.value : "🎁";
+        var newName = nmEl ? nmEl.value.trim() : "";
+        var newCost = csEl ? parseInt(csEl.value, 10) : 0;
+        if (!newName || !(newCost > 0)) { Sound.bad(); return; }
+        for (var k = 0; k < state.realRewards.length; k++) {
+          if (state.realRewards[k].id === rid) {
+            if (state.realRewards[k].icon !== newIcon && state.realRewards[k].img) {
+              delete state.realRewards[k].img;
+            }
+            state.realRewards[k].icon = newIcon;
+            state.realRewards[k].name = newName;
+            state.realRewards[k].cost = newCost;
+            break;
+          }
+        }
+        state.rewardsCustomized = true;
+        Sound.good();
+        saveState();
+        renderHome();
+        openParentRewardsModal();
+      });
+    }
     var delRwBtns = $("infoBody").querySelectorAll("[data-delrw]");
     for (var xi = 0; xi < delRwBtns.length; xi++) {
       onTap(delRwBtns[xi], function () {
@@ -3494,6 +3550,19 @@
           if (state.realRewards[k].id === rid) { state.realRewards.splice(k, 1); break; }
         }
         if (state.pinnedRewardId === rid && state.realRewards.length > 0) state.pinnedRewardId = state.realRewards[0].id;
+        state.rewardsCustomized = true;
+        Sound.click();
+        saveState();
+        renderHome();
+        openParentRewardsModal();
+      });
+    }
+    if ($("resetRwDefaultBtn")) {
+      onTap($("resetRwDefaultBtn"), function () {
+        if (!window.confirm("Khôi phục lại 4 món quà mặc định ban đầu?")) return;
+        state.realRewards = cloneDefaultRewards();
+        state.rewardsCustomized = false;
+        state.pinnedRewardId = state.realRewards[0].id;
         Sound.click();
         saveState();
         renderHome();
@@ -3506,6 +3575,7 @@
       var cs = parseInt($("rwCostIn").value, 10);
       if (!nm || !(cs > 0)) { Sound.bad(); return; }
       state.realRewards.push({ id: "rw_" + Date.now(), icon: ic, name: nm, cost: cs });
+      state.rewardsCustomized = true;
       Sound.good();
       saveState();
       renderHome();
