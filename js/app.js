@@ -61,7 +61,11 @@
     }, false);
   }
 
-  // Audio Fallback cho các thiết bị cũ không có voice tiếng Việt (như iPadOS 12 hoặc iOS 16 chưa tải giọng Linh)
+  // Hệ thống giọng đọc tự nhiên (Google Neural TTS trực tuyến làm chính, tự động dự phòng Web Speech API khi mất mạng)
+  var ttsGen = 0;
+  var ttsAudioUnlocked = false;
+  var ttsWatchdog = null;
+
   function getTTSAudio() {
     var a = $("ttsAudio");
     if (!a) {
@@ -73,29 +77,137 @@
     return a;
   }
 
+  function unlockTTSAudio() {
+    if (ttsAudioUnlocked) return;
+    ttsAudioUnlocked = true;
+    try {
+      var a = getTTSAudio();
+      if (a && (!a.src || a.paused)) {
+        a.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        var p = a.play();
+        if (p && typeof p.then === "function") {
+          p.then(function () { try { a.pause(); a.currentTime = 0; } catch (e) {} }).catch(function () {});
+        }
+      }
+    } catch (e) {}
+  }
+
   function stopFallbackTTS() {
+    if (ttsWatchdog) { clearTimeout(ttsWatchdog); ttsWatchdog = null; }
     try {
       var a = getTTSAudio();
       if (a) {
+        a.onended = null;
+        a.onerror = null;
+        a.onplaying = null;
         a.pause();
         a.currentTime = 0;
       }
     } catch (e) {}
   }
 
-  function playFallbackTTS(text, lang) {
-    if (!text) return;
-    try {
-      var a = getTTSAudio();
-      stopFallbackTTS();
-      var t = encodeURIComponent(text);
-      var tl = lang || "vi";
-      // Google Translate TTS endpoint chuẩn hỗ trợ đầy đủ tiếng Việt cho thiết bị không có voice offline
-      a.src = "https://translate.google.com/translate_tts?ie=UTF-8&tl=" + tl + "&client=tw-ob&q=" + t;
-      var p = a.play();
-      if (p && typeof p.catch === "function") {
-        p.catch(function () {});
+  function splitTTSChunks(text, maxLen) {
+    var limit = maxLen || 160;
+    var s = String(text || "").replace(/\s+/g, " ").trim();
+    if (!s) return [];
+    if (s.length <= limit) return [s];
+    var chunks = [];
+    while (s.length > limit) {
+      var slice = s.slice(0, limit);
+      var cut = Math.max(slice.lastIndexOf(". "), slice.lastIndexOf("! "), slice.lastIndexOf("? "), slice.lastIndexOf(", "));
+      if (cut < Math.floor(limit * 0.4)) cut = slice.lastIndexOf(" ");
+      if (cut <= 0) cut = limit;
+      chunks.push(s.slice(0, cut + 1).trim());
+      s = s.slice(cut + 1).trim();
+    }
+    if (s) chunks.push(s);
+    return chunks;
+  }
+
+  function playNaturalTTS(text, lang, rate, myGen, onFail) {
+    if (!text || myGen !== ttsGen) return;
+    var chunks = splitTTSChunks(text, 160);
+    if (!chunks.length) return;
+    var tl = lang || "vi";
+    var playRate = rate || (tl === "en" ? 0.92 : 1.0);
+    var idx = 0;
+
+    function playNext() {
+      if (myGen !== ttsGen || idx >= chunks.length) return;
+      try {
+        var a = getTTSAudio();
+        var chunk = chunks[idx++];
+        var started = false;
+        if (ttsWatchdog) { clearTimeout(ttsWatchdog); ttsWatchdog = null; }
+
+        a.onplaying = function () {
+          started = true;
+          if (ttsWatchdog) { clearTimeout(ttsWatchdog); ttsWatchdog = null; }
+        };
+        a.onended = function () {
+          if (ttsWatchdog) { clearTimeout(ttsWatchdog); ttsWatchdog = null; }
+          if (myGen === ttsGen && idx < chunks.length) {
+            playNext();
+          }
+        };
+        a.onerror = function () {
+          if (ttsWatchdog) { clearTimeout(ttsWatchdog); ttsWatchdog = null; }
+          if (myGen === ttsGen && !started && typeof onFail === "function") {
+            onFail();
+          }
+        };
+
+        a.src = "https://translate.google.com/translate_tts?ie=UTF-8&tl=" + tl + "&client=tw-ob&q=" + encodeURIComponent(chunk);
+        try { a.playbackRate = playRate; } catch (e) {}
+
+        ttsWatchdog = setTimeout(function () {
+          if (myGen === ttsGen && !started) {
+            stopFallbackTTS();
+            if (typeof onFail === "function") onFail();
+          }
+        }, 1800);
+
+        var p = a.play();
+        if (p && typeof p.catch === "function") {
+          p.catch(function () {
+            if (ttsWatchdog) { clearTimeout(ttsWatchdog); ttsWatchdog = null; }
+            if (myGen === ttsGen && !started && typeof onFail === "function") {
+              onFail();
+            }
+          });
+        }
+      } catch (e) {
+        if (typeof onFail === "function") onFail();
       }
+    }
+
+    playNext();
+  }
+
+  function speakWebSpeech(cleanText, targetLang, rate, myGen) {
+    if (myGen !== ttsGen || !("speechSynthesis" in window)) return;
+    var isVi = targetLang.indexOf("vi") === 0;
+    if (isVi) {
+      if (!cachedVoiceVi) findBestVoices();
+      if (!cachedVoiceVi) return;
+    } else if (targetLang.indexOf("en") === 0) {
+      if (!cachedVoiceEn) findBestVoices();
+      if (!cachedVoiceEn) return;
+    }
+    try {
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
+      var u = new SpeechSynthesisUtterance(cleanText);
+      u.lang = targetLang;
+      u.rate = rate || (targetLang === "en-US" ? 0.85 : 0.96);
+      u.pitch = 1.08;
+      if (isVi && cachedVoiceVi) u.voice = cachedVoiceVi;
+      else if (targetLang.indexOf("en") === 0 && cachedVoiceEn) u.voice = cachedVoiceEn;
+      setTimeout(function () {
+        if (myGen !== ttsGen) return;
+        try { window.speechSynthesis.speak(u); } catch (e) {}
+      }, 30);
     } catch (e) {}
   }
 
@@ -366,6 +478,14 @@
     speak: function (text, lang, rate) {
       if (!state.sound || !text) return;
       this.init();
+      var myGen = ++ttsGen;
+
+      // Dừng âm thanh đọc cũ trước khi phát câu mới
+      if (typeof this.stopCue === "function") this.stopCue();
+      if ("speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
+      stopFallbackTTS();
 
       // Ưu tiên phát giọng lồng tiếng thật 100% offline từ core_sprite.mp3 nếu có sẵn
       if (this.spriteBuffer && typeof this.playCue === "function" && typeof AUDIO_SPRITE_CONFIG !== "undefined" && AUDIO_SPRITE_CONFIG.phraseMap) {
@@ -379,83 +499,20 @@
       var targetLang = lang || "vi-VN";
       var isVi = targetLang.indexOf("vi") === 0;
       var fbLang = isVi ? "vi" : "en";
-      // Chuẩn hóa văn bản Unicode và phiên âm học vần tiếng Việt / tiếng Anh
       var cleanText = isVi
         ? cleanVietnamesePhonetics(text)
         : (String(text).normalize ? String(text).normalize("NFC") : String(text)).replace(/_/g, " ").replace(/\s{2,}/g, " ").trim();
 
-      // Kiểm tra xem thiết bị có voice tiếng Việt / tiếng Anh thực sự hay không
-      if (isVi) {
-        if (!cachedVoiceVi) findBestVoices();
-        // Nếu thiết bị không có voice tiếng Việt (như iPadOS 12.5.8 hoặc iOS 16 chưa tải giọng Linh):
-        // Dùng Fallback Audio (Google Vietnamese Voice) để bé nghe chuẩn, KHÔNG để giọng tiếng Anh Samantha đọc sai!
-        if (!cachedVoiceVi) {
-          playFallbackTTS(cleanText, "vi");
-          return;
-        }
-      } else if (targetLang.indexOf("en") === 0) {
-        if (!cachedVoiceEn) findBestVoices();
-        if (!cachedVoiceEn) {
-          playFallbackTTS(cleanText, "en");
-          return;
-        }
-      }
+      if (!cleanText) return;
 
-      if (!("speechSynthesis" in window)) {
-        playFallbackTTS(cleanText, fbLang);
-        return;
-      }
-
-      try {
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-        }
-        stopFallbackTTS();
-
-        var u = new SpeechSynthesisUtterance(cleanText);
-        u.lang = targetLang;
-        // Tốc độ 0.92 giúp phát âm tiếng Việt tự nhiên nhất, tránh méo giọng hay giật cục
-        u.rate = rate || (targetLang === "en-US" ? 0.8 : 0.92);
-
-        // Gán voice tiếng Việt/tiếng Anh chuẩn
-        if (isVi && cachedVoiceVi) {
-          u.voice = cachedVoiceVi;
-        } else if (targetLang.indexOf("en") === 0 && cachedVoiceEn) {
-          u.voice = cachedVoiceEn;
-        }
-
-        // Watchdog 450ms: nếu Safari/Chrome im lặng không kích hoạt onstart thì tự chuyển sang Fallback TTS
-        var started = false;
-        var watchdog = null;
-        u.onstart = function () {
-          started = true;
-          if (watchdog) { clearTimeout(watchdog); watchdog = null; }
-        };
-        u.onend = function () {
-          if (watchdog) { clearTimeout(watchdog); watchdog = null; }
-        };
-        u.onerror = function () {
-          if (watchdog) { clearTimeout(watchdog); watchdog = null; }
-          if (!started) playFallbackTTS(cleanText, fbLang);
-        };
-
-        // Timeout nhẹ 30ms để tránh bug Safari iOS WebKit drop utterance sau khi cancel
-        setTimeout(function () {
-          try {
-            watchdog = setTimeout(function () {
-              if (!started) {
-                try { window.speechSynthesis.cancel(); } catch (err) {}
-                playFallbackTTS(cleanText, fbLang);
-              }
-            }, 450);
-            window.speechSynthesis.speak(u);
-          } catch (e) {
-            if (watchdog) { clearTimeout(watchdog); watchdog = null; }
-            playFallbackTTS(cleanText, fbLang);
-          }
-        }, 30);
-      } catch (e) {
-        playFallbackTTS(cleanText, fbLang);
+      // Ưu tiên giọng Neural tự nhiên (Google TTS) khi có mạng để phát âm chuẩn ("bé", thanh điệu, ngữ điệu)
+      // Tự động fallback về Web Speech API nếu thiết bị đang ngoại tuyến hoặc bị chặn mạng
+      if (typeof navigator === "undefined" || navigator.onLine !== false) {
+        playNaturalTTS(cleanText, fbLang, rate, myGen, function () {
+          speakWebSpeech(cleanText, targetLang, rate, myGen);
+        });
+      } else {
+        speakWebSpeech(cleanText, targetLang, rate, myGen);
       }
     },
     playCue: function (cueId) {
@@ -482,6 +539,7 @@
       }
     },
     stopSpeak: function () {
+      ttsGen++;
       try {
         if (typeof this.stopCue === "function") this.stopCue();
         if ("speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -3068,6 +3126,7 @@
     }
     function unlockAudio(e) {
       Sound.init();
+      unlockTTSAudio();
       if (state.bgm && !Sound.bgmPlaying && !(e && isBgmBtnTarget(e.target))) {
         Sound.startBGM();
       }
