@@ -2827,8 +2827,21 @@
     btnEl.innerHTML = "⏳ AI đang phân tích...";
     outputEl.innerHTML = '<div style="color:#475569;font-size:13px;">🤖 Đang tổng hợp hành vi học tập của bé...</div>';
 
-    var payloadStr = JSON.stringify({
-      contents: [{ parts: [{ text: promptText }] }]
+    var payloadBase = {
+      contents: [{ parts: [{ text: promptText }] }],
+      generationConfig: {
+        maxOutputTokens: 600,
+        temperature: 0.7
+      }
+    };
+    var payloadNoThink = JSON.stringify(payloadBase);
+    var payloadFastThink = JSON.stringify({
+      contents: payloadBase.contents,
+      generationConfig: {
+        maxOutputTokens: 600,
+        temperature: 0.7,
+        thinkingConfig: { thinkingBudget: 0 }
+      }
     });
 
     function showAIError(status, respText) {
@@ -2863,31 +2876,42 @@
       }
     }
 
-    function postToEndpoint(url, onNotFound) {
+    function postToEndpoint(url, onFallback, labelName, allowThinkZero) {
+      if (labelName) {
+        outputEl.innerHTML = '<div style="color:#475569;font-size:13px;">🤖 Đang kết nối ' + esc(labelName) + '...</div>';
+      }
+      var useFast = !!allowThinkZero;
       var xhr = new XMLHttpRequest();
       xhr.open("POST", url, true);
       xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.timeout = 20000;
+      xhr.timeout = 35000;
       xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) return;
         if (xhr.status >= 200 && xhr.status < 300) {
           handleAISuccess(xhr.responseText);
-        } else if ((xhr.status === 404 || xhr.status === 503 || xhr.status === 429) && typeof onNotFound === "function") {
-          onNotFound();
+        } else if (xhr.status === 400 && useFast) {
+          // Nếu model không hỗ trợ thinkingConfig, gửi lại bằng payload chuẩn
+          postToEndpoint(url, onFallback, labelName, false);
+        } else if ((xhr.status === 404 || xhr.status === 503 || xhr.status === 429) && typeof onFallback === "function") {
+          onFallback();
         } else {
           showAIError(xhr.status, xhr.responseText);
         }
       };
       xhr.ontimeout = function () {
+        if (typeof onFallback === "function") {
+          onFallback();
+          return;
+        }
         btnEl.disabled = false;
         btnEl.innerHTML = "🤖 AI Tư Vấn Sâu Cho Ba Mẹ";
         outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⏳ Kết nối AI quá thời gian. Vui lòng thử lại!</div>';
       };
-      xhr.send(payloadStr);
+      xhr.send(useFast ? payloadFastThink : payloadNoThink);
     }
 
     if (cfg.proxyUrl) {
-      postToEndpoint(cfg.proxyUrl);
+      postToEndpoint(cfg.proxyUrl, null, "Proxy AI", false);
       return;
     }
 
@@ -2898,7 +2922,7 @@
       var listUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" + encodeURIComponent(cfg.apiKey);
       var gx = new XMLHttpRequest();
       gx.open("GET", listUrl, true);
-      gx.timeout = 12000;
+      gx.timeout = 15000;
       gx.onreadystatechange = function () {
         if (gx.readyState !== 4) return;
         if (gx.status >= 200 && gx.status < 300) {
@@ -2922,7 +2946,7 @@
               }
               var mFull = candidates[dIdx++];
               var u = "https://generativelanguage.googleapis.com/v1beta/" + mFull + ":generateContent?key=" + encodeURIComponent(cfg.apiKey);
-              postToEndpoint(u, tryDiscovered);
+              postToEndpoint(u, tryDiscovered, mFull.replace("models/", ""), mFull.indexOf("2.5") > -1 || mFull.indexOf("3.") > -1);
             }
             if (candidates.length > 0) {
               tryDiscovered();
@@ -2943,7 +2967,7 @@
       }
       var mName = models[mIdx++];
       var url = "https://generativelanguage.googleapis.com/v1beta/models/" + mName + ":generateContent?key=" + encodeURIComponent(cfg.apiKey);
-      postToEndpoint(url, tryNextModel);
+      postToEndpoint(url, tryNextModel, mName, mName.indexOf("2.5") > -1 || mName.indexOf("3.") > -1);
     }
 
     tryNextModel();
