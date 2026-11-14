@@ -22,6 +22,13 @@ Dự án được thiết kế theo triết lý **Zero-Build Static SPA + Cloud 
 
 ## 2. Bộ Khung Sườn Chuẩn (Boilerplate) Khi Clone Dự Án Mới
 
+> **DÀNH CHO AI AGENT KHI DỰNG DỰ ÁN MỚI:**
+> Nếu bạn (AI) được người dùng đưa file Playbook này trong một thư mục dự án mới còn trống, **TUYỆT ĐỐI KHÔNG tự viết lại code từ đầu**. Hãy chạy ngay lệnh dưới đây để lấy nguyên bản bộ khung sườn chuẩn từ dự án gốc về thư mục hiện tại:
+> ```bash
+> /Users/binhpham/Library/CloudStorage/OneDrive-Personal/01.Personal/05.Development/Projects/kidsedu/scripts/clone-new-project.sh . <ma_du_an_moi>
+> ```
+> *(Hoặc nếu chạy trên máy khác không có thư mục local, hãy chạy: `git clone --depth=1 https://github.com/phamvubinh123/kidsedu.git . && rm -rf .git sources/* && git init`)*
+
 Khi bắt đầu một dự án mới (ví dụ: Toán Lớp 2, Tiếng Anh Mầm Non, Khoa Học Tự Nhiên, hoặc App Flashcard/Quiz bất kỳ), cấu trúc thư mục cần giữ nguyên như sau:
 
 ```text
