@@ -2810,6 +2810,11 @@
       "2) Thói quen học (tốc độ phản hồi, đoán mò hay tập trung)\n" +
       "3) Gợi ý 1 hoạt động 5 phút tối nay để ba mẹ kèm con tại nhà.\n\n" +
       "Dữ liệu JSON: " + JSON.stringify({
+        subjectStars: {
+          math: subjectStars("math") + "/" + (UNITS.math.length * 3),
+          viet: subjectStars("viet") + "/" + (UNITS.viet.length * 3),
+          eng: subjectStars("eng") + "/" + (UNITS.eng.length * 3)
+        },
         zpd: behavior.zpd,
         bestWindow: behavior.bestWindow,
         totalSessions: behavior.totalSessions,
@@ -2822,47 +2827,117 @@
     btnEl.innerHTML = "⏳ AI đang phân tích...";
     outputEl.innerHTML = '<div style="color:#475569;font-size:13px;">🤖 Đang tổng hợp hành vi học tập của bé...</div>';
 
-    var endpoint = cfg.proxyUrl
-      ? cfg.proxyUrl
-      : ("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(cfg.apiKey));
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", endpoint, true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.timeout = 20000;
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState !== 4) return;
-      btnEl.disabled = false;
-      btnEl.innerHTML = "🤖 AI Tư Vấn Sâu Cho Ba Mẹ";
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          var res = JSON.parse(xhr.responseText);
-          var txt = "";
-          if (res && res.candidates && res.candidates[0] && res.candidates[0].content && res.candidates[0].content.parts) {
-            txt = res.candidates[0].content.parts[0].text || "";
-          } else if (res && res.reply) {
-            txt = res.reply;
-          }
-          if (!txt) throw new Error("Empty AI reply");
-          var formatted = esc(txt).replace(/\*\*(.*?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
-          try { localStorage.setItem(aiCacheStoreKey(), formatted); } catch (e) {}
-          outputEl.innerHTML = '<div class="ai-coach-reply">' + formatted + '</div>';
-          Sound.good();
-        } catch (err) {
-          outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⚠️ Không đọc được phản hồi từ AI. Vui lòng thử lại.</div>';
-        }
-      } else {
-        outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⚠️ Lỗi kết nối AI (Mã ' + xhr.status + '). Ba mẹ kiểm tra lại API Key hoặc mạng nhé.</div>';
-      }
-    };
-    xhr.ontimeout = function () {
-      btnEl.disabled = false;
-      btnEl.innerHTML = "🤖 AI Tư Vấn Sâu Cho Ba Mẹ";
-      outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⏳ Kết nối AI quá thời gian. Vui lòng thử lại!</div>';
-    };
-    xhr.send(JSON.stringify({
+    var payloadStr = JSON.stringify({
       contents: [{ parts: [{ text: promptText }] }]
-    }));
+    });
+
+    function showAIError(status, respText) {
+      btnEl.disabled = false;
+      btnEl.innerHTML = "🤖 AI Tư Vấn Sâu Cho Ba Mẹ";
+      var detail = "";
+      try {
+        var er = JSON.parse(respText || "{}");
+        if (er && er.error && er.error.message) detail = "<br><small>" + esc(er.error.message) + "</small>";
+      } catch (e) {}
+      outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⚠️ Lỗi kết nối AI (Mã ' + status + '). Ba mẹ kiểm tra lại API Key hoặc mạng nhé.' + detail + '</div>';
+    }
+
+    function handleAISuccess(respText) {
+      btnEl.disabled = false;
+      btnEl.innerHTML = "🤖 AI Tư Vấn Sâu Cho Ba Mẹ";
+      try {
+        var res = JSON.parse(respText);
+        var txt = "";
+        if (res && res.candidates && res.candidates[0] && res.candidates[0].content && res.candidates[0].content.parts) {
+          txt = res.candidates[0].content.parts[0].text || "";
+        } else if (res && res.reply) {
+          txt = res.reply;
+        }
+        if (!txt) throw new Error("Empty AI reply");
+        var formatted = esc(txt).replace(/\*\*(.*?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
+        try { localStorage.setItem(aiCacheStoreKey(), formatted); } catch (e) {}
+        outputEl.innerHTML = '<div class="ai-coach-reply">' + formatted + '</div>';
+        Sound.good();
+      } catch (err) {
+        outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⚠️ Không đọc được phản hồi từ AI. Vui lòng thử lại.</div>';
+      }
+    }
+
+    function postToEndpoint(url, onNotFound) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.timeout = 20000;
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          handleAISuccess(xhr.responseText);
+        } else if (xhr.status === 404 && typeof onNotFound === "function") {
+          onNotFound();
+        } else {
+          showAIError(xhr.status, xhr.responseText);
+        }
+      };
+      xhr.ontimeout = function () {
+        btnEl.disabled = false;
+        btnEl.innerHTML = "🤖 AI Tư Vấn Sâu Cho Ba Mẹ";
+        outputEl.innerHTML = '<div style="color:#dc2626;font-size:13px;">⏳ Kết nối AI quá thời gian. Vui lòng thử lại!</div>';
+      };
+      xhr.send(payloadStr);
+    }
+
+    if (cfg.proxyUrl) {
+      postToEndpoint(cfg.proxyUrl);
+      return;
+    }
+
+    var models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash"];
+    var mIdx = 0;
+
+    function discoverAndCallModel() {
+      var listUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" + encodeURIComponent(cfg.apiKey);
+      var gx = new XMLHttpRequest();
+      gx.open("GET", listUrl, true);
+      gx.timeout = 12000;
+      gx.onreadystatechange = function () {
+        if (gx.readyState !== 4) return;
+        if (gx.status >= 200 && gx.status < 300) {
+          try {
+            var data = JSON.parse(gx.responseText);
+            var arr = (data && data.models) ? data.models : [];
+            var picked = "";
+            for (var i = 0; i < arr.length; i++) {
+              var m = arr[i];
+              var methods = m.supportedGenerationMethods || [];
+              if (methods.indexOf("generateContent") > -1 && m.name) {
+                if (m.name.indexOf("flash") > -1) { picked = m.name; break; }
+                if (!picked) picked = m.name;
+              }
+            }
+            if (picked) {
+              var u = "https://generativelanguage.googleapis.com/v1beta/" + picked + ":generateContent?key=" + encodeURIComponent(cfg.apiKey);
+              postToEndpoint(u);
+              return;
+            }
+          } catch (e) {}
+        }
+        showAIError(gx.status || 404, gx.responseText);
+      };
+      gx.ontimeout = function () { showAIError(408, ""); };
+      gx.send();
+    }
+
+    function tryNextModel() {
+      if (mIdx >= models.length) {
+        discoverAndCallModel();
+        return;
+      }
+      var mName = models[mIdx++];
+      var url = "https://generativelanguage.googleapis.com/v1beta/models/" + mName + ":generateContent?key=" + encodeURIComponent(cfg.apiKey);
+      postToEndpoint(url, tryNextModel);
+    }
+
+    tryNextModel();
   }
 
   // ---------------------------------------------------------
