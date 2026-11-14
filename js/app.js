@@ -2872,7 +2872,7 @@
         if (xhr.readyState !== 4) return;
         if (xhr.status >= 200 && xhr.status < 300) {
           handleAISuccess(xhr.responseText);
-        } else if (xhr.status === 404 && typeof onNotFound === "function") {
+        } else if ((xhr.status === 404 || xhr.status === 503 || xhr.status === 429) && typeof onNotFound === "function") {
           onNotFound();
         } else {
           showAIError(xhr.status, xhr.responseText);
@@ -2891,7 +2891,7 @@
       return;
     }
 
-    var models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash"];
+    var models = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash"];
     var mIdx = 0;
 
     function discoverAndCallModel() {
