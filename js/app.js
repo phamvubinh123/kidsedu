@@ -1437,8 +1437,17 @@
     }
     return a.emoji;
   }
-  function mascotHTML() {
-    return '<img src="assets/mascot.jpg" alt="" onerror="this.parentNode.innerHTML=\'🧒\'">';
+  function mascotHTML(subj) {
+    var roleIc = (subj === "math") ? "🐲" : "🐰";
+    return '<img src="assets/mascot.jpg" alt="" onerror="this.parentNode.innerHTML=\'🧒\'">' +
+      '<span class="mascot-role-tag">' + roleIc + '</span>';
+  }
+
+  function unitStoryIntro(subj, u) {
+    if (!u) return "";
+    if (subj === "math") return "🐲 Rồng Lửa: Cùng giải mật mã \"" + u.title + "\" để mở cổng Lâu Đài Toán!";
+    if (subj === "viet") return "🐰 Thỏ Trắng: Khám phá kho chữ \"" + u.title + "\" cùng Thỏ nhé!";
+    return "🐰 Thỏ Trắng: Phiêu lưu đảo Tiếng Anh với \"" + u.title + "\" nào!";
   }
 
   function confetti(n) {
@@ -1556,16 +1565,38 @@
       }
     }
 
+    var activeSubj = state.lastSubj || "math";
     var map = "";
     for (var s = 0; s < SUBJECTS.length; s++) {
       var sj = SUBJECTS[s];
+      var isLast = sj.id === activeSubj;
       map += '<div class="island" data-subj="' + sj.id + '">' +
+        (isLast ? '<button type="button" class="island-resume-star" id="resumeStarBtn" title="Nhấn để học tiếp">⭐ Học tiếp</button>' : '') +
         '<div class="island-pic"><div class="island-fallback">' + sj.emoji + '</div>' +
         '<img src="' + sj.img + '" alt="" onerror="this.style.display=\'none\'"></div>' +
         '<div class="island-label">' + sj.name + '<small>⭐ ' + subjectStars(sj.id) + "/" + (UNITS[sj.id].length * 3) + "</small></div>" +
         "</div>";
     }
     $("islandMap").innerHTML = map;
+    if ($("resumeStarBtn")) {
+      onTap($("resumeStarBtn"), function (e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        Sound.click();
+        curSubj = state.lastSubj || "math";
+        var uList = UNITS[curSubj] || [];
+        curUnitIdx = Math.min(Math.max(0, uList.length - 1), Math.max(0, state.lastUnitIdx || 0));
+        if (!isUnlocked(curSubj, curUnitIdx)) curUnitIdx = 0;
+        var u = uList[curUnitIdx];
+        if (u && u.topic === "passages") {
+          readReturnScreen = "screenHome";
+          openPassageReader();
+        } else {
+          renderMap();
+          showScreen("screenMap");
+          openModePicker();
+        }
+      });
+    }
     var isl = $("islandMap").querySelectorAll(".island");
     for (var k = 0; k < isl.length; k++) {
       onTap(isl[k], function () {
@@ -1810,7 +1841,8 @@
     var u = UNITS[curSubj][curUnitIdx];
     var stInfo = stageStats(curSubj, u.topic);
     $("modeTitle").innerHTML = "Bài " + (curUnitIdx + 1) + ": " + u.icon + " " + u.title +
-      '<div style="font-size:12px;font-weight:700;color:#b45309;margin-top:2px">⭐ ' + stInfo.stars + '/3 sao • Đúng ' + stInfo.correct + '/' + stInfo.total + ' câu (' + Math.round(stInfo.ratio * 100) + '%)</div>';
+      '<div style="font-size:12px;font-weight:700;color:#b45309;margin-top:2px">⭐ ' + stInfo.stars + '/3 sao • Đúng ' + stInfo.correct + '/' + stInfo.total + ' câu (' + Math.round(stInfo.ratio * 100) + '%)</div>' +
+      '<div class="mode-story-intro">' + esc(unitStoryIntro(curSubj, u)) + '</div>';
     var p = state.progress[unitKey(curSubj, u.topic)] || {};
     var html = "";
     for (var i = 0; i < MODES.length; i++) {
@@ -2137,11 +2169,11 @@
     var rewardCoins = isFirstTime ? (parseInt(p.reward, 10) || 15) : 5;
     var replayNote = "";
     if (!isFirstTime) {
-      if ((state.dailyQuest.replayCoinsCount || 0) < 5) {
+      if ((state.dailyQuest.replayCoinsCount || 0) < 3) {
         state.dailyQuest.replayCoinsCount = (state.dailyQuest.replayCoinsCount || 0) + 1;
       } else {
         rewardCoins = 0;
-        replayNote = "<br><small style='color:#d97706'>Hôm nay bé nhận đủ 5 lượt xu ôn bài rồi, thử bài mới nhé!</small>";
+        replayNote = "<br><small style='color:#d97706'>Hôm nay bé nhận đủ 3 lượt xu ôn bài rồi, thử bài mới nhé!</small>";
       }
     }
     state.coins += rewardCoins;
@@ -2192,7 +2224,7 @@
       startTs: Date.now(), qStartTs: Date.now(), totalRtMs: 0, rtCount: 0, fastGuessCount: 0, audioReplays: 0, correctCount: 0, finalized: false
     };
 
-    $("mascotImg").innerHTML = mascotHTML();
+    $("mascotImg").innerHTML = mascotHTML(curSubj);
     $("hudScore").innerHTML = "0";
     $("hudBar").style.width = "0%";
     $("boardLesson").innerHTML = u.icon + " " + u.title;
@@ -2232,6 +2264,14 @@
     b.innerHTML = msg;
     void b.offsetWidth;
     addClass(b, "pulse");
+    var mi = $("mascotImg");
+    if (mi) {
+      removeClass(mi, "happy");
+      removeClass(mi, "encourage");
+      void mi.offsetWidth;
+      if (kind === "good") addClass(mi, "happy");
+      else if (kind === "bad") addClass(mi, "encourage");
+    }
   }
 
   function readPrompt(q) {
@@ -2371,31 +2411,47 @@
 
   function answerQuiz(btn, q) {
     if (game.locked || hasClass(btn, "disabled")) return;
-    game.locked = true; // Chỉ 1 cơ hội duy nhất, khóa ngay lập tức!
+    game.locked = true;
     var val = btn.getAttribute("data-val");
     var rt = Math.min(60000, Math.max(200, Date.now() - (game.qStartTs || game.startTs || Date.now())));
     game.totalRtMs = (game.totalRtMs || 0) + rt;
     game.rtCount = (game.rtCount || 0) + 1;
     if (val === q.answer) {
       game.correctCount = (game.correctCount || 0) + 1;
+      game.streak = (game.streak || 0) + 1;
       addClass(btn, "correct");
       flashFeedback(true);
-      var pts = 10;
+      var pts = q._retried ? 5 : 10;
       game.score += pts;
       updateHud();
       floatPoints("+" + pts, btn);
       Sound.good();
+      var praiseTxt = pick(PRAISE);
+      if (game.streak >= 3 && game.streak % 3 === 0) {
+        state.coins += 3;
+        saveState();
+        Sound.sparkle();
+        floatPoints("+3 🪙", btn);
+        praiseTxt = "🔥 Chuỗi " + game.streak + " câu siêu đỉnh! +3 xu!";
+      }
       var toSpeak = q.speakText || (game.lang === "en-US" ? q.answer : null);
       if (toSpeak) later(function () { Sound.speak(toSpeak, game.lang); }, 450);
-      say(pick(PRAISE), "good");
+      say(praiseTxt, "good");
       if (Math.random() < 0.35) confetti(8);
       later(function () { game.idx++; nextQuestion(); }, 1500);
     } else {
-      // CHỌN SAI -> FAILED NGAY LẬP TỨC!
+      game.streak = 0;
       if (rt < 1200) game.fastGuessCount = (game.fastGuessCount || 0) + 1;
       addClass(btn, "wrong");
+      addClass(btn, "disabled");
       flashFeedback(false);
       Sound.bad();
+      if (!q._retried) {
+        q._retried = true;
+        game.locked = false;
+        say(pick(RETRY) + " Bé thử chọn lại nhé!", "bad");
+        return;
+      }
       var all = $("gameStage").querySelectorAll(".stone");
       for (var i = 0; i < all.length; i++) {
         if (all[i].getAttribute("data-val") === q.answer) {
@@ -2481,6 +2537,7 @@
     star.style.top = (r.top - ar.top + 20) + "px";
     if (val === q.answer) {
       game.correctCount = (game.correctCount || 0) + 1;
+      game.streak = (game.streak || 0) + 1;
       star.innerHTML = "🌟";
       arena.appendChild(star);
       addClass(el, "ok");
@@ -2491,11 +2548,20 @@
       game.score += pts;
       updateHud();
       floatPoints("+" + pts, el);
-      say(pick(PRAISE), "good");
+      var bPraise = pick(PRAISE);
+      if (game.streak >= 3 && game.streak % 3 === 0) {
+        state.coins += 3;
+        saveState();
+        Sound.sparkle();
+        floatPoints("+3 🪙", el);
+        bPraise = "🔥 Chuỗi " + game.streak + " câu siêu đỉnh! +3 xu!";
+      }
+      say(bPraise, "good");
       var toSpeak = q.speakText || (game.lang === "en-US" ? q.answer : null);
       if (toSpeak) later(function () { Sound.speak(toSpeak, game.lang); }, 500);
       later(function () { game.idx++; nextQuestion(); }, 1600);
     } else {
+      game.streak = 0;
       // BẮN SAI BÓNG -> FAILED NGAY LẬP TỨC!
       if (rt < 1200) game.fastGuessCount = (game.fastGuessCount || 0) + 1;
       star.innerHTML = "💨";
@@ -2766,17 +2832,18 @@
     }
     var oldBest = state.progress[key][game.mode] || 0;
     var badgesBefore = countBadges();
+    var levelBefore = getPlayerLevel(totalStars());
     if (stars > oldBest) state.progress[key][game.mode] = stars;
 
     ensureGamificationState();
     var replayNote = "";
     if (oldBest >= 3 && stars > 0) {
-      if ((state.dailyQuest.replayCoinsCount || 0) < 5) {
+      if ((state.dailyQuest.replayCoinsCount || 0) < 3) {
         coins = Math.max(3, Math.round(coins * 0.3));
         state.dailyQuest.replayCoinsCount = (state.dailyQuest.replayCoinsCount || 0) + 1;
       } else {
         coins = 0;
-        replayNote = "<br><small style='color:#d97706'>Hôm nay bé nhận đủ 5 lượt xu ôn bài rồi, thử bài mới nhé!</small>";
+        replayNote = "<br><small style='color:#d97706'>Hôm nay bé nhận đủ 3 lượt xu ôn bài rồi, thử bài mới nhé!</small>";
       }
     }
     state.coins += coins;
@@ -2784,6 +2851,8 @@
     if (typeof recordTelemetry === "function") recordTelemetry(true);
     saveState();
     var newBadge = countBadges() > badgesBefore;
+    var levelAfter = getPlayerLevel(totalStars());
+    var leveledUp = levelAfter !== levelBefore;
 
     $("resultTitle").innerHTML = stars >= 3 ? "XUẤT SẮC!" : stars >= 2 ? "GIỎI LẮM!" : stars >= 1 ? "HOÀN THÀNH!" : "CỐ LÊN NÀO!";
     var sh = "";
@@ -2795,8 +2864,78 @@
     }
     $("resultStars").innerHTML = sh;
     var bonusHtml = actRes.bonusNotes.length ? "<br><small style='color:#15803d;font-weight:800'>" + actRes.bonusNotes.join(" • ") + "</small>" : "";
-    $("resultScore").innerHTML = "Điểm: " + game.score + " / " + game.max + " (" + stars + "/3 ⭐)" + (newBadge ? "<br>🏅 Bé nhận được huy hiệu mới!" : "") + bonusHtml + replayNote;
+    var lvlHtml = leveledUp ? "<br><b style='color:#7c3aed'>🎊 Thăng cấp: " + esc(levelAfter) + "!</b>" : "";
+    $("resultScore").innerHTML = "Điểm: " + game.score + " / " + game.max + " (" + stars + "/3 ⭐)" + (newBadge ? "<br>🏅 Bé nhận được huy hiệu mới!" : "") + lvlHtml + bonusHtml + replayNote;
     $("resultCoins").innerHTML = "+" + (coins + actRes.bonusCoins) + ' <i class="coin big"></i>';
+
+    // Rương Ngày (nếu đủ 3/3) hoặc Rương Bất Ngờ (Boss hoặc 25% khi >= 2 sao)
+    var surpEl = $("resultSurpriseWrap");
+    if (surpEl) {
+      var dqNow = state.dailyQuest;
+      var doneQNow = (dqNow.math ? 1 : 0) + (dqNow.viet ? 1 : 0) + (dqNow.eng ? 1 : 0);
+      var subjUnits = UNITS[game.subj] || [];
+      var isBossUnit = (curUnitIdx === subjUnits.length - 1);
+      if (doneQNow >= 3 && !dqNow.claimed) {
+        surpEl.innerHTML = '<button type="button" class="surprise-chest-btn" id="resDailyChestBtn">🎁 Đủ 3/3 môn! Chạm mở Rương Ngày (+15 xu)</button>';
+        onTap($("resDailyChestBtn"), function () {
+          if (state.dailyQuest.claimed) return;
+          state.dailyQuest.claimed = true;
+          state.coins += 15;
+          Sound.fanfare(); Sound.coin(); confetti(30);
+          saveState(); renderHome();
+          this.disabled = true;
+          this.innerHTML = "✅ Đã nhận +15 xu từ Rương Ngày!";
+        });
+      } else if ((isBossUnit && stars >= 1.5) || (stars >= 2 && Math.random() < 0.25)) {
+        surpEl.innerHTML = '<button type="button" class="surprise-chest-btn" id="resBonusChestBtn">🎁 Rương Bất Ngờ! Chạm mở quà bí mật</button>';
+        onTap($("resBonusChestBtn"), function () {
+          var bonusC = 5 + Math.floor(Math.random() * 6);
+          state.coins += bonusC;
+          Sound.fanfare(); Sound.coin(); confetti(26);
+          saveState(); renderHome();
+          this.disabled = true;
+          this.innerHTML = "🎉 Tuyệt vời! Bé mở được +" + bonusC + " xu!";
+        });
+      } else {
+        surpEl.innerHTML = "";
+      }
+    }
+
+    // Nút CTA thông minh "Chơi tiếp" (chế độ kế tiếp hoặc bài tiếp theo vừa mở)
+    var nextBtn = $("nextActionBtn");
+    if (nextBtn) {
+      var nextModeObj = null;
+      var uProg = state.progress[key] || {};
+      for (var mi = 0; mi < MODES.length; mi++) {
+        if (MODES[mi].id !== game.mode && (uProg[MODES[mi].id] || 0) < 3) {
+          nextModeObj = MODES[mi];
+          break;
+        }
+      }
+      var nextUIdx = curUnitIdx + 1;
+      var subjArr = UNITS[game.subj] || [];
+      var nextUnitObj = (nextUIdx < subjArr.length && isUnlocked(game.subj, nextUIdx) && subjArr[nextUIdx].topic !== "passages") ? subjArr[nextUIdx] : null;
+      if (nextModeObj) {
+        nextBtn.style.display = "block";
+        nextBtn.innerHTML = "▶ Chơi tiếp: " + nextModeObj.icon + " " + nextModeObj.name;
+        nextBtn.onclick = function () {
+          Sound.click(); closeOverlay("resultOverlay"); Sound.stopSpeak();
+          curMode = nextModeObj.id;
+          startGame();
+        };
+      } else if (nextUnitObj) {
+        nextBtn.style.display = "block";
+        nextBtn.innerHTML = "🚀 Sang Bài " + (nextUIdx + 1) + ": " + nextUnitObj.title;
+        nextBtn.onclick = function () {
+          Sound.click(); closeOverlay("resultOverlay"); Sound.stopSpeak();
+          curUnitIdx = nextUIdx;
+          renderMap(); showScreen("screenMap"); openModePicker();
+        };
+      } else {
+        nextBtn.style.display = "none";
+      }
+    }
+
     openOverlay("resultOverlay");
     if (stars >= 2) { Sound.fanfare(); confetti(26); } else { Sound.good(); }
     later(function () { Sound.coin(); }, 900);
@@ -3487,9 +3626,9 @@
     var dq = state.dailyQuest;
     var doneQ = (dq.math ? 1 : 0) + (dq.viet ? 1 : 0) + (dq.eng ? 1 : 0);
     var html = '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#d97706;font-size:16px">🔥 Chuỗi học liên tiếp: <b>' + (state.streak.count || 0) + '</b> ngày (Kỷ lục: ' + (state.streak.best || 0) + ')</div>';
-    html += '<div class="quest-row' + (dq.math ? ' done' : '') + '"><span>' + (dq.math ? '✅' : '🧮') + ' Chơi 1 lượt Toán 1</span><span class="quest-reward">' + (dq.math ? 'Đã nhận +5 <i class="coin sm"></i>' : '+5 <i class="coin sm"></i>') + '</span></div>';
-    html += '<div class="quest-row' + (dq.viet ? ' done' : '') + '"><span>' + (dq.viet ? '✅' : '📖') + ' Chơi / Đọc 1 bài Tiếng Việt</span><span class="quest-reward">' + (dq.viet ? 'Đã nhận +5 <i class="coin sm"></i>' : '+5 <i class="coin sm"></i>') + '</span></div>';
-    html += '<div class="quest-row' + (dq.eng ? ' done' : '') + '"><span>' + (dq.eng ? '✅' : '🌍') + ' Chơi 1 lượt Tiếng Anh</span><span class="quest-reward">' + (dq.eng ? 'Đã nhận +5 <i class="coin sm"></i>' : '+5 <i class="coin sm"></i>') + '</span></div>';
+    html += '<div class="quest-row' + (dq.math ? ' done' : ' actionable') + '"' + (dq.math ? '' : ' data-qsubj="math"') + '><span>' + (dq.math ? '✅' : '🧮') + ' Chơi 1 lượt Toán 1</span><span class="quest-reward">' + (dq.math ? 'Đã nhận +5 <i class="coin sm"></i>' : 'Làm ngay ➜') + '</span></div>';
+    html += '<div class="quest-row' + (dq.viet ? ' done' : ' actionable') + '"' + (dq.viet ? '' : ' data-qsubj="viet"') + '><span>' + (dq.viet ? '✅' : '📖') + ' Chơi / Đọc 1 bài Tiếng Việt</span><span class="quest-reward">' + (dq.viet ? 'Đã nhận +5 <i class="coin sm"></i>' : 'Làm ngay ➜') + '</span></div>';
+    html += '<div class="quest-row' + (dq.eng ? ' done' : ' actionable') + '"' + (dq.eng ? '' : ' data-qsubj="eng"') + '><span>' + (dq.eng ? '✅' : '🌍') + ' Chơi 1 lượt Tiếng Anh</span><span class="quest-reward">' + (dq.eng ? 'Đã nhận +5 <i class="coin sm"></i>' : 'Làm ngay ➜') + '</span></div>';
 
     html += '<div style="text-align:center;margin-top:14px;">';
     if (doneQ >= 3 && !dq.claimed) {
@@ -3510,6 +3649,15 @@
 
     $("infoTitle").innerHTML = "🎯 Nhiệm Vụ & Chuỗi Ngày";
     $("infoBody").innerHTML = html;
+    var qRows = $("infoBody").querySelectorAll(".quest-row[data-qsubj]");
+    for (var qi = 0; qi < qRows.length; qi++) {
+      onTap(qRows[qi], function () {
+        Sound.click();
+        var s = this.getAttribute("data-qsubj");
+        closeOverlay("infoOverlay");
+        if (s) openSubject(s);
+      });
+    }
     if ($("claimDailyChestBtn")) {
       onTap($("claimDailyChestBtn"), function () {
         state.dailyQuest.claimed = true;
@@ -4220,7 +4368,7 @@
           }
         }
       }
-      $("pauseMascot").innerHTML = mascotHTML();
+      $("pauseMascot").innerHTML = mascotHTML(curSubj);
       openOverlay("pauseOverlay");
     });
     onTap($("resumeBtn"), function () {

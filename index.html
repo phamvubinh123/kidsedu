@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/mascot.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=62">
+  <link rel="stylesheet" href="css/style.css?v=63">
 </head>
 <body>
 
@@ -207,10 +207,12 @@
       <div class="result-stars" id="resultStars"></div>
       <div class="result-score" id="resultScore">Điểm: 0</div>
       <div class="result-coins" id="resultCoins">+0 <i class="coin big"></i></div>
+      <div id="resultSurpriseWrap" style="margin-top:10px;text-align:center;"></div>
       <div class="panel-actions two">
         <button class="btn-orange" id="replayBtn">↻ Chơi lại</button>
         <button class="btn-green" id="toMapBtn">Bản đồ ➜</button>
       </div>
+      <button class="btn-green" id="nextActionBtn" style="display:none;margin-top:10px;width:100%;font-size:18px;padding:10px 16px;">▶ Chơi tiếp ➜</button>
     </div>
   </div>
 
@@ -308,10 +310,10 @@
   <!-- Firebase SDK v8 (Tương thích 100% cú pháp ES5 cho iPadOS 12.5.8 đến iOS 18) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/firebase-config.js?v=62"></script>
-  <script src="js/project-config.js?v=62"></script>
-  <script src="js/data.js?v=62"></script>
-  <script src="js/audio-manifest.js?v=62"></script>
-  <script src="js/app.js?v=62"></script>
+  <script src="js/firebase-config.js?v=63"></script>
+  <script src="js/project-config.js?v=63"></script>
+  <script src="js/data.js?v=63"></script>
+  <script src="js/audio-manifest.js?v=63"></script>
+  <script src="js/app.js?v=63"></script>
 </body>
 </html>
