@@ -581,11 +581,11 @@
 
   var AVATARS = CFG.avatars || [
     { id: "hero", name: "Hiệp Sĩ Nhí", need: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
-    { id: "fire", name: "Lửa Đỏ", need: 8, img: "assets/hero-fire.jpg", emoji: "🔥" },
-    { id: "ice", name: "Băng Giá", need: 16, img: "assets/hero-ice.jpg", emoji: "❄️" },
-    { id: "thunder", name: "Sấm Sét", need: 25, img: "assets/hero-thunder.jpg", emoji: "⚡" },
-    { id: "ninja", name: "Bóng Đêm", need: 35, img: "assets/hero-shadow.jpg", emoji: "🥷" },
-    { id: "king", name: "Bá Tước (Vua Hiệp Sĩ)", need: 45, img: "assets/hero-king.jpg", emoji: "👑" }
+    { id: "fire", name: "Hiệp Sĩ Lửa Đỏ", need: 8, img: "assets/hero-fire.jpg", emoji: "🔥" },
+    { id: "ice", name: "Hiệp Sĩ Băng Giá", need: 16, img: "assets/hero-ice.jpg", emoji: "❄️" },
+    { id: "thunder", name: "Hiệp Sĩ Sấm Sét", need: 25, img: "assets/hero-thunder.jpg", emoji: "⚡" },
+    { id: "ninja", name: "Hiệp Sĩ Bóng Đêm", need: 35, img: "assets/hero-shadow.jpg", emoji: "🥷" },
+    { id: "king", name: "Hiệp Sĩ Bá Tước", need: 45, img: "assets/hero-king.jpg", emoji: "👑" }
   ];
 
   var PRAISE = CFG.praiseMessages || [

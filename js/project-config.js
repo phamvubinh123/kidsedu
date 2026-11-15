@@ -6,7 +6,7 @@
 var PROJECT_CONFIG = {
   // 1. Định danh dự án & Bộ nhớ lưu trữ (Đổi storagePrefix khi tạo dự án mới để không trùng dữ liệu)
   appTitle: "Đảo Tri Thức",
-  appVersion: "v66 (15/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: Luôn yêu cầu mã PIN 4 số mỗi khi vào Góc Ba Mẹ.",
+  appVersion: "v68 (15/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: 6 nhân vật Hiệp Sĩ 3D.",
   storagePrefix: "vqtt",
   firebaseRoot: "kidsedu_vqtt",
 
@@ -46,11 +46,11 @@ var PROJECT_CONFIG = {
   // 5. Nhân vật mở khóa theo Tổng số Sao (6 nhân vật hình người 3D)
   avatars: [
     { id: "hero", name: "Hiệp Sĩ Nhí", need: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
-    { id: "fire", name: "Lửa Đỏ", need: 8, img: "assets/hero-fire.jpg", emoji: "🔥" },
-    { id: "ice", name: "Băng Giá", need: 16, img: "assets/hero-ice.jpg", emoji: "❄️" },
-    { id: "thunder", name: "Sấm Sét", need: 25, img: "assets/hero-thunder.jpg", emoji: "⚡" },
-    { id: "ninja", name: "Bóng Đêm", need: 35, img: "assets/hero-shadow.jpg", emoji: "🥷" },
-    { id: "king", name: "Bá Tước (Vua Hiệp Sĩ)", need: 45, img: "assets/hero-king.jpg", emoji: "👑" }
+    { id: "fire", name: "Hiệp Sĩ Lửa Đỏ", need: 8, img: "assets/hero-fire.jpg", emoji: "🔥" },
+    { id: "ice", name: "Hiệp Sĩ Băng Giá", need: 16, img: "assets/hero-ice.jpg", emoji: "❄️" },
+    { id: "thunder", name: "Hiệp Sĩ Sấm Sét", need: 25, img: "assets/hero-thunder.jpg", emoji: "⚡" },
+    { id: "ninja", name: "Hiệp Sĩ Bóng Đêm", need: 35, img: "assets/hero-shadow.jpg", emoji: "🥷" },
+    { id: "king", name: "Hiệp Sĩ Bá Tước", need: 45, img: "assets/hero-king.jpg", emoji: "👑" }
   ],
 
   // 6. Cửa hàng Đổi Quà Thật (Tab 2) & Quà mục tiêu mặc định
