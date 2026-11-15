@@ -6,7 +6,7 @@
 var PROJECT_CONFIG = {
   // 1. Định danh dự án & Bộ nhớ lưu trữ (Đổi storagePrefix khi tạo dự án mới để không trùng dữ liệu)
   appTitle: "Đảo Tri Thức",
-  appVersion: "v58 (14/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: AI phân tích độ khó chỉ tính trên số thẻ và chặng bé đã làm.",
+  appVersion: "v59 (15/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: Cổng PIN 4 số cho Luyện đọc & Ba Mẹ, mở Nhân vật theo số sao.",
   storagePrefix: "vqtt",
   firebaseRoot: "kidsedu_vqtt",
 
@@ -43,20 +43,20 @@ var PROJECT_CONFIG = {
     "Siêu Trí Tuệ Nhí"
   ],
 
-  // 5. Cửa hàng Nhân vật (Tab 1)
+  // 5. Nhân vật mở khóa theo Tổng số Sao (giống Huy hiệu)
   avatars: [
-    { id: "hero", name: "Hiệp Sĩ Nhí", price: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
-    { id: "sword", name: "Hiệp Sĩ Kiếm Bạc", price: 20, emoji: "⚔️" },
-    { id: "shield", name: "Hiệp Sĩ Khiên Vàng", price: 30, emoji: "🛡️" },
-    { id: "archer", name: "Hiệp Sĩ Cung Thủ", price: 40, emoji: "🏹" },
-    { id: "fire", name: "Hiệp Sĩ Lửa Đỏ", price: 50, emoji: "🔥" },
-    { id: "ice", name: "Hiệp Sĩ Băng Giá", price: 60, emoji: "❄️" },
-    { id: "thunder", name: "Hiệp Sĩ Sấm Sét", price: 80, emoji: "⚡" },
-    { id: "ninja", name: "Hiệp Sĩ Bóng Đêm", price: 100, emoji: "🥷" },
-    { id: "mecha", name: "Hiệp Sĩ Rô-Bốt", price: 120, emoji: "🤖" },
-    { id: "mage", name: "Hiệp Sĩ Phép Thuật", price: 150, emoji: "🧙" },
-    { id: "star", name: "Hiệp Sĩ Ánh Sao", price: 180, emoji: "🌟" },
-    { id: "king", name: "Vua Hiệp Sĩ", price: 220, emoji: "👑" }
+    { id: "hero", name: "Hiệp Sĩ Nhí", need: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
+    { id: "sword", name: "Hiệp Sĩ Kiếm Bạc", need: 3, emoji: "⚔️" },
+    { id: "shield", name: "Hiệp Sĩ Khiên Vàng", need: 6, emoji: "🛡️" },
+    { id: "archer", name: "Hiệp Sĩ Cung Thủ", need: 10, emoji: "🏹" },
+    { id: "fire", name: "Hiệp Sĩ Lửa Đỏ", need: 14, emoji: "🔥" },
+    { id: "ice", name: "Hiệp Sĩ Băng Giá", need: 18, emoji: "❄️" },
+    { id: "thunder", name: "Hiệp Sĩ Sấm Sét", need: 23, emoji: "⚡" },
+    { id: "ninja", name: "Hiệp Sĩ Bóng Đêm", need: 28, emoji: "🥷" },
+    { id: "mecha", name: "Hiệp Sĩ Rô-Bốt", need: 34, emoji: "🤖" },
+    { id: "mage", name: "Hiệp Sĩ Phép Thuật", need: 40, emoji: "🧙" },
+    { id: "star", name: "Hiệp Sĩ Ánh Sao", need: 45, emoji: "🌟" },
+    { id: "king", name: "Vua Hiệp Sĩ", need: 50, emoji: "👑" }
   ],
 
   // 6. Cửa hàng Đổi Quà Thật (Tab 2) & Quà mục tiêu mặc định

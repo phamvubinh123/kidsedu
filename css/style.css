@@ -1452,5 +1452,34 @@ body.in-subscreen .cloud-layer { display: none; }
   font-weight: 700; background: #ffffff; margin: 0 6px 8px 0;
 }
 
+/* Modal mã PIN 4 số Cổng Ba Mẹ */
+#pinOverlay { z-index: 1200; }
+.pin-sub { font-size: 14px; font-weight: 700; color: #334155; text-align: center; margin: 4px 0 12px; }
+.pin-dots { text-align: center; margin: 6px 0 8px; }
+.pin-dot {
+  display: inline-block; width: 20px; height: 20px; border-radius: 50%;
+  border: 2.5px solid #94a3b8; background: #ffffff; margin: 0 8px;
+  -webkit-transition: all 0.15s; transition: all 0.15s;
+}
+.pin-dot.filled { background: #2563eb; border-color: #1d4ed8; -webkit-transform: scale(1.1); transform: scale(1.1); }
+.pin-dot.err { background: #ef4444; border-color: #b91c1c; }
+.pin-hint { font-size: 12px; font-weight: 700; color: #64748b; text-align: center; min-height: 18px; margin-bottom: 10px; }
+.pin-hint.err { color: #dc2626; }
+.pin-keypad {
+  display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  -webkit-justify-content: space-between; justify-content: space-between;
+  max-width: 264px; margin: 0 auto;
+}
+.pin-key {
+  width: 31%; height: 52px; margin-bottom: 8px; border-radius: 16px;
+  border: 2px solid #cbd5e1; background: #ffffff; color: #0f172a;
+  font-family: inherit; font-size: 22px; font-weight: 800; cursor: pointer;
+  box-shadow: 0 3px 0 #cbd5e1;
+}
+.pin-key:active { -webkit-transform: translateY(2px); transform: translateY(2px); box-shadow: 0 1px 0 #cbd5e1; }
+.pin-key.fn { font-size: 14px; font-weight: 800; background: #f1f5f9; color: #334155; }
+.pin-key.cancel { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; box-shadow: 0 3px 0 #fca5a5; }
+.shop-card.locked { opacity: 0.78; background: #f8fafc; }
+
 
 

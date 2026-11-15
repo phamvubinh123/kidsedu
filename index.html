@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/mascot.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=58">
+  <link rel="stylesheet" href="css/style.css?v=59">
 </head>
 <body>
 
@@ -261,14 +261,44 @@
     </div>
   </div>
 
+  <!-- ================= MODAL MÃ PIN 4 SỐ CỔNG BA MẸ ================= -->
+  <div class="overlay" id="pinOverlay">
+    <div class="frost-panel small" id="pinPanel">
+      <div class="panel-title" id="pinTitle">🔒 Cổng Ba Mẹ</div>
+      <div class="pin-sub" id="pinSub">Nhập mã PIN 4 số để tiếp tục</div>
+      <div class="pin-dots" id="pinDots">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-hint" id="pinHint"></div>
+      <div class="pin-keypad" id="pinKeypad">
+        <button type="button" class="pin-key" data-k="1">1</button>
+        <button type="button" class="pin-key" data-k="2">2</button>
+        <button type="button" class="pin-key" data-k="3">3</button>
+        <button type="button" class="pin-key" data-k="4">4</button>
+        <button type="button" class="pin-key" data-k="5">5</button>
+        <button type="button" class="pin-key" data-k="6">6</button>
+        <button type="button" class="pin-key" data-k="7">7</button>
+        <button type="button" class="pin-key" data-k="8">8</button>
+        <button type="button" class="pin-key" data-k="9">9</button>
+        <button type="button" class="pin-key fn" data-k="back">⌫ Xóa</button>
+        <button type="button" class="pin-key" data-k="0">0</button>
+        <button type="button" class="pin-key fn cancel" data-k="cancel">Hủy</button>
+      </div>
+      <button class="close-x" id="pinCloseBtn" type="button">✕</button>
+    </div>
+  </div>
+
   <audio id="ttsAudio" preload="none" style="display:none"></audio>
   <!-- Firebase SDK v8 (Tương thích 100% cú pháp ES5 cho iPadOS 12.5.8 đến iOS 18) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/firebase-config.js?v=58"></script>
-  <script src="js/project-config.js?v=58"></script>
-  <script src="js/data.js?v=58"></script>
-  <script src="js/audio-manifest.js?v=58"></script>
-  <script src="js/app.js?v=58"></script>
+  <script src="js/firebase-config.js?v=59"></script>
+  <script src="js/project-config.js?v=59"></script>
+  <script src="js/data.js?v=59"></script>
+  <script src="js/audio-manifest.js?v=59"></script>
+  <script src="js/app.js?v=59"></script>
 </body>
 </html>

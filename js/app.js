@@ -683,6 +683,7 @@
     pinnedRewardId: CFG.defaultPinnedRewardId || "rw_icecream",
     rewardTickets: [],
     telemetry: [],
+    parentPin: "",
     updatedAt: 0
   };
 
@@ -871,14 +872,150 @@
     state.updatedAt = 0;
   }
 
-  function askParentalGate(actionLabel) {
-    var a = 6 + Math.floor(Math.random() * 4); // 6..9
-    var b = 7 + Math.floor(Math.random() * 3); // 7..9
-    var ans = window.prompt("🔒 CỔNG BỐ MẸ (" + actionLabel + ")\nĐể tránh bé bấm nhầm, bố mẹ nhập kết quả phép nhân:\n" + a + " × " + b + " = ?");
-    if (ans === null) return false;
-    if (parseInt(ans, 10) === (a * b)) return true;
-    window.alert("Kết quả chưa đúng. Thao tác đã được hủy để bảo vệ dữ liệu của bé!");
-    return false;
+  function pinStoreKey() { return STORE_PREFIX + "_parent_pin"; }
+
+  function getParentPin() {
+    if (state.parentPin && /^\d{4}$/.test(String(state.parentPin))) {
+      return String(state.parentPin);
+    }
+    try {
+      var saved = localStorage.getItem(pinStoreKey());
+      if (saved && /^\d{4}$/.test(saved)) return saved;
+    } catch (e) {}
+    return "1234";
+  }
+
+  function saveParentPin(pin) {
+    var clean = String(pin || "").replace(/\D/g, "");
+    if (!/^\d{4}$/.test(clean)) return false;
+    state.parentPin = clean;
+    try { localStorage.setItem(pinStoreKey(), clean); } catch (e) {}
+    saveState();
+    return true;
+  }
+
+  var pinModalState = null;
+
+  function renderPinDots(val, isErr) {
+    var box = $("pinDots");
+    if (!box) return;
+    var dots = box.querySelectorAll(".pin-dot");
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].className = "pin-dot" + (isErr ? " err" : (i < val.length ? " filled" : ""));
+    }
+  }
+
+  function bindPinModalOnce() {
+    if (!$("pinOverlay") || $("pinOverlay").getAttribute("data-bound")) return;
+    $("pinOverlay").setAttribute("data-bound", "1");
+    var keys = $("pinKeypad").querySelectorAll(".pin-key");
+    for (var i = 0; i < keys.length; i++) {
+      onTap(keys[i], function () {
+        if (!pinModalState) return;
+        var k = this.getAttribute("data-k");
+        if (k === "cancel") {
+          Sound.click();
+          closeOverlay("pinOverlay");
+          pinModalState = null;
+          return;
+        }
+        if (k === "back") {
+          Sound.click();
+          pinModalState.value = pinModalState.value.slice(0, -1);
+          renderPinDots(pinModalState.value, false);
+          return;
+        }
+        if (pinModalState.value.length >= 4) return;
+        Sound.click();
+        pinModalState.value += k;
+        renderPinDots(pinModalState.value, false);
+        if (pinModalState.value.length === 4) {
+          var entered = pinModalState.value;
+          var curSt = pinModalState;
+          setTimeout(function () {
+            if (!pinModalState || pinModalState !== curSt) return;
+            if (curSt.mode === "setup") {
+              saveParentPin(entered);
+              Sound.good();
+              closeOverlay("pinOverlay");
+              pinModalState = null;
+              window.alert("✅ Đã lưu mã PIN 4 số mới thành công!");
+              if (typeof curSt.onSuccess === "function") curSt.onSuccess(entered);
+              return;
+            }
+            if (entered === getParentPin()) {
+              Sound.good();
+              closeOverlay("pinOverlay");
+              pinModalState = null;
+              if (typeof curSt.onSuccess === "function") curSt.onSuccess();
+            } else {
+              Sound.bad();
+              renderPinDots(entered, true);
+              if ($("pinHint")) {
+                $("pinHint").className = "pin-hint err";
+                $("pinHint").innerHTML = "Mã PIN chưa đúng, ba mẹ thử lại nhé!";
+              }
+              addClass($("pinPanel"), "shake-it");
+              setTimeout(function () {
+                removeClass($("pinPanel"), "shake-it");
+                if (pinModalState === curSt) {
+                  pinModalState.value = "";
+                  renderPinDots("", false);
+                }
+              }, 450);
+            }
+          }, 120);
+        }
+      });
+    }
+    onTap($("pinCloseBtn"), function () {
+      Sound.click();
+      closeOverlay("pinOverlay");
+      pinModalState = null;
+    });
+  }
+
+  function openPinModal(opts) {
+    bindPinModalOnce();
+    var mode = (opts && opts.mode) || "verify";
+    var curPin = getParentPin();
+    pinModalState = {
+      mode: mode,
+      value: "",
+      onSuccess: opts && opts.onSuccess
+    };
+    $("pinTitle").innerHTML = (opts && opts.title) || "🔒 Cổng Ba Mẹ";
+    $("pinSub").innerHTML = (opts && opts.sub) || "Nhập mã PIN 4 số để tiếp tục";
+    if ($("pinHint")) {
+      $("pinHint").className = "pin-hint";
+      if (mode === "setup") {
+        $("pinHint").innerHTML = "Chọn 4 chữ số dễ nhớ cho Ba Mẹ";
+      } else if (curPin === "1234") {
+        $("pinHint").innerHTML = "Mã PIN mặc định: 1234 (đổi trong Cài đặt)";
+      } else {
+        $("pinHint").innerHTML = "";
+      }
+    }
+    renderPinDots("", false);
+    openOverlay("pinOverlay");
+  }
+
+  function askParentalGate(actionLabel, onSuccess) {
+    openPinModal({
+      mode: "verify",
+      title: "🔒 Cổng Ba Mẹ",
+      sub: actionLabel ? ("Nhập PIN 4 số: " + esc(actionLabel)) : "Nhập mã PIN 4 số để tiếp tục",
+      onSuccess: onSuccess
+    });
+  }
+
+  function openPinSetupModal(onDone) {
+    openPinModal({
+      mode: "setup",
+      title: "🔐 Đổi Mã PIN 4 Số",
+      sub: "Nhập mã PIN mới gồm 4 chữ số",
+      onSuccess: onDone
+    });
   }
 
   function switchProfile(pid) {
@@ -922,30 +1059,31 @@
     if (!pid || profiles.length <= 1) return;
     var prof = findProfileById(pid);
     var label = prof ? prof.name : pid;
-    if (!askParentalGate("Xóa hồ sơ " + label)) return;
-    if (!window.confirm('Bạn có chắc muốn xóa hồ sơ bé "' + label + '"? Mọi sao và xu của hồ sơ này sẽ bị xóa vĩnh viễn.')) return;
-    var nextList = [];
-    for (var i = 0; i < profiles.length; i++) {
-      if (profiles[i].id !== pid) nextList.push(profiles[i]);
-    }
-    if (!nextList.length) return;
-    profiles = nextList;
-    try { localStorage.removeItem(profileStoreKey(pid)); } catch (e) {}
-    CloudSync.deleteProfile(pid);
+    askParentalGate("Xóa hồ sơ " + label, function () {
+      if (!window.confirm('Bạn có chắc muốn xóa hồ sơ bé "' + label + '"? Mọi sao và xu của hồ sơ này sẽ bị xóa vĩnh viễn.')) return;
+      var nextList = [];
+      for (var i = 0; i < profiles.length; i++) {
+        if (profiles[i].id !== pid) nextList.push(profiles[i]);
+      }
+      if (!nextList.length) return;
+      profiles = nextList;
+      try { localStorage.removeItem(profileStoreKey(pid)); } catch (e) {}
+      CloudSync.deleteProfile(pid);
 
-    if (currentProfileId === pid) {
-      currentProfileId = profiles[0].id;
-      saveProfilesList();
-      var nextProf = profiles[0];
-      resetStateForProfile(nextProf.name, nextProf.avatar || "hero");
-      loadState();
-      renderHome();
-      CloudSync.listenCurrentProfile();
-    } else {
-      saveProfilesList();
-    }
-    Sound.click();
-    renderProfileCards();
+      if (currentProfileId === pid) {
+        currentProfileId = profiles[0].id;
+        saveProfilesList();
+        var nextProf = profiles[0];
+        resetStateForProfile(nextProf.name, nextProf.avatar || "hero");
+        loadState();
+        renderHome();
+        CloudSync.listenCurrentProfile();
+      } else {
+        saveProfilesList();
+      }
+      Sound.click();
+      renderProfileCards();
+    });
   }
 
   // Bộ máy đồng bộ đám mây Firebase
@@ -1006,6 +1144,7 @@
           pinnedRewardId: data.pinnedRewardId || "rw_car",
           rewardTickets: Array.isArray(data.rewardTickets) ? data.rewardTickets : [],
           telemetry: Array.isArray(data.telemetry) ? data.telemetry.slice(-80) : [],
+          parentPin: data.parentPin || "",
           updatedAt: data.updatedAt || Date.now()
         };
         this.db.ref("kidsedu/profiles/" + pid).set(payload, function (err) {
@@ -1687,24 +1826,26 @@
   }
 
   function openPassageReader(idx) {
-    if (typeof idx === "number") {
-      curPassageIdx = idx;
-    } else if (typeof state.lastPassageIdx === "number" && state.lastPassageIdx >= 0) {
-      curPassageIdx = state.lastPassageIdx;
-    } else {
-      curPassageIdx = 0;
-    }
-    if (typeof READING_PASSAGES !== "undefined" && READING_PASSAGES.length > 0) {
-      if (curPassageIdx >= READING_PASSAGES.length) curPassageIdx = READING_PASSAGES.length - 1;
-      curWeekNum = getPassageWeekNum(READING_PASSAGES[curPassageIdx]);
-      curWeekGroup = Math.floor((curWeekNum - 1) / 6);
-    }
-    state.lastSubj = "viet";
-    state.lastUnitIdx = 4; // index của bài Luyện đọc đoạn văn
-    state.lastPassageIdx = curPassageIdx;
-    saveState();
-    renderPassageScreen();
-    showScreen("screenRead");
+    askParentalGate("Vào Phòng Luyện Đọc cùng bé", function () {
+      if (typeof idx === "number") {
+        curPassageIdx = idx;
+      } else if (typeof state.lastPassageIdx === "number" && state.lastPassageIdx >= 0) {
+        curPassageIdx = state.lastPassageIdx;
+      } else {
+        curPassageIdx = 0;
+      }
+      if (typeof READING_PASSAGES !== "undefined" && READING_PASSAGES.length > 0) {
+        if (curPassageIdx >= READING_PASSAGES.length) curPassageIdx = READING_PASSAGES.length - 1;
+        curWeekNum = getPassageWeekNum(READING_PASSAGES[curPassageIdx]);
+        curWeekGroup = Math.floor((curWeekNum - 1) / 6);
+      }
+      state.lastSubj = "viet";
+      state.lastUnitIdx = 4; // index của bài Luyện đọc đoạn văn
+      state.lastPassageIdx = curPassageIdx;
+      saveState();
+      renderPassageScreen();
+      showScreen("screenRead");
+    });
   }
 
   function renderPassageScreen() {
@@ -1917,7 +2058,6 @@
     var p = READING_PASSAGES[curPassageIdx];
     if (!p) return;
     stopSampleReading();
-    if (!askParentalGate("Xác nhận bé đã đọc xong " + p.title)) return;
 
     Sound.fanfare();
     confetti(30);
@@ -3320,8 +3460,10 @@
       '<button type="button" class="shop-tab' + (curShopTab === "avatars" ? " active" : "") + '" data-stab="avatars">🦸 Nhân Vật</button>' +
       '<button type="button" class="shop-tab' + (curShopTab === "badges" ? " active" : "") + '" data-stab="badges">🏅 Huy Hiệu</button>' +
       '</div>';
-    if (curShopTab !== "badges") {
+    if (curShopTab === "rewards") {
       html += '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đang có <b>' + state.coins + '</b> <i class="coin sm"></i></div>';
+    } else if (curShopTab === "avatars") {
+      html += '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đang có <b>' + totalStars() + ' ⭐</b> · Tích sao để mở khóa nhân vật mới!</div>';
     }
 
     if (curShopTab === "rewards") {
@@ -3364,17 +3506,19 @@
       html += renderBadgesHTML();
       $("infoTitle").innerHTML = "🏅 Huy Hiệu Của Bé";
     } else {
+      var curStars = totalStars();
       html += '<div class="grid-cards">';
       for (var i = 0; i < AVATARS.length; i++) {
         var a = AVATARS[i];
-        var owned = state.owned.indexOf(a.id) > -1;
+        var needS = typeof a.need === "number" ? a.need : 0;
+        var owned = curStars >= needS;
         var using = state.avatar === a.id;
-        html += '<div class="shop-card' + (owned ? " owned" : "") + (using ? " using" : "") + '" data-id="' + a.id + '">' +
+        html += '<div class="shop-card' + (owned ? " owned" : " locked") + (using ? " using" : "") + '" data-id="' + a.id + '">' +
           '<div class="shop-ic">' + avatarHTML(a.id) + '</div><div class="shop-name">' + a.name + "</div>" +
-          '<div class="shop-price">' + (using ? "Đang dùng ✅" : owned ? "Chọn" : a.price + ' <i class="coin sm"></i>') + "</div></div>";
+          '<div class="shop-price">' + (using ? "Đang dùng ✅" : owned ? "Đã mở • Chọn" : "🔒 Cần " + needS + " ⭐") + "</div></div>";
       }
       html += "</div>";
-      $("infoTitle").innerHTML = "🦸 Cửa Hàng Nhân Vật";
+      $("infoTitle").innerHTML = "🦸 Nhân Vật Của Bé";
     }
 
     $("infoBody").innerHTML = html;
@@ -3407,22 +3551,25 @@
             if (state.realRewards[x].id === rid) { reward = state.realRewards[x]; break; }
           }
           if (!reward || state.coins < reward.cost) { Sound.bad(); return; }
-          if (!askParentalGate("Đổi quà " + reward.name + " (" + reward.cost + " xu)")) return;
-          state.coins -= reward.cost;
-          state.rewardTickets.push({
-            id: "tk_" + Date.now(),
-            rewardName: reward.name,
-            icon: reward.icon,
-            cost: reward.cost,
-            status: "pending",
-            date: getTodayStr(0)
+          var chosenRw = reward;
+          askParentalGate("Đổi quà " + chosenRw.name + " (" + chosenRw.cost + " xu)", function () {
+            if (state.coins < chosenRw.cost) { Sound.bad(); return; }
+            state.coins -= chosenRw.cost;
+            state.rewardTickets.push({
+              id: "tk_" + Date.now(),
+              rewardName: chosenRw.name,
+              icon: chosenRw.icon,
+              cost: chosenRw.cost,
+              status: "pending",
+              date: getTodayStr(0)
+            });
+            Sound.fanfare();
+            Sound.coin();
+            confetti(28);
+            saveState();
+            renderHome();
+            openShop("rewards");
           });
-          Sound.fanfare();
-          Sound.coin();
-          confetti(28);
-          saveState();
-          renderHome();
-          openShop("rewards");
         });
       }
     } else if (curShopTab === "avatars") {
@@ -3430,14 +3577,16 @@
       for (var k = 0; k < cards.length; k++) {
         onTap(cards[k], function () {
           var a = getAvatar(this.getAttribute("data-id"));
-          if (state.owned.indexOf(a.id) > -1) {
-            state.avatar = a.id; Sound.click();
-          } else if (state.coins >= a.price) {
-            state.coins -= a.price; state.owned.push(a.id); state.avatar = a.id;
-            Sound.coin(); confetti(14);
+          var needS = typeof a.need === "number" ? a.need : 0;
+          var curS = totalStars();
+          if (curS >= needS) {
+            state.avatar = a.id;
+            if (state.owned.indexOf(a.id) === -1) state.owned.push(a.id);
+            Sound.click();
           } else {
             Sound.bad();
-            this.querySelector(".shop-price").innerHTML = "Cần thêm " + (a.price - state.coins) + ' <i class="coin sm"></i>';
+            var missing = Math.round((needS - curS) * 10) / 10;
+            this.querySelector(".shop-price").innerHTML = "Thiếu " + missing + " ⭐";
             return;
           }
           saveState(); renderHome(); openShop("avatars");
@@ -3682,6 +3831,7 @@
 
     // 2. CÀI ĐẶT CHO PHỤ HUYNH
     html += '<div class="set-section-title">👨‍👩‍👧 Cài Đặt Dành Cho Bố Mẹ</div>';
+    html += '<div class="set-row"><span>🔐 Mã PIN Cổng Ba Mẹ (4 số)</span><button class="small-btn" id="changePinBtn">Đổi PIN</button></div>';
     html += '<div class="set-row"><span>🎟️ Duyệt phiếu quà đã đổi' + (pendingCnt ? ' <b style="color:#dc2626">(' + pendingCnt + ' chờ duyệt)</b>' : '') + '</span><button class="small-btn" id="manageRewardsBtn">' + (pendingCnt ? 'Duyệt ngay' : 'Quản lý') + '</button></div>';
     var aiCfgNow = getAIConfig();
     html += '<div class="set-row"><span>🤖 Trợ lý AI Phân tích (Gemini): <b>' + ((aiCfgNow.apiKey || aiCfgNow.proxyUrl) ? 'Đã gắn' : 'Chưa gắn') + '</b></span><button class="small-btn" id="configAiBtn">Cấu hình</button></div>';
@@ -3699,7 +3849,7 @@
     html += '<div class="guide-item"><span class="gi-ic">📜</span><div><b>Phiến Đá Bí Ẩn:</b> chạm từng hình để đếm (bài đếm số) rồi chọn phiến đá đáp án đúng.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">🧩</span><div><b>Ghép Đôi Nhanh & Lật Thẻ:</b> chạm ghép cặp hình/câu hỏi và đáp án đi cùng nhau.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">🎈</span><div><b>Bóng Bay Tri Thức:</b> chạm quả bóng có đáp án đúng trước khi bóng bay mất.</div></div>';
-    html += '<div class="guide-item"><span class="gi-ic">🔊</span><div>Bấm nút <b>loa</b> để nghe đọc câu hỏi; dùng <b>xu vàng</b> để mua nhân vật mới trong Cửa hàng.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🔊</span><div>Bấm nút <b>loa</b> để nghe đọc câu hỏi; tích lũy <b>sao</b> để mở khóa nhân vật mới & dùng <b>xu vàng</b> để đổi quà thật.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">💡</span><div><b>Mẹo cho iPad & iPhone cũ:</b> Vào <b>Cài đặt máy ➜ Trợ năng ➜ Nội dung được đọc ➜ Giọng nói ➜ Tiếng Việt</b> tải giọng Linh về máy; bấm Chia sẻ Safari ➜ <b>Thêm vào MH chính</b> để chơi toàn màn hình.</div></div>';
     html += '</div>';
 
@@ -3710,12 +3860,18 @@
     var toggles = $("infoBody").querySelectorAll(".toggle");
     for (var i = 0; i < toggles.length; i++) {
       onTap(toggles[i], function () {
-        var k = this.getAttribute("data-key");
+        var btnEl = this;
+        var k = btnEl.getAttribute("data-key");
         if (k === "unlockAll" && !state.unlockAll) {
-          if (!askParentalGate("Mở khóa tất cả bài")) return;
+          askParentalGate("Mở khóa tất cả bài", function () {
+            state.unlockAll = true;
+            addClass(btnEl, "on");
+            saveState(); Sound.click();
+          });
+          return;
         }
         state[k] = !state[k];
-        if (state[k]) addClass(this, "on"); else removeClass(this, "on");
+        if (state[k]) addClass(btnEl, "on"); else removeClass(btnEl, "on");
         if (k === "bgm") {
           if (state.bgm) Sound.startBGM(); else Sound.stopBGM();
           updateBgmButtons();
@@ -3734,16 +3890,26 @@
       box.style.display = open ? "none" : "block";
       this.innerHTML = open ? "Xem kỹ" : "Thu gọn";
     });
+    if ($("changePinBtn")) {
+      onTap($("changePinBtn"), function () {
+        Sound.click();
+        askParentalGate("Xác nhận PIN cũ để đổi PIN mới", function () {
+          openPinSetupModal();
+        });
+      });
+    }
     onTap($("manageRewardsBtn"), function () {
       Sound.click();
-      if (!askParentalGate("Quản lý Quà Thật & Duyệt Phiếu")) return;
-      openParentRewardsModal();
+      askParentalGate("Quản lý Quà Thật & Duyệt Phiếu", function () {
+        openParentRewardsModal();
+      });
     });
     if ($("configAiBtn")) {
       onTap($("configAiBtn"), function () {
         Sound.click();
-        if (!askParentalGate("Cấu hình Trợ lý AI")) return;
-        openAIConfigModal();
+        askParentalGate("Cấu hình Trợ lý AI", function () {
+          openAIConfigModal();
+        });
       });
     }
     onTap($("setCloudBtn"), function () {
@@ -3766,35 +3932,39 @@
 
     onTap($("importBtn"), function () {
       Sound.click();
-      if (!askParentalGate("Khôi phục dữ liệu")) return;
-      var input = window.prompt("Dán mã lưu tiến độ vào đây để khôi phục:");
-      if (input && input.replace(/\s/g, "").length > 5) {
-        try {
-          var restored = JSON.parse(decodeURIComponent(atob(input.trim())));
-          if (!restored || typeof restored !== "object") throw new Error("Invalid state");
-          for (var k in restored) {
-            if (restored.hasOwnProperty(k)) state[k] = restored[k];
+      askParentalGate("Khôi phục dữ liệu", function () {
+        var input = window.prompt("Dán mã lưu tiến độ vào đây để khôi phục:");
+        if (input && input.replace(/\s/g, "").length > 5) {
+          try {
+            var restored = JSON.parse(decodeURIComponent(atob(input.trim())));
+            if (!restored || typeof restored !== "object") throw new Error("Invalid state");
+            for (var k in restored) {
+              if (restored.hasOwnProperty(k)) state[k] = restored[k];
+            }
+            state.coins = Math.max(0, parseInt(state.coins, 10) || 0);
+            ensureGamificationState();
+            saveState();
+            renderHome();
+            closeOverlay("infoOverlay");
+            Sound.fanfare();
+            window.alert("Khôi phục tiến độ học tập thành công!");
+          } catch (e) {
+            window.alert("Mã tiến độ không hợp lệ. Vui lòng kiểm tra lại!");
           }
-          state.coins = Math.max(0, parseInt(state.coins, 10) || 0);
-          ensureGamificationState();
-          saveState();
-          renderHome();
-          closeOverlay("infoOverlay");
-          Sound.fanfare();
-          window.alert("Khôi phục tiến độ học tập thành công!");
-        } catch (e) {
-          window.alert("Mã tiến độ không hợp lệ. Vui lòng kiểm tra lại!");
         }
-      }
+      });
     });
     onTap($("resetBtn"), function () {
       Sound.click();
-      if (!askParentalGate("Xóa làm lại từ đầu")) return;
-      if (window.confirm("Xác nhận lần cuối: Xóa toàn bộ sao, xu và nhân vật đã mua?")) {
-        var keepName = state.name;
-        resetStateForProfile(keepName, "hero");
-        saveState(); renderHome(); closeOverlay("infoOverlay");
-      }
+      askParentalGate("Xóa làm lại từ đầu", function () {
+        if (window.confirm("Xác nhận lần cuối: Xóa toàn bộ tiến độ, sao và xu?")) {
+          var keepName = state.name;
+          var keepPin = getParentPin();
+          resetStateForProfile(keepName, "hero");
+          state.parentPin = keepPin;
+          saveState(); renderHome(); closeOverlay("infoOverlay");
+        }
+      });
     });
     openOverlay("infoOverlay");
   }
