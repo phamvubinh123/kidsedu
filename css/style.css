@@ -119,13 +119,7 @@ body.in-subscreen .cloud-layer { display: none; }
 .icon-btn { font-size: 28px; width: 46px; height: 46px; -webkit-flex-shrink: 0; flex-shrink: 0; margin-left: 4px; }
 .icon-btn:active { -webkit-transform: rotate(45deg); transform: rotate(45deg); }
 
-.badge-strip {
-  display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between;
-  border-radius: 18px; padding: 6px 14px; margin-bottom: 6px; cursor: pointer;
-}
-.bs-label { font-size: 14px; font-weight: 800; color: #264d8c; }
-.bs-items { font-size: 26px; letter-spacing: 3px; white-space: nowrap; }
-.bs-items .locked, .badge-card.locked .badge-ic { opacity: 0.35; -webkit-filter: grayscale(100%); filter: grayscale(100%); }
+.badge-card.locked .badge-ic { opacity: 0.35; -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 
 /* ---------- Bản đồ đảo ---------- */
 .island-map { position: relative; margin-top: 4px; }
@@ -771,7 +765,7 @@ body.in-subscreen .cloud-layer { display: none; }
   }
   #screenHome { padding-bottom: 130px; }
 
-  .topbar, .badge-strip, .continue-banner {
+  .topbar {
     max-width: 860px;
     margin-left: auto;
     margin-right: auto;
@@ -1215,11 +1209,12 @@ body.in-subscreen .cloud-layer { display: none; }
   font-size: 14px; font-weight: 800; color: #312e81;
 }
 .ai-insight-head small { font-size: 11px; color: #6366f1; font-weight: 700; }
-.ai-zpd-grid { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 7px; }
+.ai-zpd-grid { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
 .ai-zpd-item {
   background: #ffffff; border-radius: 12px; padding: 8px 10px;
-  border-left: 4px solid #94a3b8; font-size: 12px;
+  border-left: 4px solid #94a3b8; font-size: 12px; margin-bottom: 7px;
 }
+.ai-zpd-item:last-child { margin-bottom: 0; }
 .ai-zpd-item.easy { border-left-color: #22c55e; }
 .ai-zpd-item.optimal { border-left-color: #f59e0b; }
 .ai-zpd-item.hard { border-left-color: #ef4444; }

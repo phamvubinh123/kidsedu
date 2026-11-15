@@ -1603,7 +1603,7 @@
       var isBoss = (i === units.length - 1);
       var cls = "unit-node";
       if (!unlocked) cls += " locked";
-      else if (st >= 4) cls += " done perfect";
+      else if (st >= 3) cls += " done perfect";
       else if (st > 0) cls += " done";
       if (isBoss) cls += " is-boss";
       var isNext = false;
@@ -1637,8 +1637,8 @@
           if (prevUnit && prevUnit.topic === "passages") {
             showToastBubble("Bé cần đọc ít nhất 1 bài ở chặng trước để mở khóa chặng này nhé!");
           } else {
-            var doneCnt = prevUnit ? unitGamesDone(curSubj, prevUnit.topic) : 0;
-            showToastBubble("Bé cần hoàn thành 3/4 trò chơi ở chặng trước (" + doneCnt + "/3) để mở khóa nhé!");
+            var prevSt = prevUnit ? unitStars(curSubj, prevUnit.topic) : 0;
+            showToastBubble("Bé cần đạt ít nhất 1.5 ⭐ ở chặng trước (hiện có " + prevSt + "/3 ⭐) để mở khóa nhé!");
           }
           return;
         }
@@ -2336,11 +2336,7 @@
           addClass(all[i], "disabled");
         }
       }
-      var wrongMsg = pick([
-        "Tiếc quá, chưa đúng rồi! Đáp án đúng là: <b>" + esc(q.answer) + "</b>",
-        "Chưa đúng rồi nè! Đáp án đúng là: <b>" + esc(q.answer) + "</b>",
-        "Ối, sai mất rồi! Đáp án đúng là: <b>" + esc(q.answer) + "</b>. Lần sau bé chú ý nhé! 💪"
-      ]);
+      var wrongMsg = pick(RETRY) + " Đáp án đúng là: <b>" + esc(q.answer) + "</b>";
       say(wrongMsg, "bad");
       var toSpeakWrong = q.speakText || (game.lang === "en-US" ? q.answer : q.answer);
       if (toSpeakWrong) {
@@ -2440,7 +2436,7 @@
       flashFeedback(false);
       Sound.pop();
       later(function () { Sound.bad(); }, 100);
-      say("Chưa đúng rồi! Đáp án đúng là: <b>" + esc(q.answer) + "</b> 🎈", "bad");
+      say(pick(RETRY) + " Đáp án đúng là: <b>" + esc(q.answer) + "</b> 🎈", "bad");
       var toSpeakWrong = q.speakText || (game.lang === "en-US" ? q.answer : q.answer);
       if (toSpeakWrong) {
         later(function () { Sound.speak("Đáp án đúng là " + toSpeakWrong, game.lang); }, 500);
@@ -2906,8 +2902,8 @@
       '<input class="parent-rw-input" id="aiKeyInput" type="password" style="width:100%;margin-bottom:10px;" placeholder="Dán Gemini API Key (AIza...) nếu muốn đổi mới">' +
       '<div class="set-section-title">🌐 Hoặc Proxy URL (Tùy chọn)</div>' +
       '<input class="parent-rw-input" id="aiProxyInput" type="url" style="width:100%;margin-bottom:12px;" value="' + esc(cfg.proxyUrl || "") + '" placeholder="https://your-worker.workers.dev">' +
-      '<div style="display:-webkit-flex;display:flex;gap:8px;">' +
-        '<button type="button" class="small-btn" id="saveAiCfgBtn" style="flex:1;height:40px;">💾 Lưu cấu hình AI</button>' +
+      '<div style="display:-webkit-flex;display:flex;">' +
+        '<button type="button" class="small-btn" id="saveAiCfgBtn" style="flex:1;height:40px;margin-right:8px;">💾 Lưu cấu hình AI</button>' +
         '<button type="button" class="small-btn red" id="clearAiCfgBtn" style="height:40px;">🗑️ Xóa Key</button>' +
       '</div>';
 
@@ -3203,6 +3199,14 @@
   // ---------------------------------------------------------
   // 10. BÁO CÁO HỌC TẬP, HUY HIỆU, CỬA HÀNG, CÀI ĐẶT
   // ---------------------------------------------------------
+  function getPlayerLevel(stars) {
+    var s = Number(stars) || 0;
+    var maxS = maxTotalStars() || 54;
+    var pct = s / maxS;
+    var idx = Math.min(LEVELS.length - 1, Math.floor(pct * LEVELS.length));
+    return LEVELS[Math.max(0, idx)];
+  }
+
   function buildReportHTML() {
     var ts = totalStars();
     var maxS = maxTotalStars();
@@ -3243,7 +3247,7 @@
 
     var html = '<div class="report-summary-card">' +
       '<div style="display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between">' +
-        '<div><b style="font-size:18px;color:#1e3a8a">👦 ' + esc(state.name) + '</b><div style="font-size:12px;color:#64748b;margin-top:2px">Học lực: ' + (ts >= 55 ? 'Xuất sắc 🌟' : ts >= 28 ? 'Khá tốt 👍' : 'Đang rèn luyện 🌱') + '</div></div>' +
+        '<div><b style="font-size:18px;color:#1e3a8a">👦 ' + esc(state.name) + '</b><div style="font-size:12px;color:#64748b;margin-top:2px">Danh hiệu: <b>' + esc(getPlayerLevel(ts)) + '</b> · ' + (ts >= 40 ? 'Xuất sắc 🌟' : ts >= 20 ? 'Khá tốt 👍' : 'Đang rèn luyện 🌱') + '</div></div>' +
         '<div style="text-align:right"><b style="font-size:20px;color:#d97706">⭐ ' + ts + '/' + maxS + '</b><div style="font-size:11px;color:#64748b">Tổng số sao</div></div>' +
       '</div>' +
       '<div class="report-subj-grid">' +
@@ -3304,7 +3308,7 @@
       html += '<div class="report-list">';
       for (var nw = 0; nw < needWork.length; nw++) {
         var it = needWork[nw];
-        var starStr = it.stars > 0 ? (it.stars + '/4 ⭐ (Cần củng cố)') : 'Chưa học / Chưa đạt';
+        var starStr = it.stars > 0 ? (it.stars + '/3 ⭐ (Cần củng cố)') : 'Chưa học / Chưa đạt';
         html += '<div class="report-item warn">' +
           '<div class="report-item-ic">' + it.icon + '</div>' +
           '<div class="report-item-info">' +
@@ -3323,7 +3327,7 @@
       html += '<div class="report-list">';
       for (var ms = 0; ms < mastered.length; ms++) {
         var mItem = mastered[ms];
-        var mStarStr = mItem.stars >= 4 ? '⭐⭐⭐⭐ (Xuất sắc)' : '⭐⭐⭐ (Khá tốt)';
+        var mStarStr = mItem.stars >= 3 ? '⭐⭐⭐ (Xuất sắc)' : '⭐⭐ (Khá tốt)';
         html += '<div class="report-item good">' +
           '<div class="report-item-ic">' + mItem.icon + '</div>' +
           '<div class="report-item-info">' +
@@ -3845,7 +3849,7 @@
     html += '<div class="set-section-title">❓ Hướng Dẫn & Thông Tin</div>';
     html += '<div class="set-row"><span>📖 Hướng dẫn cách học & mẹo iPad</span><button class="small-btn" id="toggleGuideBtn">Xem kỹ</button></div>';
     html += '<div id="guideDetailBox" style="display:none; margin-top:8px;">';
-    html += '<div class="guide-item"><span class="gi-ic">🏝️</span><div>Chạm vào một <b>hòn đảo</b> (Toán, Tiếng Việt, Tiếng Anh) để vào bản đồ bài học. Mỗi chặng cần hoàn thành ít nhất <b>3/4 trò chơi</b> để mở khóa chặng tiếp theo.</div></div>';
+    html += '<div class="guide-item"><span class="gi-ic">🏝️</span><div>Chạm vào một <b>hòn đảo</b> (Toán, Tiếng Việt, Tiếng Anh) để vào bản đồ bài học. Mỗi chặng cần đạt ít nhất <b>1.5/3 ⭐</b> để mở khóa chặng tiếp theo.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">📜</span><div><b>Phiến Đá Bí Ẩn:</b> chạm từng hình để đếm (bài đếm số) rồi chọn phiến đá đáp án đúng.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">🧩</span><div><b>Ghép Đôi Nhanh & Lật Thẻ:</b> chạm ghép cặp hình/câu hỏi và đáp án đi cùng nhau.</div></div>';
     html += '<div class="guide-item"><span class="gi-ic">🎈</span><div><b>Bóng Bay Tri Thức:</b> chạm quả bóng có đáp án đúng trước khi bóng bay mất.</div></div>';
