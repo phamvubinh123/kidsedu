@@ -1157,7 +1157,7 @@
         Sound.click();
         renderProfileCards();
       });
-    });
+    }, { skipSession: true });
   }
 
   // Bộ máy đồng bộ đám mây Firebase
@@ -4156,12 +4156,14 @@
     });
     onTap($("addKidBtn"), function () {
       Sound.click();
-      showPromptModal("👦 Thêm Bé Mới", "Nhập tên bé mới (ví dụ: Bảo An):", "", "Tên bé...", function (n) {
-        if (n && n.replace(/\s/g, "").length) {
-          addNewProfile(n);
-          closeOverlay("profileOverlay");
-        }
-      });
+      askParentalGate("Thêm hồ sơ bé mới", function () {
+        showPromptModal("👦 Thêm Bé Mới", "Nhập tên bé mới (ví dụ: Bảo An):", "", "Tên bé...", function (n) {
+          if (n && n.replace(/\s/g, "").length) {
+            addNewProfile(n);
+            closeOverlay("profileOverlay");
+          }
+        });
+      }, { skipSession: true });
     });
     if ($("badgeStrip")) onTap($("badgeStrip"), function () { Sound.click(); openBadges(); });
 
