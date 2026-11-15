@@ -917,6 +917,7 @@
           Sound.click();
           closeOverlay("pinOverlay");
           pinModalState = null;
+          if ($("infoOverlay") && !hasClass($("infoOverlay"), "open")) setActiveNav("home");
           return;
         }
         if (k === "back") {
@@ -973,6 +974,7 @@
       Sound.click();
       closeOverlay("pinOverlay");
       pinModalState = null;
+      if ($("infoOverlay") && !hasClass($("infoOverlay"), "open")) setActiveNav("home");
     });
   }
 
@@ -1498,7 +1500,10 @@
   function openOverlay(id) { addClass($(id), "open"); }
   function closeOverlay(id) {
     removeClass($(id), "open");
-    if (id === "infoOverlay") setActiveNav("home");
+    if (id === "infoOverlay") {
+      parentSessionUntil = 0;
+      setActiveNav("home");
+    }
   }
 
   // ---------------------------------------------------------
@@ -4051,6 +4056,13 @@
     openOverlay("infoOverlay");
   }
 
+  function enterParentCorner() {
+    askParentalGate("Vào Góc Ba Mẹ", function () {
+      parentSessionUntil = Date.now() + 5 * 60 * 1000;
+      openSettings();
+    }, { skipSession: true });
+  }
+
   function openSettings() {
     ensureGamificationState();
     var pendingCnt = 0;
@@ -4302,7 +4314,7 @@
     if ($("gqQuestBtn")) onTap($("gqQuestBtn"), function () { Sound.click(); openDailyQuestModal(); });
     if ($("gqGoalBtn")) onTap($("gqGoalBtn"), function () { Sound.click(); openShop("rewards"); });
 
-    if ($("settingsBtn")) onTap($("settingsBtn"), function () { Sound.click(); openSettings(); });
+    if ($("settingsBtn")) onTap($("settingsBtn"), function () { Sound.click(); enterParentCorner(); });
     onTap($("profileBtn"), function () { openProfileModal(); });
     onTap($("homeAvatar"), function () { openProfileModal(); });
     if ($("topReportBtn")) onTap($("topReportBtn"), function () { openReport(); });
@@ -4339,7 +4351,7 @@
         else if (n === "report") openReport();
         else if (n === "badges") openBadges();
         else if (n === "shop") openShop("rewards");
-        else if (n === "guide" || n === "settings") openSettings();
+        else if (n === "guide" || n === "settings") enterParentCorner();
       });
     }
 
