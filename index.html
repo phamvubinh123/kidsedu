@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="assets/mascot.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=60">
+  <link rel="stylesheet" href="css/style.css?v=61">
 </head>
 <body>
 
@@ -59,9 +59,9 @@
 
     <nav class="bottom-nav glass">
       <button class="nav-item active" data-nav="home"><span class="nav-ic home-ic">🏠</span><span>Trang chủ</span></button>
-      <button class="nav-item" data-nav="achieve"><span class="nav-ic">🏆</span><span>Thành tích</span></button>
+      <button class="nav-item" data-nav="badges"><span class="nav-ic">🏅</span><span>Kho báu</span></button>
       <button class="nav-item" data-nav="shop"><span class="nav-ic">🎁</span><span>Đổi quà</span></button>
-      <button class="nav-item" data-nav="settings"><span class="nav-ic">⚙️</span><span>Cài đặt</span></button>
+      <button class="nav-item" data-nav="settings"><span class="nav-ic">👨‍👩‍👧<span class="nav-badge-dot" id="parentNavBadge" style="display:none"></span></span><span>Ba Mẹ</span></button>
     </nav>
   </section>
 
@@ -149,9 +149,8 @@
       <button class="bgm-btn on" id="readBgmBtn" aria-label="Nhạc nền" title="Bật/tắt nhạc nền"></button>
     </div>
 
-    <!-- Thanh lọc cụm tuần, tuần & chọn bài -->
-    <div class="week-group-tabs" id="weekGroupTabs"></div>
-    <div class="week-group-tabs" id="weekSubTabs" style="margin-top:4px"></div>
+    <!-- Thanh lọc 1 tầng Tuần (cuộn ngang) & chọn bài -->
+    <div class="week-group-tabs week-scroll-tabs" id="weekSubTabs"></div>
     <div class="week-carousel-wrap">
       <div class="week-carousel" id="weekCarousel"></div>
     </div>
@@ -291,14 +290,28 @@
     </div>
   </div>
 
+  <!-- ================= MODAL HỘP THOẠI CUSTOM (THAY PROMPT/ALERT/CONFIRM) ================= -->
+  <div class="overlay" id="dialogOverlay">
+    <div class="frost-panel small" id="dialogPanel">
+      <div class="panel-title" id="dialogTitle">Thông báo</div>
+      <div class="dialog-msg" id="dialogMsg"></div>
+      <input type="text" class="parent-rw-input dialog-input" id="dialogInput" style="display:none">
+      <div class="panel-actions two" id="dialogActions">
+        <button type="button" class="btn-orange" id="dialogCancelBtn">Hủy</button>
+        <button type="button" class="btn-green" id="dialogOkBtn">Đồng ý</button>
+      </div>
+      <button class="close-x" id="dialogCloseBtn" type="button">✕</button>
+    </div>
+  </div>
+
   <audio id="ttsAudio" preload="none" style="display:none"></audio>
   <!-- Firebase SDK v8 (Tương thích 100% cú pháp ES5 cho iPadOS 12.5.8 đến iOS 18) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/firebase-config.js?v=60"></script>
-  <script src="js/project-config.js?v=60"></script>
-  <script src="js/data.js?v=60"></script>
-  <script src="js/audio-manifest.js?v=60"></script>
-  <script src="js/app.js?v=60"></script>
+  <script src="js/firebase-config.js?v=61"></script>
+  <script src="js/project-config.js?v=61"></script>
+  <script src="js/data.js?v=61"></script>
+  <script src="js/audio-manifest.js?v=61"></script>
+  <script src="js/app.js?v=61"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@
 var PROJECT_CONFIG = {
   // 1. Định danh dự án & Bộ nhớ lưu trữ (Đổi storagePrefix khi tạo dự án mới để không trùng dữ liệu)
   appTitle: "Đảo Tri Thức",
-  appVersion: "v60 (15/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: Đồng bộ thang 3 sao, sửa flex gap iPad cũ, kích hoạt RETRY & cấp bậc LEVELS.",
+  appVersion: "v61 (15/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: Tối ưu UI/UX cho bé 6 tuổi, lưới 2x2 mobile, tách Góc Ba Mẹ.",
   storagePrefix: "vqtt",
   firebaseRoot: "kidsedu_vqtt",
 

@@ -939,12 +939,13 @@
               Sound.good();
               closeOverlay("pinOverlay");
               pinModalState = null;
-              window.alert("✅ Đã lưu mã PIN 4 số mới thành công!");
+              showAlertModal("🔐 Đổi Mã PIN", "✅ Đã lưu mã PIN 4 số mới thành công!");
               if (typeof curSt.onSuccess === "function") curSt.onSuccess(entered);
               return;
             }
             if (entered === getParentPin()) {
               Sound.good();
+              if (!curSt.skipSession) parentSessionUntil = Date.now() + 5 * 60 * 1000;
               closeOverlay("pinOverlay");
               pinModalState = null;
               if (typeof curSt.onSuccess === "function") curSt.onSuccess();
@@ -975,6 +976,8 @@
     });
   }
 
+  var parentSessionUntil = 0;
+
   function openPinModal(opts) {
     bindPinModalOnce();
     var mode = (opts && opts.mode) || "verify";
@@ -982,6 +985,7 @@
     pinModalState = {
       mode: mode,
       value: "",
+      skipSession: !!(opts && opts.skipSession),
       onSuccess: opts && opts.onSuccess
     };
     $("pinTitle").innerHTML = (opts && opts.title) || "🔒 Cổng Ba Mẹ";
@@ -991,7 +995,7 @@
       if (mode === "setup") {
         $("pinHint").innerHTML = "Chọn 4 chữ số dễ nhớ cho Ba Mẹ";
       } else if (curPin === "1234") {
-        $("pinHint").innerHTML = "Mã PIN mặc định: 1234 (đổi trong Cài đặt)";
+        $("pinHint").innerHTML = "Mã PIN mặc định: 1234 (đổi trong Góc Ba Mẹ)";
       } else {
         $("pinHint").innerHTML = "";
       }
@@ -1000,11 +1004,17 @@
     openOverlay("pinOverlay");
   }
 
-  function askParentalGate(actionLabel, onSuccess) {
+  function askParentalGate(actionLabel, onSuccess, opts) {
+    var useSession = !(opts && opts.skipSession);
+    if (useSession && Date.now() < parentSessionUntil) {
+      if (typeof onSuccess === "function") onSuccess();
+      return;
+    }
     openPinModal({
       mode: "verify",
       title: "🔒 Cổng Ba Mẹ",
       sub: actionLabel ? ("Nhập PIN 4 số: " + esc(actionLabel)) : "Nhập mã PIN 4 số để tiếp tục",
+      skipSession: !!(opts && opts.skipSession),
       onSuccess: onSuccess
     });
   }
@@ -1015,6 +1025,69 @@
       title: "🔐 Đổi Mã PIN 4 Số",
       sub: "Nhập mã PIN mới gồm 4 chữ số",
       onSuccess: onDone
+    });
+  }
+
+  var dialogModalState = null;
+
+  function bindDialogModalOnce() {
+    if (!$("dialogOverlay") || $("dialogOverlay").getAttribute("data-bound")) return;
+    $("dialogOverlay").setAttribute("data-bound", "1");
+    function closeDlg() {
+      Sound.click();
+      closeOverlay("dialogOverlay");
+      dialogModalState = null;
+    }
+    onTap($("dialogCancelBtn"), closeDlg);
+    onTap($("dialogCloseBtn"), closeDlg);
+    onTap($("dialogOkBtn"), function () {
+      if (!dialogModalState) { closeDlg(); return; }
+      var st = dialogModalState;
+      var val = $("dialogInput") ? $("dialogInput").value : "";
+      Sound.click();
+      closeOverlay("dialogOverlay");
+      dialogModalState = null;
+      if (typeof st.onOk === "function") st.onOk(val);
+    });
+  }
+
+  function showDialogModal(opts) {
+    bindDialogModalOnce();
+    if (!$("dialogOverlay")) return;
+    var type = (opts && opts.type) || "alert";
+    dialogModalState = { type: type, onOk: opts && opts.onOk };
+    $("dialogTitle").innerHTML = esc((opts && opts.title) || "Thông báo");
+    $("dialogMsg").innerHTML = esc((opts && opts.msg) || "");
+    var inp = $("dialogInput");
+    if (inp) {
+      if (type === "prompt") {
+        inp.style.display = "block";
+        inp.value = (opts && opts.defaultVal) || "";
+        inp.placeholder = (opts && opts.placeholder) || "";
+        inp.readOnly = !!(opts && opts.readOnly);
+        setTimeout(function () {
+          try { inp.focus(); if (opts && opts.readOnly) inp.select(); } catch (e) {}
+        }, 80);
+      } else {
+        inp.style.display = "none";
+      }
+    }
+    $("dialogCancelBtn").style.display = (type === "alert" || (opts && opts.readOnly)) ? "none" : "inline-block";
+    $("dialogOkBtn").innerHTML = esc((opts && opts.okText) || (type === "alert" ? "Đóng" : "Đồng ý"));
+    openOverlay("dialogOverlay");
+  }
+
+  function showAlertModal(title, msg, onOk) {
+    showDialogModal({ type: "alert", title: title, msg: msg, okText: "Đã hiểu", onOk: onOk });
+  }
+  function showConfirmModal(title, msg, onOk) {
+    showDialogModal({ type: "confirm", title: title, msg: msg, okText: "Xác nhận", onOk: onOk });
+  }
+  function showPromptModal(title, msg, defaultVal, placeholder, onOk, readOnly) {
+    showDialogModal({
+      type: "prompt", title: title, msg: msg,
+      defaultVal: defaultVal, placeholder: placeholder,
+      readOnly: !!readOnly, okText: readOnly ? "Đóng" : "Xác nhận", onOk: onOk
     });
   }
 
@@ -1060,29 +1133,30 @@
     var prof = findProfileById(pid);
     var label = prof ? prof.name : pid;
     askParentalGate("Xóa hồ sơ " + label, function () {
-      if (!window.confirm('Bạn có chắc muốn xóa hồ sơ bé "' + label + '"? Mọi sao và xu của hồ sơ này sẽ bị xóa vĩnh viễn.')) return;
-      var nextList = [];
-      for (var i = 0; i < profiles.length; i++) {
-        if (profiles[i].id !== pid) nextList.push(profiles[i]);
-      }
-      if (!nextList.length) return;
-      profiles = nextList;
-      try { localStorage.removeItem(profileStoreKey(pid)); } catch (e) {}
-      CloudSync.deleteProfile(pid);
+      showConfirmModal("🗑️ Xóa Hồ Sơ Bé", 'Bạn có chắc muốn xóa hồ sơ bé "' + label + '"?\nMọi sao và xu của hồ sơ này sẽ bị xóa vĩnh viễn.', function () {
+        var nextList = [];
+        for (var i = 0; i < profiles.length; i++) {
+          if (profiles[i].id !== pid) nextList.push(profiles[i]);
+        }
+        if (!nextList.length) return;
+        profiles = nextList;
+        try { localStorage.removeItem(profileStoreKey(pid)); } catch (e) {}
+        CloudSync.deleteProfile(pid);
 
-      if (currentProfileId === pid) {
-        currentProfileId = profiles[0].id;
-        saveProfilesList();
-        var nextProf = profiles[0];
-        resetStateForProfile(nextProf.name, nextProf.avatar || "hero");
-        loadState();
-        renderHome();
-        CloudSync.listenCurrentProfile();
-      } else {
-        saveProfilesList();
-      }
-      Sound.click();
-      renderProfileCards();
+        if (currentProfileId === pid) {
+          currentProfileId = profiles[0].id;
+          saveProfilesList();
+          var nextProf = profiles[0];
+          resetStateForProfile(nextProf.name, nextProf.avatar || "hero");
+          loadState();
+          renderHome();
+          CloudSync.listenCurrentProfile();
+        } else {
+          saveProfilesList();
+        }
+        Sound.click();
+        renderProfileCards();
+      });
     });
   }
 
@@ -1467,6 +1541,21 @@
       }
     }
 
+    var navBadge = $("parentNavBadge");
+    if (navBadge) {
+      var pendCnt = 0;
+      var tks = state.rewardTickets || [];
+      for (var pti = 0; pti < tks.length; pti++) {
+        if (tks[pti] && tks[pti].status === "pending") pendCnt++;
+      }
+      if (pendCnt > 0) {
+        navBadge.style.display = "inline-block";
+        navBadge.innerHTML = pendCnt > 9 ? "9+" : pendCnt;
+      } else {
+        navBadge.style.display = "none";
+      }
+    }
+
     var map = "";
     for (var s = 0; s < SUBJECTS.length; s++) {
       var sj = SUBJECTS[s];
@@ -1845,7 +1934,7 @@
       saveState();
       renderPassageScreen();
       showScreen("screenRead");
-    });
+    }, { skipSession: true });
   }
 
   function renderPassageScreen() {
@@ -1859,36 +1948,11 @@
     $("readWeekTag").innerHTML = esc(p.week);
     $("readLessonTitle").innerHTML = esc(p.title);
 
-    // 1. Bộ lọc 3 cụm tuần (Tuần 1-6, 7-12, 13-18) -> Tuần lẻ -> Các bài trong tuần
-    var groupLabels = ["Tuần 1–6", "Tuần 7–12", "Tuần 13–18"];
-    var grpEl = $("weekGroupTabs");
-    if (grpEl) {
-      var grpHtml = "";
-      for (var g = 0; g < 3; g++) {
-        grpHtml += '<button class="week-group-btn' + (g === curWeekGroup ? " active" : "") + '" data-wgrp="' + g + '">' + esc(groupLabels[g]) + '</button>';
-      }
-      grpEl.innerHTML = grpHtml;
-      var gBtns = grpEl.querySelectorAll(".week-group-btn");
-      for (var gb = 0; gb < gBtns.length; gb++) {
-        onTap(gBtns[gb], function () {
-          Sound.click();
-          stopSampleReading();
-          curWeekGroup = parseInt(this.getAttribute("data-wgrp"), 10) || 0;
-          var targetWeek = curWeekGroup * 6 + 1;
-          curPassageIdx = firstPassageIdxOfWeek(targetWeek);
-          state.lastPassageIdx = curPassageIdx;
-          saveState();
-          renderPassageScreen();
-        });
-      }
-    }
-
+    // 1. Bộ lọc 1 tầng Tuần 1..18 (cuộn ngang) -> Các bài trong tuần
     var subEl = $("weekSubTabs");
     if (subEl) {
-      var wStart = curWeekGroup * 6 + 1;
-      var wEnd = Math.min(18, wStart + 5);
       var subHtml = "";
-      for (var wn = wStart; wn <= wEnd; wn++) {
+      for (var wn = 1; wn <= 18; wn++) {
         var wAllDone = true, wHasAny = false;
         for (var wi = 0; wi < READING_PASSAGES.length; wi++) {
           if (getPassageWeekNum(READING_PASSAGES[wi]) === wn) {
@@ -1896,7 +1960,7 @@
             if (!(state.passages && state.passages[READING_PASSAGES[wi].id] > 0)) wAllDone = false;
           }
         }
-        subHtml += '<button class="week-group-btn' + (wn === curWeekNum ? " active" : "") + '" data-wnum="' + wn + '">T' + wn + (wHasAny && wAllDone ? " ⭐" : "") + '</button>';
+        subHtml += '<button class="week-group-btn' + (wn === curWeekNum ? " active" : "") + '" data-wnum="' + wn + '">Tuần ' + wn + (wHasAny && wAllDone ? " ⭐" : "") + '</button>';
       }
       subEl.innerHTML = subHtml;
       var sBtns = subEl.querySelectorAll(".week-group-btn");
@@ -1910,6 +1974,10 @@
           saveState();
           renderPassageScreen();
         });
+      }
+      var activeWBtn = subEl.querySelector(".week-group-btn.active");
+      if (activeWBtn && subEl.scrollWidth > subEl.clientWidth) {
+        subEl.scrollLeft = Math.max(0, activeWBtn.offsetLeft - subEl.clientWidth / 2 + activeWBtn.offsetWidth / 2);
       }
     }
 
@@ -2920,14 +2988,16 @@
         proxyUrl: nextProxy
       });
       Sound.good();
-      window.alert("✅ Đã lưu cấu hình Trợ lý AI! Ba Mẹ có thể vào mục Báo Cáo để bấm 'AI Tư Vấn Sâu'.");
-      openSettings();
+      showAlertModal("🤖 Trợ Lý AI", "✅ Đã lưu cấu hình Trợ lý AI! Ba Mẹ có thể vào mục Báo Cáo để bấm 'AI Tư Vấn Sâu'.", function () {
+        openSettings();
+      });
     });
     onTap($("clearAiCfgBtn"), function () {
       saveAIConfig({ apiKey: "", proxyUrl: "" });
       Sound.click();
-      window.alert("Đã xóa API Key khỏi máy.");
-      openAIConfigModal();
+      showAlertModal("🤖 Trợ Lý AI", "Đã xóa API Key khỏi máy.", function () {
+        openAIConfigModal();
+      });
     });
     openOverlay("infoOverlay");
   }
@@ -3459,11 +3529,13 @@
   function openShop(tab) {
     ensureGamificationState();
     if (tab === "rewards" || tab === "avatars" || tab === "badges") curShopTab = tab;
-    var html = '<div class="shop-tabs">' +
-      '<button type="button" class="shop-tab' + (curShopTab === "rewards" ? " active" : "") + '" data-stab="rewards">🎁 Quà Của Bé</button>' +
-      '<button type="button" class="shop-tab' + (curShopTab === "avatars" ? " active" : "") + '" data-stab="avatars">🦸 Nhân Vật</button>' +
-      '<button type="button" class="shop-tab' + (curShopTab === "badges" ? " active" : "") + '" data-stab="badges">🏅 Huy Hiệu</button>' +
-      '</div>';
+    var html = "";
+    if (curShopTab === "badges" || curShopTab === "avatars") {
+      html += '<div class="shop-tabs">' +
+        '<button type="button" class="shop-tab' + (curShopTab === "badges" ? " active" : "") + '" data-stab="badges">🏅 Huy Hiệu</button>' +
+        '<button type="button" class="shop-tab' + (curShopTab === "avatars" ? " active" : "") + '" data-stab="avatars">🦸 Nhân Vật</button>' +
+        '</div>';
+    }
     if (curShopTab === "rewards") {
       html += '<div style="text-align:center;margin-bottom:12px;font-weight:800;color:#2a5aa0">Bé đang có <b>' + state.coins + '</b> <i class="coin sm"></i></div>';
     } else if (curShopTab === "avatars") {
@@ -3573,7 +3645,7 @@
             saveState();
             renderHome();
             openShop("rewards");
-          });
+          }, { skipSession: true });
         });
       }
     } else if (curShopTab === "avatars") {
@@ -3793,14 +3865,15 @@
     }
     if ($("resetRwDefaultBtn")) {
       onTap($("resetRwDefaultBtn"), function () {
-        if (!window.confirm("Khôi phục lại 4 món quà mặc định ban đầu?")) return;
-        state.realRewards = cloneDefaultRewards();
-        state.rewardsCustomized = false;
-        state.pinnedRewardId = state.realRewards[0].id;
-        Sound.click();
-        saveState();
-        renderHome();
-        openParentRewardsModal();
+        showConfirmModal("🔄 Khôi Phục Quà Mặc Định", "Khôi phục lại 4 món quà mặc định ban đầu?", function () {
+          state.realRewards = cloneDefaultRewards();
+          state.rewardsCustomized = false;
+          state.pinnedRewardId = state.realRewards[0].id;
+          Sound.click();
+          saveState();
+          renderHome();
+          openParentRewardsModal();
+        });
       });
     }
     onTap($("addRwBtn"), function () {
@@ -3824,7 +3897,7 @@
     for (var ti = 0; ti < state.rewardTickets.length; ti++) {
       if (state.rewardTickets[ti].status === "pending") pendingCnt++;
     }
-    $("infoTitle").innerHTML = "⚙️ Cài Đặt & Hướng Dẫn";
+    $("infoTitle").innerHTML = "👨‍👩‍👧 Góc Ba Mẹ & Cài Đặt";
     var html = "";
 
     // 1. ÂM THANH & GIỌNG ĐỌC
@@ -3834,7 +3907,8 @@
     html += '<div class="set-row"><span>🗣️ Tự động đọc câu hỏi</span><button class="toggle' + (state.autoRead ? " on" : "") + '" data-key="autoRead"></button></div>';
 
     // 2. CÀI ĐẶT CHO PHỤ HUYNH
-    html += '<div class="set-section-title">👨‍👩‍👧 Cài Đặt Dành Cho Bố Mẹ</div>';
+    html += '<div class="set-section-title">👨‍👩‍👧 Dành Cho Ba Mẹ</div>';
+    html += '<div class="set-row"><span>📊 Báo cáo học tập & AI ZPD</span><button class="small-btn" id="openReportFromParentBtn">Xem báo cáo</button></div>';
     html += '<div class="set-row"><span>🔐 Mã PIN Cổng Ba Mẹ (4 số)</span><button class="small-btn" id="changePinBtn">Đổi PIN</button></div>';
     html += '<div class="set-row"><span>🎟️ Duyệt phiếu quà đã đổi' + (pendingCnt ? ' <b style="color:#dc2626">(' + pendingCnt + ' chờ duyệt)</b>' : '') + '</span><button class="small-btn" id="manageRewardsBtn">' + (pendingCnt ? 'Duyệt ngay' : 'Quản lý') + '</button></div>';
     var aiCfgNow = getAIConfig();
@@ -3894,6 +3968,13 @@
       box.style.display = open ? "none" : "block";
       this.innerHTML = open ? "Xem kỹ" : "Thu gọn";
     });
+    if ($("openReportFromParentBtn")) {
+      onTap($("openReportFromParentBtn"), function () {
+        Sound.click();
+        closeOverlay("infoOverlay");
+        openReport();
+      });
+    }
     if ($("changePinBtn")) {
       onTap($("changePinBtn"), function () {
         Sound.click();
@@ -3919,55 +4000,56 @@
     onTap($("setCloudBtn"), function () {
       Sound.click();
       if (CloudSync.db) {
-        window.alert("🟢 Đã kết nối Firebase thành công!\nMọi tiến độ của bé Hoàng Long và các bé khác sẽ tự động đồng bộ giữa iPad và iPhone.");
+        showAlertModal("☁️ Đồng Bộ Đám Mây", "🟢 Đã kết nối Firebase thành công!\nMọi tiến độ của bé sẽ tự động đồng bộ giữa iPad và iPhone.");
       } else {
-        window.alert("💾 Trạng thái: Lưu cục bộ trên máy.\nĐể bật đồng bộ đám mây giữa các thiết bị, bạn hãy tạo Firebase Project miễn phí và điền vào file js/firebase-config.js nhé!");
+        showAlertModal("☁️ Đồng Bộ Đám Mây", "💾 Trạng thái: Lưu cục bộ trên máy.\nĐể bật đồng bộ đám mây giữa các thiết bị, bạn hãy tạo Firebase Project miễn phí và điền vào file js/firebase-config.js nhé!");
       }
     });
     onTap($("exportBtn"), function () {
       Sound.click();
       try {
         var str = btoa(encodeURIComponent(JSON.stringify(state)));
-        window.prompt("Sao chép mã lưu tiến độ của bé (dùng để chuyển sang máy khác):", str);
+        showPromptModal("📋 Sao Lưu Mã Tiến Độ", "Sao chép mã lưu tiến độ bên dưới để chuyển sang máy khác:", str, "", null, true);
       } catch (e) {
-        window.alert("Không thể tạo mã lưu!");
+        showAlertModal("❌ Lỗi", "Không thể tạo mã lưu!");
       }
     });
 
     onTap($("importBtn"), function () {
       Sound.click();
       askParentalGate("Khôi phục dữ liệu", function () {
-        var input = window.prompt("Dán mã lưu tiến độ vào đây để khôi phục:");
-        if (input && input.replace(/\s/g, "").length > 5) {
-          try {
-            var restored = JSON.parse(decodeURIComponent(atob(input.trim())));
-            if (!restored || typeof restored !== "object") throw new Error("Invalid state");
-            for (var k in restored) {
-              if (restored.hasOwnProperty(k)) state[k] = restored[k];
+        showPromptModal("📥 Khôi Phục Tiến Độ", "Dán mã lưu tiến độ vào đây để khôi phục:", "", "Dán mã tiến độ...", function (input) {
+          if (input && input.replace(/\s/g, "").length > 5) {
+            try {
+              var restored = JSON.parse(decodeURIComponent(atob(input.trim())));
+              if (!restored || typeof restored !== "object") throw new Error("Invalid state");
+              for (var k in restored) {
+                if (restored.hasOwnProperty(k)) state[k] = restored[k];
+              }
+              state.coins = Math.max(0, parseInt(state.coins, 10) || 0);
+              ensureGamificationState();
+              saveState();
+              renderHome();
+              closeOverlay("infoOverlay");
+              Sound.fanfare();
+              showAlertModal("✅ Thành Công", "Khôi phục tiến độ học tập thành công!");
+            } catch (e) {
+              showAlertModal("❌ Lỗi", "Mã tiến độ không hợp lệ. Vui lòng kiểm tra lại!");
             }
-            state.coins = Math.max(0, parseInt(state.coins, 10) || 0);
-            ensureGamificationState();
-            saveState();
-            renderHome();
-            closeOverlay("infoOverlay");
-            Sound.fanfare();
-            window.alert("Khôi phục tiến độ học tập thành công!");
-          } catch (e) {
-            window.alert("Mã tiến độ không hợp lệ. Vui lòng kiểm tra lại!");
           }
-        }
+        });
       });
     });
     onTap($("resetBtn"), function () {
       Sound.click();
       askParentalGate("Xóa làm lại từ đầu", function () {
-        if (window.confirm("Xác nhận lần cuối: Xóa toàn bộ tiến độ, sao và xu?")) {
+        showConfirmModal("🗑️ Xóa Làm Lại Từ Đầu", "Xác nhận lần cuối: Xóa toàn bộ tiến độ, sao và xu?", function () {
           var keepName = state.name;
           var keepPin = getParentPin();
           resetStateForProfile(keepName, "hero");
           state.parentPin = keepPin;
           saveState(); renderHome(); closeOverlay("infoOverlay");
-        }
+        });
       });
     });
     openOverlay("infoOverlay");
@@ -4067,18 +4149,19 @@
     if ($("syncPill")) onTap($("syncPill"), function () {
       Sound.click();
       if (CloudSync.db) {
-        window.alert("🟢 Trạng thái: Đã kết nối đám mây Firebase!\nMọi tiến độ của bé Hoàng Long và các bé khác sẽ tự động đồng bộ giữa iPad và iPhone.");
+        showAlertModal("☁️ Trạng Thái Đám Mây", "🟢 Đã kết nối đám mây Firebase!\nMọi tiến độ của bé sẽ tự động đồng bộ giữa iPad và iPhone.");
       } else {
-        window.alert("💾 Trạng thái: Lưu trên máy.\nĐể đồng bộ dữ liệu giữa iPad và iPhone, bạn hãy tạo Firebase Project miễn phí và dán cấu hình vào file js/firebase-config.js nhé!");
+        showAlertModal("☁️ Trạng Thái Lưu Trữ", "💾 Đang lưu trên máy.\nĐể đồng bộ dữ liệu giữa iPad và iPhone, bạn hãy tạo Firebase Project miễn phí và dán cấu hình vào file js/firebase-config.js nhé!");
       }
     });
     onTap($("addKidBtn"), function () {
       Sound.click();
-      var n = window.prompt("Nhập tên bé mới (ví dụ: Bảo An):");
-      if (n && n.replace(/\s/g, "").length) {
-        addNewProfile(n);
-        closeOverlay("profileOverlay");
-      }
+      showPromptModal("👦 Thêm Bé Mới", "Nhập tên bé mới (ví dụ: Bảo An):", "", "Tên bé...", function (n) {
+        if (n && n.replace(/\s/g, "").length) {
+          addNewProfile(n);
+          closeOverlay("profileOverlay");
+        }
+      });
     });
     if ($("badgeStrip")) onTap($("badgeStrip"), function () { Sound.click(); openBadges(); });
 
@@ -4091,7 +4174,7 @@
         else if (n === "achieve") openAchievements("report");
         else if (n === "report") openReport();
         else if (n === "badges") openBadges();
-        else if (n === "shop") openShop();
+        else if (n === "shop") openShop("rewards");
         else if (n === "guide" || n === "settings") openSettings();
       });
     }

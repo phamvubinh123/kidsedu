@@ -293,17 +293,17 @@ body.in-subscreen .cloud-layer { display: none; }
 .unit-node:active .unit-circle { -webkit-transform: scale(0.92); transform: scale(0.92); }
 .unit-circle {
   position: relative;
-  width: 36px; height: 36px; margin: 0 auto; border-radius: 50%;
+  width: 48px; height: 48px; margin: 0 auto; border-radius: 50%;
   background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
   border: 3px solid #f97316;
   box-shadow: 0 3px 0 #c2410c, 0 0 0 3px rgba(255, 255, 255, 0.72), 0 5px 12px rgba(0, 0, 0, 0.32);
   display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center;
   -webkit-justify-content: center; justify-content: center;
-  font-size: 17px; font-weight: 800; color: #7c2d12;
+  font-size: 20px; font-weight: 800; color: #7c2d12;
   -webkit-transition: -webkit-transform 0.15s; transition: transform 0.15s;
 }
 .unit-node.locked .unit-circle {
-  width: 30px; height: 30px; font-size: 14px;
+  width: 42px; height: 42px; font-size: 16px;
 }
 .unit-num {
   position: absolute; top: -5px; left: -5px;
@@ -460,12 +460,21 @@ body.in-subscreen .cloud-layer { display: none; }
 .board-prompt-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; }
 .board-prompt { font-size: 22px; font-weight: 800; color: #4a2a10; text-align: center; line-height: 1.25; -webkit-flex: 1; flex: 1; }
 .speak-btn {
-  width: 46px; height: 46px; border-radius: 50%; font-size: 22px; margin-left: 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
+  width: 54px; height: 54px; border-radius: 50%; font-size: 24px; margin-left: 8px; -webkit-flex-shrink: 0; flex-shrink: 0;
   display: -webkit-inline-flex; display: inline-flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
   background: radial-gradient(circle at 40% 35%, #fff59d, #ffca28); border: 3px solid #e09b00; box-shadow: 0 3px 0 #b07800;
+  -webkit-animation: speakPulse 2.6s ease-in-out infinite; animation: speakPulse 2.6s ease-in-out infinite;
 }
-.speak-btn svg { width: 26px; height: 26px; display: block; }
+.speak-btn svg { width: 30px; height: 30px; display: block; }
 .speak-btn:active { -webkit-transform: translateY(2px); transform: translateY(2px); box-shadow: none; }
+@-webkit-keyframes speakPulse {
+  0%, 100% { -webkit-transform: scale(1); }
+  50% { -webkit-transform: scale(1.07); }
+}
+@keyframes speakPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
 
 /* --- Thẻ hiển thị hình minh họa --- */
 .visual-card {
@@ -641,7 +650,7 @@ body.in-subscreen .cloud-layer { display: none; }
 .frost-panel.tall { max-width: 600px; }
 .panel-title { text-align: center; font-size: 26px; font-weight: 800; color: #8a4b12; margin-bottom: 14px; line-height: 1.15; }
 .close-x {
-  position: absolute; top: 14px; right: 14px; z-index: 5; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; font-weight: 800;
+  position: absolute; top: 12px; right: 12px; z-index: 5; width: 46px; height: 46px; border-radius: 50%; font-size: 20px; font-weight: 800;
   background: #fff; color: #b5651d; box-shadow: 0 3px 0 #e3cfa3;
 }
 .panel-actions { text-align: center; margin-top: 18px; }
@@ -658,7 +667,7 @@ body.in-subscreen .cloud-layer { display: none; }
 .panel-actions.two .btn-green, .panel-actions.two .btn-orange { min-width: 0; -webkit-flex: 1; flex: 1; max-width: 220px; font-size: 21px; padding-left: 10px; padding-right: 10px; }
 
 /* --- Thẻ chế độ chơi --- */
-.mode-cards { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; -webkit-align-items: stretch; align-items: stretch; }
+.mode-cards { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; -webkit-justify-content: space-between; justify-content: space-between; -webkit-align-items: stretch; align-items: stretch; }
 .mode-card {
   width: 23.5%; border-radius: 18px; overflow: hidden; background: #f3f6e4; cursor: pointer; text-align: center;
   display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column;
@@ -872,7 +881,7 @@ body.in-subscreen .cloud-layer { display: none; }
 
 /* ---------- Nút BGM (Loa nhạc nền tròn xanh/đỏ) ---------- */
 .bgm-btn {
-  width: 36px; height: 36px; padding: 0; border: none; border-radius: 50%;
+  width: 44px; height: 44px; padding: 0; border: none; border-radius: 50%;
   background: transparent; cursor: pointer; -webkit-flex-shrink: 0; flex-shrink: 0;
   position: relative;
   display: -webkit-inline-flex; display: inline-flex;
@@ -882,7 +891,7 @@ body.in-subscreen .cloud-layer { display: none; }
   transition: transform 0.15s;
 }
 .bgm-btn:active { -webkit-transform: scale(0.92); transform: scale(0.92); }
-.bgm-btn svg { width: 36px; height: 36px; display: block; }
+.bgm-btn svg { width: 38px; height: 38px; display: block; }
 .bgm-btn.on {
   animation: bgmPulse 2.4s ease-in-out infinite;
 }
@@ -1028,7 +1037,7 @@ body.in-subscreen .cloud-layer { display: none; }
   box-shadow: 0 0 12px rgba(251, 146, 60, 0.35);
 }
 .s-speaker {
-  font-size: 20px; width: 38px; height: 38px; line-height: 38px; text-align: center;
+  font-size: 22px; width: 46px; height: 46px; line-height: 46px; text-align: center;
   border-radius: 50%; background: #e0f2fe; margin-right: 12px;
   -webkit-flex-shrink: 0; flex-shrink: 0; cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.06);
@@ -1413,8 +1422,8 @@ body.in-subscreen .cloud-layer { display: none; }
 .reward-card.can-buy .rw-bar-fill { background: linear-gradient(90deg, #fbbf24, #d97706); }
 .rw-actions { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .rw-btn {
-  padding: 6px 10px; border-radius: 11px; font-size: 12px; font-weight: 800;
-  background: #e2e8f0; color: #334155; text-align: center; margin-bottom: 5px;
+  min-height: 42px; padding: 8px 14px; border-radius: 12px; font-size: 13px; font-weight: 800;
+  background: #e2e8f0; color: #334155; text-align: center; margin-bottom: 6px;
 }
 .rw-btn.pin.on { background: #3b82f6; color: #ffffff; }
 .rw-btn.buy { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #78350f; margin-bottom: 0; box-shadow: 0 2px 0 #d97706; }
@@ -1475,6 +1484,41 @@ body.in-subscreen .cloud-layer { display: none; }
 .pin-key.fn { font-size: 14px; font-weight: 800; background: #f1f5f9; color: #334155; }
 .pin-key.cancel { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; box-shadow: 0 3px 0 #fca5a5; }
 .shop-card.locked { opacity: 0.78; background: #f8fafc; }
+
+/* Lưới 2x2 cho Modal Chọn Chế Độ trên Mobile */
+@media (max-width: 600px) {
+  .mode-card { width: 48%; margin-bottom: 10px; }
+  .mc-head { min-height: 54px; padding: 6px 6px; }
+  .mc-name { font-size: 15px; }
+  .mc-icon { font-size: 36px; }
+}
+
+/* Thanh chọn tuần 1 tầng cuộn ngang trong Phòng Luyện Đọc */
+.week-scroll-tabs {
+  display: -webkit-flex; display: flex; -webkit-flex-wrap: nowrap; flex-wrap: nowrap;
+  -webkit-justify-content: flex-start; justify-content: flex-start;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  white-space: nowrap; padding-bottom: 4px;
+}
+.week-scroll-tabs::-webkit-scrollbar { display: none; height: 0; }
+.week-scroll-tabs .week-group-btn { -webkit-flex-shrink: 0; flex-shrink: 0; margin-right: 6px; }
+
+/* Chấm đỏ thông báo trên thanh điều hướng Góc Ba Mẹ */
+.nav-ic { position: relative; display: inline-block; }
+.nav-badge-dot {
+  position: absolute; top: -4px; right: -8px;
+  min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
+  background: #ef4444; color: #ffffff; border: 1.5px solid #ffffff;
+  font-size: 10px; font-weight: 800; line-height: 14px; text-align: center;
+}
+
+/* Modal hộp thoại custom thay alert/confirm/prompt */
+#dialogOverlay { z-index: 1250; }
+.dialog-msg {
+  font-size: 15px; font-weight: 700; color: #334155; line-height: 1.45;
+  text-align: center; margin: 4px 0 14px; white-space: pre-line; word-break: break-word;
+}
+.dialog-input { width: 100%; margin: 0 0 14px 0; text-align: center; font-size: 16px; }
 
 
 
