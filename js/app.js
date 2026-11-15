@@ -1488,8 +1488,18 @@
     }
     window.scrollTo(0, 0);
   }
+  function setActiveNav(navKey) {
+    var navs = document.querySelectorAll(".nav-item");
+    for (var i = 0; i < navs.length; i++) {
+      if (navs[i].getAttribute("data-nav") === navKey) addClass(navs[i], "active");
+      else removeClass(navs[i], "active");
+    }
+  }
   function openOverlay(id) { addClass($(id), "open"); }
-  function closeOverlay(id) { removeClass($(id), "open"); }
+  function closeOverlay(id) {
+    removeClass($(id), "open");
+    if (id === "infoOverlay") setActiveNav("home");
+  }
 
   // ---------------------------------------------------------
   // 6. MÀN HÌNH CHÍNH
@@ -3827,6 +3837,11 @@
     openOverlay("profileOverlay");
   }
 
+  var SVG_TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+  var SVG_SAVE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+  var SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+  var SVG_UNDO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>';
+
   function renderProfileCards() {
     var c = $("profileCards");
     if (!c) return;
@@ -3846,7 +3861,7 @@
           '<div class="profile-meta">⭐ ' + stars + ' sao • <i class="coin sm"></i> ' + coins + ' xu</div>' +
         '</div>' +
         '<div class="profile-tag">' + (isActive ? 'Đang học ✅' : 'Chọn') + '</div>' +
-        (profiles.length > 1 ? '<button type="button" class="profile-del" data-del-pid="' + esc(p.id) + '" title="Xóa hồ sơ">🗑️</button>' : '') +
+        (profiles.length > 1 ? '<button type="button" class="profile-del" data-del-pid="' + esc(p.id) + '" title="Xóa hồ sơ">' + SVG_TRASH + '</button>' : '') +
       '</div>';
     }
     c.innerHTML = html;
@@ -3885,8 +3900,8 @@
         var item = pendingList[pi];
         html += '<div class="ticket-row">' +
           '<span>' + esc(item.tk.icon || "🎁") + ' <b>' + esc(item.tk.rewardName) + '</b> (' + item.tk.cost + ' <i class="coin sm"></i> · ' + esc(item.tk.date || "") + ')</span>' +
-          '<span><button type="button" class="small-btn" data-deliver="' + item.idx + '">✅ Duyệt trao</button> ' +
-          '<button type="button" class="small-btn red" data-refund="' + item.idx + '">↩️ Hoàn xu</button></span></div>';
+          '<span><button type="button" class="slim-act-btn approve has-txt" data-deliver="' + item.idx + '" title="Duyệt trao">' + SVG_CHECK + 'Duyệt</button>' +
+          '<button type="button" class="slim-act-btn refund has-txt" data-refund="' + item.idx + '" title="Hoàn xu">' + SVG_UNDO + 'Hoàn xu</button></span></div>';
       }
     }
     if (deliveredList.length > 0) {
@@ -3920,8 +3935,8 @@
         iconSelectHTML("", r.icon || "🎁", 'data-edit-icon="' + esc(r.id) + '"') +
         '<input class="parent-rw-input" data-edit-name="' + esc(r.id) + '" style="flex:1;min-width:110px;" value="' + esc(r.name) + '" placeholder="Tên quà">' +
         '<input class="parent-rw-input" data-edit-cost="' + esc(r.id) + '" type="number" min="10" step="10" value="' + (r.cost || 100) + '" style="width:74px;" placeholder="Xu">' +
-        '<button type="button" class="small-btn" data-saverw="' + esc(r.id) + '" title="Lưu thay đổi">💾</button>' +
-        '<button type="button" class="small-btn red" data-delrw="' + esc(r.id) + '" title="Xóa quà">🗑️</button>' +
+        '<button type="button" class="slim-act-btn save" data-saverw="' + esc(r.id) + '" title="Lưu thay đổi">' + SVG_SAVE + '</button>' +
+        '<button type="button" class="slim-act-btn del" data-delrw="' + esc(r.id) + '" title="Xóa quà">' + SVG_TRASH + '</button>' +
       '</div>';
     }
 
@@ -4317,7 +4332,9 @@
       onTap(navs[i], function () {
         Sound.click();
         var n = this.getAttribute("data-nav");
-        if (n === "read") { readReturnScreen = "screenHome"; openPassageReader(); }
+        setActiveNav(n || "home");
+        if (n === "home") { renderHome(); showScreen("screenHome"); }
+        else if (n === "read") { readReturnScreen = "screenHome"; openPassageReader(); }
         else if (n === "achieve") openAchievements("report");
         else if (n === "report") openReport();
         else if (n === "badges") openBadges();
