@@ -43,20 +43,14 @@ var PROJECT_CONFIG = {
     "Siêu Trí Tuệ Nhí"
   ],
 
-  // 5. Nhân vật mở khóa theo Tổng số Sao (giống Huy hiệu)
+  // 5. Nhân vật mở khóa theo Tổng số Sao (6 nhân vật hình người 3D)
   avatars: [
     { id: "hero", name: "Hiệp Sĩ Nhí", need: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
-    { id: "sword", name: "Hiệp Sĩ Kiếm Bạc", need: 3, emoji: "⚔️" },
-    { id: "shield", name: "Hiệp Sĩ Khiên Vàng", need: 6, emoji: "🛡️" },
-    { id: "archer", name: "Hiệp Sĩ Cung Thủ", need: 10, emoji: "🏹" },
-    { id: "fire", name: "Hiệp Sĩ Lửa Đỏ", need: 14, emoji: "🔥" },
-    { id: "ice", name: "Hiệp Sĩ Băng Giá", need: 18, emoji: "❄️" },
-    { id: "thunder", name: "Hiệp Sĩ Sấm Sét", need: 23, emoji: "⚡" },
-    { id: "ninja", name: "Hiệp Sĩ Bóng Đêm", need: 28, emoji: "🥷" },
-    { id: "mecha", name: "Hiệp Sĩ Rô-Bốt", need: 34, emoji: "🤖" },
-    { id: "mage", name: "Hiệp Sĩ Phép Thuật", need: 40, emoji: "🧙" },
-    { id: "star", name: "Hiệp Sĩ Ánh Sao", need: 45, emoji: "🌟" },
-    { id: "king", name: "Vua Hiệp Sĩ", need: 50, emoji: "👑" }
+    { id: "fire", name: "Lửa Đỏ", need: 8, img: "assets/hero-fire.jpg", emoji: "🔥" },
+    { id: "ice", name: "Băng Giá", need: 16, img: "assets/hero-ice.jpg", emoji: "❄️" },
+    { id: "thunder", name: "Sấm Sét", need: 25, img: "assets/hero-thunder.jpg", emoji: "⚡" },
+    { id: "ninja", name: "Bóng Đêm", need: 35, img: "assets/hero-shadow.jpg", emoji: "🥷" },
+    { id: "king", name: "Bá Tước (Vua Hiệp Sĩ)", need: 45, img: "assets/hero-king.jpg", emoji: "👑" }
   ],
 
   // 6. Cửa hàng Đổi Quà Thật (Tab 2) & Quà mục tiêu mặc định

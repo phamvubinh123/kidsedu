@@ -580,18 +580,12 @@
   var LEVELS = CFG.levels || ["Mầm Non Chăm Chỉ", "Bé Ngoan Hiếu Học", "Ong Nhỏ Thông Thái", "Nhà Thám Hiểm Nhí", "Ngôi Sao Lớp 1", "Kiện Tướng Tri Thức", "Siêu Trí Tuệ Nhí"];
 
   var AVATARS = CFG.avatars || [
-    { id: "hero", name: "Hiệp Sĩ Nhí", price: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
-    { id: "sword", name: "Hiệp Sĩ Kiếm Bạc", price: 20, emoji: "⚔️" },
-    { id: "shield", name: "Hiệp Sĩ Khiên Vàng", price: 30, emoji: "🛡️" },
-    { id: "archer", name: "Hiệp Sĩ Cung Thủ", price: 40, emoji: "🏹" },
-    { id: "fire", name: "Hiệp Sĩ Lửa Đỏ", price: 50, emoji: "🔥" },
-    { id: "ice", name: "Hiệp Sĩ Băng Giá", price: 60, emoji: "❄️" },
-    { id: "thunder", name: "Hiệp Sĩ Sấm Sét", price: 80, emoji: "⚡" },
-    { id: "ninja", name: "Hiệp Sĩ Bóng Đêm", price: 100, emoji: "🥷" },
-    { id: "mecha", name: "Hiệp Sĩ Rô-Bốt", price: 120, emoji: "🤖" },
-    { id: "mage", name: "Hiệp Sĩ Phép Thuật", price: 150, emoji: "🧙" },
-    { id: "star", name: "Hiệp Sĩ Ánh Sao", price: 180, emoji: "🌟" },
-    { id: "king", name: "Vua Hiệp Sĩ", price: 220, emoji: "👑" }
+    { id: "hero", name: "Hiệp Sĩ Nhí", need: 0, img: "assets/mascot.jpg", emoji: "🛡️" },
+    { id: "fire", name: "Lửa Đỏ", need: 8, img: "assets/hero-fire.jpg", emoji: "🔥" },
+    { id: "ice", name: "Băng Giá", need: 16, img: "assets/hero-ice.jpg", emoji: "❄️" },
+    { id: "thunder", name: "Sấm Sét", need: 25, img: "assets/hero-thunder.jpg", emoji: "⚡" },
+    { id: "ninja", name: "Bóng Đêm", need: 35, img: "assets/hero-shadow.jpg", emoji: "🥷" },
+    { id: "king", name: "Bá Tước (Vua Hiệp Sĩ)", need: 45, img: "assets/hero-king.jpg", emoji: "👑" }
   ];
 
   var PRAISE = CFG.praiseMessages || [
