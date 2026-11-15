@@ -1684,8 +1684,9 @@
 
     var sj = subjectById(curSubj);
     var units = UNITS[curSubj];
-    $("mapSubjName").innerHTML = "ĐẢO: " + sj.short;
+    $("mapSubjName").innerHTML = "ĐẢO " + sj.short.replace(/\s*1\s*$/, "");
     $("mapStars").innerHTML = subjectStars(curSubj) + "/" + (units.length * 3);
+    if ($("mapCoins")) $("mapCoins").innerHTML = state.coins || 0;
 
     var cards = document.querySelectorAll("#mapAccordion .map-card");
     for (var ci = 0; ci < cards.length; ci++) {
@@ -3775,25 +3776,21 @@
             if (state.realRewards[x].id === rid) { reward = state.realRewards[x]; break; }
           }
           if (!reward || state.coins < reward.cost) { Sound.bad(); return; }
-          var chosenRw = reward;
-          askParentalGate("Đổi quà " + chosenRw.name + " (" + chosenRw.cost + " xu)", function () {
-            if (state.coins < chosenRw.cost) { Sound.bad(); return; }
-            state.coins -= chosenRw.cost;
-            state.rewardTickets.push({
-              id: "tk_" + Date.now(),
-              rewardName: chosenRw.name,
-              icon: chosenRw.icon,
-              cost: chosenRw.cost,
-              status: "pending",
-              date: getTodayStr(0)
-            });
-            Sound.fanfare();
-            Sound.coin();
-            confetti(28);
-            saveState();
-            renderHome();
-            openShop("rewards");
-          }, { skipSession: true });
+          state.coins -= reward.cost;
+          state.rewardTickets.push({
+            id: "tk_" + Date.now(),
+            rewardName: reward.name,
+            icon: reward.icon,
+            cost: reward.cost,
+            status: "pending",
+            date: getTodayStr(0)
+          });
+          Sound.fanfare();
+          Sound.coin();
+          confetti(28);
+          saveState();
+          renderHome();
+          openShop("rewards");
         });
       }
     } else if (curShopTab === "avatars") {
