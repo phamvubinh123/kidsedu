@@ -1879,5 +1879,190 @@ var QUESTION_BANK = {
         { topic: "numbers_talk", lesson: "English Numbers (1 - 10)", prompt: "What number comes after NINE (9)?", visualType: "eng", visual: "9️⃣ ➡️ 🔟", word: "n i n e  ->  ...", speakText: "ten", options: ["ten", "eight", "seven", "one"], answer: "ten" },
         { topic: "numbers_talk", lesson: "Greetings & Communication", prompt: "When you meet your friend Bill, you say: '..., Bill!' 👋", visualType: "eng", visual: "👋😊", word: "..., Bill!", speakText: "Hi Bill", options: ["Hi", "Book", "Ball", "Car"], answer: "Hi" },
         { topic: "numbers_talk", lesson: "Colors & Objects", prompt: "What color is the apple? 🍎 'It's ...'", visualType: "eng", visual: "🍎 🔴", word: "It's ...", speakText: "It is red", options: ["red", "blue", "green", "black"], answer: "red" }
+      ],
+
+      // ---------------- ĐẢO THÁM TỬ (TƯ DUY LOGIC & SUY LUẬN) ----------------
+      logic: [
+        // Chặng 1: Ở Nhà - Ai Đã Đến Nhà? (10 vụ án)
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 1: Tủ lạnh mở cửa",
+          prompt: "Trong nhà bếp, ai đã quên đóng cửa tủ lạnh?",
+          readPrompt: "Trong nhà bếp, ai đã quên đóng cửa tủ lạnh? Bé hãy nhìn manh mối nhé!",
+          visualType: "detective",
+          sceneTitle: "🧊 Hiện trường: Nhà Bếp",
+          clues: [
+            "🍎 Tủ lạnh mở toang, rơi 1 quả táo đỏ",
+            "👻 Bóng trùm chăn cầm kẹo mút 🍭 và quàng khăn sọc đỏ 🧣",
+            "🔍 Nghi phạm: 🐧 Váy hồng | 👦 Áo xanh | 🦉 Khăn xanh | 🐊 Khăn đỏ cầm 🍭"
+          ],
+          clueShort: "🍭 + 🧣 đỏ",
+          pairAnswer: "🐊 Cá Sấu",
+          options: ["🐊 Cá Sấu", "🐧 Cánh Cụt", "🦉 Cú Mèo", "👦 Bé Trai"],
+          answer: "🐊 Cá Sấu",
+          explain: "Bạn Cá Sấu 🐊 cầm kẹo mút 🍭 và quàng khăn sọc đỏ 🧣 giống hệt bóng người ở tủ lạnh!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 2: Miếng bánh kem biến mất",
+          prompt: "Trên bàn ăn, ai đã ăn vụng miếng bánh kem dâu?",
+          readPrompt: "Trên bàn ăn, ai đã ăn vụng miếng bánh kem dâu?",
+          visualType: "detective",
+          sceneTitle: "🍰 Hiện trường: Bàn Ăn",
+          clues: [
+            "🍓 Đĩa bánh mất 1 miếng, dính kem dâu quanh mép",
+            "🐾 Trên ghế có dấu chân mèo nhỏ xíu và sợi râu trắng",
+            "🔍 Nghi phạm: 🐶 Đeo nơ | 🐱 Mép dính kem 🍓 | 🐰 Gặm cà rốt | 🐸 Đang nhảy"
+          ],
+          clueShort: "🐾 + 🍓 trên mép",
+          pairAnswer: "🐱 Mèo Mướp",
+          options: ["🐱 Mèo Mướp", "🐶 Cún Con", "🐰 Thỏ Trắng", "🐸 Ếch Xanh"],
+          answer: "🐱 Mèo Mướp",
+          explain: "Trên ghế có dấu chân mèo 🐾 và mép của Mèo Mướp 🐱 còn dính kem dâu 🍓 nè!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 3: Cốc sữa bị đổ",
+          prompt: "Ai đã vô tình làm đổ cốc sữa trên bàn học?",
+          readPrompt: "Ai đã vô tình làm đổ cốc sữa trên bàn học?",
+          visualType: "detective",
+          sceneTitle: "🥛 Hiện trường: Bàn Học",
+          clues: [
+            "🥛 Cốc sữa đổ tràn, có 1 chiếc lông vũ màu nâu rơi cạnh đó",
+            "🧣 Chủ nhân làm rơi chiếc khăn len màu xanh dương",
+            "🔍 Nghi phạm: 🦉 Lông nâu, mất khăn | 🐻 Áo vàng | 🦊 Đuôi xù | 🐼 Ôm tre"
+          ],
+          clueShort: "🪶 Nâu + 🧣 xanh",
+          pairAnswer: "🦉 Cú Mèo",
+          options: ["🦉 Cú Mèo", "🐻 Gấu Nâu", "🦊 Cáo Nhỏ", "🐼 Gấu Trúc"],
+          answer: "🦉 Cú Mèo",
+          explain: "Chỉ có bạn Cú Mèo 🦉 có lông vũ màu nâu và bị rơi mất chiếc khăn xanh dương!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 4: Bức tranh trên tường",
+          prompt: "Ai là họa sĩ nhí đã vẽ bông hoa lên tường phòng khách?",
+          readPrompt: "Ai là họa sĩ nhí đã vẽ bông hoa lên tường phòng khách?",
+          visualType: "detective",
+          sceneTitle: "🎨 Hiện trường: Phòng Khách",
+          clues: [
+            "🌺 Trên tường có bông hoa vẽ bằng bút sáp màu đỏ",
+            "🖍️ Hộp bút sáp đỏ rơi dưới đất, ai đó tay còn dính màu đỏ",
+            "🔍 Nghi phạm: 🐻 Tay dính đỏ 🖍️ | 🐥 Cầm còi | 🐢 Đeo kính | 🐑 Đang ngủ"
+          ],
+          clueShort: "🖍️ Tay dính đỏ",
+          pairAnswer: "🐻 Gấu Bông",
+          options: ["🐻 Gấu Bông", "🐥 Gà Con", "🐢 Rùa Con", "🐑 Cừu Non"],
+          answer: "🐻 Gấu Bông",
+          explain: "Bàn tay của bạn Gấu Bông 🐻 còn dính đầy màu bút sáp đỏ 🖍️ kìa!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 5: Điều khiển tivi biến mất",
+          prompt: "Ai đã giấu chiếc điều khiển tivi dưới gối sofa?",
+          readPrompt: "Ai đã giấu chiếc điều khiển tivi dưới gối sofa?",
+          visualType: "detective",
+          sceneTitle: "📺 Hiện trường: Ghế Sofa",
+          clues: [
+            "🛋️ Dưới gối sofa có chiếc điều khiển và một mẩu cà rốt cắn dở 🥕",
+            "👂 Lúc chạy đi, kẻ trốn để lộ đôi tai dài sau ghế",
+            "🔍 Nghi phạm: 🐰 Tai dài thích 🥕 | 🐒 Đội mũ | 🐘 Vòi dài | 🦆 Chân màng"
+          ],
+          clueShort: "🥕 + 👂 Tai dài",
+          pairAnswer: "🐰 Thỏ Trắng",
+          options: ["🐰 Thỏ Trắng", "🐒 Khỉ Con", "🐘 Voi Con", "🦆 Vịt Vàng"],
+          answer: "🐰 Thỏ Trắng",
+          explain: "Mẩu cà rốt 🥕 và đôi tai dài chính là manh mối chỉ ra bạn Thỏ Trắng 🐰!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 6: Dấu chân ướt trên thảm",
+          prompt: "Ai vừa đi nghịch nước về làm ướt thảm lau chân?",
+          readPrompt: "Ai vừa đi nghịch nước về làm ướt thảm lau chân?",
+          visualType: "detective",
+          sceneTitle: "💦 Hiện trường: Cửa Ra Vào",
+          clues: [
+            "💧 Trên thảm có những giọt nước và dấu chân có màng bơi",
+            "🎩 Chiếc phao bơi hình ngôi sao vứt ngay cạnh cửa",
+            "🔍 Nghi phạm: 🦆 Chân màng ướt | 🦁 Bờm vàng | 🦒 Cổ cao | 🐭 Đuôi dài"
+          ],
+          clueShort: "💧 + Chân màng",
+          pairAnswer: "🦆 Vịt Vàng",
+          options: ["🦆 Vịt Vàng", "🦁 Sư Tử", "🦒 Hươu Cao Cổ", "🐭 Chuột Nhắt"],
+          answer: "🦆 Vịt Vàng",
+          explain: "Chỉ có bạn Vịt Vàng 🦆 mới có bàn chân màng bơi và mang theo phao bơi!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 7: Đĩa chuối chín trên kệ",
+          prompt: "Ai đã lén ăn hết 3 quả chuối chín trên kệ bếp?",
+          readPrompt: "Ai đã lén ăn hết 3 quả chuối chín trên kệ bếp?",
+          visualType: "detective",
+          sceneTitle: "🍌 Hiện trường: Kệ Bếp",
+          clues: [
+            "🍌 Trên kệ còn lại 3 vỏ chuối vàng và 1 chiếc mũ lưỡi trai xanh 🧢",
+            "🌳 Có tiếng cười 'khẹc khẹc' trèo lên tủ cao",
+            "🔍 Nghi phạm: 🐒 Mất mũ 🧢 | 🐷 Mũ hồng | 🐮 Đeo chuông | 🐴 Giày đỏ"
+          ],
+          clueShort: "🍌 + 🧢 Mũ xanh",
+          pairAnswer: "🐒 Khỉ Con",
+          options: ["🐒 Khỉ Con", "🐷 Heo Hồng", "🐮 Bò Sữa", "🐴 Ngựa Con"],
+          answer: "🐒 Khỉ Con",
+          explain: "Khỉ Con 🐒 rất thích ăn chuối 🍌, lại trèo lên tủ cao và làm rơi mũ xanh 🧢!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 8: Chiếc xương đồ chơi của Cún",
+          prompt: "Ai đã đào một hố nhỏ trong chậu cây để giấu đồ chơi?",
+          readPrompt: "Ai đã đào một hố nhỏ trong chậu cây để giấu đồ chơi?",
+          visualType: "detective",
+          sceneTitle: "🪴 Hiện trường: Ban Công",
+          clues: [
+            "🪴 Chậu cây bị bới đất tung tóe, thò ra đầu chiếc xương nhựa 🦴",
+            "🐕 Mũi ai dính đầy đất nâu và đang vẫy đuôi tít",
+            "🔍 Nghi phạm: 🐶 Mũi dính đất | 🐱 Sạch sẽ | 🐰 Ôm gấu | 🐦 Đang hót"
+          ],
+          clueShort: "🪴 + 🦴 Xương nhựa",
+          pairAnswer: "🐶 Cún Con",
+          options: ["🐶 Cún Con", "🐱 Mèo Trắng", "🐰 Thỏ Nâu", "🐦 Chim Sâu"],
+          answer: "🐶 Cún Con",
+          explain: "Bạn Cún Con 🐶 thích giấu xương 🦴 và cái mũi còn dính đầy đất kìa!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 9: Chiếc gối ôm bị xẹp",
+          prompt: "Ai đã làm rụng những chiếc gai nhỏ xíu lên ghế?",
+          readPrompt: "Ai đã làm rụng những chiếc gai nhỏ xíu lên ghế?",
+          visualType: "detective",
+          sceneTitle: "🛋️ Hiện trường: Góc Đọc Sách",
+          clues: [
+            "📌 Trên đệm ghế có vài chiếc gai nhọn nhỏ và quả táo chín 🍎",
+            "🧣 Khăn quàng cổ sọc cam bị mắc vào thành ghế",
+            "🔍 Nghi phạm: 🦔 Lưng đầy gai | 🐼 Lông mượt | 🐨 Ôm cây | 🐧 Áo đen"
+          ],
+          clueShort: "📌 Gai nhọn + 🍎",
+          pairAnswer: "🦔 Bạn Nhím",
+          options: ["🦔 Bạn Nhím", "🐼 Gấu Trúc", "🐨 Gấu Túi", "🐧 Cánh Cụt"],
+          answer: "🦔 Bạn Nhím",
+          explain: "Bạn Nhím 🦔 có bộ lông gai nhọn nên khi ngồi đã làm rơi gai lên đệm ghế!"
+        },
+        {
+          topic: "detective_home",
+          lesson: "Vụ án 10: Lọ hoa thủy tinh bị vỡ",
+          prompt: "Ai đã đá bóng trong nhà làm vỡ lọ hoa trên bàn?",
+          readPrompt: "Ai đã đá bóng trong nhà làm vỡ lọ hoa trên bàn?",
+          visualType: "detective",
+          sceneTitle: "⚽ Hiện trường: Sân Nhà",
+          clues: [
+            "💐 Lọ hoa đổ nghiêng, ngay cạnh có quả bóng đá số 10 ⚽",
+            "👟 Giày đinh đá bóng in dấu bùn ngay trước cửa",
+            "🔍 Nghi phạm: 🦊 Áo cầu thủ ⚽ | 🐢 Đọc sách | 🦉 Ngủ gật | 🐸 Thổi sáo"
+          ],
+          clueShort: "⚽ + 👟 Giày bóng",
+          pairAnswer: "🦊 Cáo Nhỏ",
+          options: ["🦊 Cáo Nhỏ", "🐢 Rùa Già", "🦉 Cú Mèo", "🐸 Ếch Xanh"],
+          answer: "🦊 Cáo Nhỏ",
+          explain: "Cáo Nhỏ 🦊 mặc áo cầu thủ và đi giày đá bóng ⚽ đã sút bóng trúng lọ hoa!"
+        }
       ]
     };

@@ -1649,6 +1649,9 @@
       { x: 69, y: 42, via: [[48, 36], [66, 38]] },
       { x: 24, y: 53, via: [[54, 45], [32, 47]] },
       { x: 59, y: 68, via: [[34, 57], [58, 59], [68, 63]] }
+    ],
+    logic: [
+      { x: 31, y: 23 }
     ]
   };
 
@@ -1665,9 +1668,9 @@
     return out;
   }
 
-  var MAP_ORDER = ["math", "viet", "eng"];
-  var MAP_PATH_IDS = { math: "unitPathMath", viet: "unitPathViet", eng: "unitPathEng" };
-  var MAP_STRIP_STAR_IDS = { math: "stripStarsMath", viet: "stripStarsViet", eng: "stripStarsEng" };
+  var MAP_ORDER = ["math", "viet", "eng", "logic"];
+  var MAP_PATH_IDS = { math: "unitPathMath", viet: "unitPathViet", eng: "unitPathEng", logic: "unitPathLogic" };
+  var MAP_STRIP_STAR_IDS = { math: "stripStarsMath", viet: "stripStarsViet", eng: "stripStarsEng", logic: "stripStarsLogic" };
   var mapControlsBound = false;
 
   function openSubject(subj) {
@@ -2446,9 +2449,10 @@
       }
       var toSpeak = q.speakText || (game.lang === "en-US" ? q.answer : null);
       if (toSpeak) later(function () { Sound.speak(toSpeak, game.lang); }, 450);
+      if (q.explain) praiseTxt = "💡 " + q.explain;
       say(praiseTxt, "good");
       if (Math.random() < 0.35) confetti(8);
-      later(function () { game.idx++; nextQuestion(); }, 1500);
+      later(function () { game.idx++; nextQuestion(); }, q.explain ? 2600 : 1500);
     } else {
       game.streak = 0;
       if (rt < 1200) game.fastGuessCount = (game.fastGuessCount || 0) + 1;
@@ -2470,13 +2474,13 @@
           addClass(all[i], "disabled");
         }
       }
-      var wrongMsg = pick(RETRY) + " Đáp án đúng là: <b>" + esc(q.answer) + "</b>";
+      var wrongMsg = q.explain ? ("💡 " + esc(q.explain)) : (pick(RETRY) + " Đáp án đúng là: <b>" + esc(q.answer) + "</b>");
       say(wrongMsg, "bad");
       var toSpeakWrong = q.speakText || (game.lang === "en-US" ? q.answer : q.answer);
       if (toSpeakWrong) {
         later(function () { Sound.speak("Đáp án đúng là " + toSpeakWrong, game.lang); }, 500);
       }
-      later(function () { game.idx++; nextQuestion(); }, 2500);
+      later(function () { game.idx++; nextQuestion(); }, 2800);
     }
   }
 
@@ -2649,8 +2653,10 @@
       } else if (q.visualType === "split") {
         if (q.visualData.left === "?") left = q.visualData.top + " = ? + " + q.visualData.right;
         else left = q.visualData.top + " = " + q.visualData.left + " + ?";
+      } else if (q.visualType === "detective") {
+        left = q.clueShort || q.lesson;
       }
-      if (!left || String(right).length > 12) continue;
+      if (!left || String(right).length > 16) continue;
       if (usedA[right] || usedL[left]) continue;
       usedA[right] = true; usedL[left] = true;
       pairs.push({ a: left, b: right, speak: q.speakText || right });

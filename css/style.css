@@ -121,15 +121,21 @@ body.in-subscreen .cloud-layer { display: none; }
 
 .badge-card.locked .badge-ic { opacity: 0.35; -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 
-/* ---------- Bản đồ đảo ---------- */
-.island-map { position: relative; margin-top: 4px; }
+/* ---------- Bản đồ đảo (Lưới 2x2 cho 4 đảo) ---------- */
+.island-map {
+  position: relative; margin-top: 8px;
+  display: -webkit-flex; display: flex;
+  -webkit-flex-wrap: wrap; flex-wrap: wrap;
+  -webkit-justify-content: space-around; justify-content: space-around;
+  -webkit-align-items: center; align-items: center;
+}
 .island {
-  position: relative; width: 24.5vh; max-width: 58vw; cursor: pointer; display: block;
+  position: relative; width: 44%; max-width: 210px; margin: 4px 2% 10px; cursor: pointer; display: block;
   -webkit-animation: bob 4.5s ease-in-out infinite; animation: bob 4.5s ease-in-out infinite;
 }
-.island:nth-child(1) { margin-left: 0; }
-.island:nth-child(2) { margin-left: auto; margin-right: 0; margin-top: -8.5vh; -webkit-animation-delay: -1.5s; animation-delay: -1.5s; }
-.island:nth-child(3) { margin: -5.5vh 0 0 8%; -webkit-animation-delay: -3s; animation-delay: -3s; }
+.island:nth-child(2) { -webkit-animation-delay: -1.2s; animation-delay: -1.2s; }
+.island:nth-child(3) { -webkit-animation-delay: -2.4s; animation-delay: -2.4s; }
+.island:nth-child(4) { -webkit-animation-delay: -3.6s; animation-delay: -3.6s; }
 .island:active .island-pic { -webkit-transform: scale(0.95); transform: scale(0.95); }
 .island-pic {
   width: 100%; padding-top: 100%; position: relative; border-radius: 50%;
@@ -494,6 +500,20 @@ body.in-subscreen .cloud-layer { display: none; }
 }
 .v-eng { color: #1565c0; background: #e8f2ff; border-color: #90caf9; letter-spacing: 1px; }
 .v-poem { font-size: 19px; font-weight: 700; color: #5a3a1a; line-height: 1.5; white-space: pre-line; background: #fffbea; border-radius: 14px; padding: 8px 12px; border: 2px solid #ffe08a; }
+.detective-scene {
+  text-align: left; background: #fffdf4; border-radius: 14px; padding: 10px 12px;
+  border: 2px solid #ffd54f; box-shadow: inset 0 2px 6px rgba(255, 193, 7, 0.14);
+}
+.detective-head {
+  font-size: 17px; font-weight: 800; color: #b45309; margin-bottom: 6px;
+  border-bottom: 2px dashed #fde68a; padding-bottom: 4px; text-align: center;
+}
+.detective-clues { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
+.detective-clue-item {
+  font-size: 15px; font-weight: 700; color: #334155; background: #ffffff;
+  border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 6px 10px; margin-top: 6px; line-height: 1.35;
+}
+.detective-clue-item:first-child { margin-top: 0; }
 .split-tree { display: inline-block; }
 .split-top { width: 62px; height: 62px; margin: 0 auto; border-radius: 50%; background: linear-gradient(180deg, #4fd18b, #1f9e5a); color: #fff; font-size: 30px; font-weight: 800; line-height: 58px; border: 3px solid #fff; box-shadow: 0 4px 0 #157a43; }
 .split-lines { font-size: 26px; font-weight: 800; color: #8a6a40; line-height: 1.1; }
@@ -783,7 +803,7 @@ body.in-subscreen .cloud-layer { display: none; }
     margin-right: auto;
   }
 
-  /* 3 Hòn Đảo dàn hàng ngang đẹp mắt trên iPad / Web */
+  /* 4 Hòn Đảo dàn hàng ngang đẹp mắt trên iPad / Web */
   .island-map {
     display: -webkit-flex;
     display: flex;
@@ -791,17 +811,18 @@ body.in-subscreen .cloud-layer { display: none; }
     justify-content: space-around;
     -webkit-align-items: center;
     align-items: center;
-    max-width: 940px;
+    max-width: 980px;
     margin: 28px auto 0;
     padding: 16px 0;
   }
   .island {
-    width: 30%;
-    max-width: 280px;
+    width: 22%;
+    max-width: 220px;
     margin: 0 !important;
   }
-  .island:nth-child(2) {
-    margin-top: -28px !important;
+  .island:nth-child(2),
+  .island:nth-child(4) {
+    margin-top: -22px !important;
   }
   .island-label {
     font-size: 20px;
