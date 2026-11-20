@@ -4,7 +4,8 @@
 var SUBJECTS = [
   { id: "math", name: "Đảo Toán Học", short: "TOÁN 1", img: "assets/island-math.jpg", emoji: "🏰" },
   { id: "viet", name: "Đảo Tiếng Việt", short: "TIẾNG VIỆT 1", img: "assets/island-viet.jpg", emoji: "📚" },
-  { id: "eng", name: "Đảo Tiếng Anh", short: "TIẾNG ANH 1", img: "assets/island-eng.jpg", emoji: "🎈" }
+  { id: "eng", name: "Đảo Tiếng Anh", short: "TIẾNG ANH 1", img: "assets/island-eng.jpg", emoji: "🎈" },
+  { id: "logic", name: "Đảo Thám Tử", short: "THÁM TỬ", img: "assets/island-detective.jpg", emoji: "🕵️" }
 ];
 
 var UNITS = {
@@ -31,6 +32,9 @@ var UNITS = {
     { topic: "u9_12", title: "Unit 9 - 12", icon: "🐒" },
     { topic: "u13_16", title: "Unit 13 - 16", icon: "🐯" },
     { topic: "numbers_talk", title: "Numbers & Talk", icon: "🔢" }
+  ],
+  logic: [
+    { topic: "detective_home", title: "Ở Nhà: Ai Đã Đến?", icon: "🏠" }
   ]
 };
 
