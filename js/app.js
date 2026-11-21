@@ -715,6 +715,7 @@
     }
     if (!Array.isArray(state.rewardTickets)) state.rewardTickets = [];
     if (!Array.isArray(state.telemetry)) state.telemetry = [];
+    if (!state.solvedCases || typeof state.solvedCases !== "object") state.solvedCases = {};
 
     // Đảm bảo avatar thuộc danh sách 12 hiệp sĩ hiện tại
     var validAvatar = false;
@@ -853,6 +854,7 @@
     state.owned = ["hero"];
     state.progress = {};
     state.passages = {};
+    state.solvedCases = {};
     state.lastSubj = "math";
     state.lastUnitIdx = 0;
     state.lastPassageIdx = 0;
@@ -1203,6 +1205,7 @@
           owned: Array.isArray(data.owned) ? data.owned : ["hero"],
           progress: data.progress || {},
           passages: data.passages || {},
+          solvedCases: data.solvedCases || {},
           lastSubj: data.lastSubj || "math",
           lastUnitIdx: data.lastUnitIdx || 0,
           lastPassageIdx: data.lastPassageIdx || 0,
@@ -1325,6 +1328,21 @@
   function stageStats(subj, topic) {
     var p = state.progress[unitKey(subj, topic)] || {};
     var stats = p.stats || {};
+    if (subj === "logic") {
+      var lQs = unitQuestions("logic", topic);
+      var lTotal = lQs.length || 10;
+      var solvedCnt = 0;
+      if (state.solvedCases) {
+        for (var li = 0; li < lQs.length; li++) {
+          if (lQs[li].caseId && state.solvedCases[lQs[li].caseId]) solvedCnt++;
+        }
+      }
+      var qSt = stats.quiz;
+      var stCnt = (qSt && typeof qSt.correct === "number") ? qSt.correct : 0;
+      var lCorrect = Math.min(lTotal, Math.max(solvedCnt, stCnt));
+      var lRatio = lTotal > 0 ? (lCorrect / lTotal) : 0;
+      return { correct: lCorrect, total: lTotal, ratio: lRatio, stars: ratioToHalfStars(lRatio) };
+    }
     var totalCorrect = 0;
     var totalQuestions = 0;
     for (var i = 0; i < MODES.length; i++) {
@@ -1434,7 +1452,7 @@
     return a.emoji;
   }
   function mascotHTML(subj) {
-    var roleIc = (subj === "math") ? "🐲" : "🐰";
+    var roleIc = (subj === "math") ? "🐲" : (subj === "logic") ? "🕵️" : "🐰";
     return '<img src="assets/mascot.jpg" alt="" onerror="this.parentNode.innerHTML=\'🧒\'">' +
       '<span class="mascot-role-tag">' + roleIc + '</span>';
   }
@@ -1443,6 +1461,7 @@
     if (!u) return "";
     if (subj === "math") return "🐲 Rồng Lửa: Cùng giải mật mã \"" + u.title + "\" để mở cổng Lâu Đài Toán!";
     if (subj === "viet") return "🐰 Thỏ Trắng: Khám phá kho chữ \"" + u.title + "\" cùng Thỏ nhé!";
+    if (subj === "logic") return "🕵️ Thám Tử Gấu: Quan sát hiện trường, chạm kính lúp soi manh mối và chỉ ra thủ phạm nhé!";
     return "🐰 Thỏ Trắng: Phiêu lưu đảo Tiếng Anh với \"" + u.title + "\" nào!";
   }
 
@@ -1848,11 +1867,61 @@
   }
 
   // ---------------------------------------------------------
-  // 8. CHỌN CHẾ ĐỘ CHƠI
+  // 8. CHỌN CHẾ ĐỘ CHƠI / BẢNG HỒ SƠ VỤ ÁN THÁM TỬ
   // ---------------------------------------------------------
   function openModePicker() {
     var u = UNITS[curSubj][curUnitIdx];
     var stInfo = stageStats(curSubj, u.topic);
+    var mcEl = $("modeCards");
+
+    if (curSubj === "logic") {
+      $("modeTitle").innerHTML = "🕵️ Chặng " + (curUnitIdx + 1) + ": " + u.icon + " " + u.title +
+        '<div style="font-size:12px;font-weight:700;color:#b45309;margin-top:2px">⭐ ' + stInfo.stars + '/3 sao • Đã phá ' + stInfo.correct + '/' + stInfo.total + ' vụ án (' + Math.round(stInfo.ratio * 100) + '%)</div>' +
+        '<div class="mode-story-intro">' + esc(unitStoryIntro(curSubj, u)) + '</div>';
+      addClass(mcEl, "detective-board");
+      var cases = unitQuestions("logic", u.topic);
+      var dHtml = '<button type="button" class="det-start-all-btn" id="btnStartAllCases">' +
+        '<span class="dsa-ic">🔍</span>' +
+        '<span class="dsa-txt"><b>ĐIỀU TRA LIÊN HOÀN ' + cases.length + ' VỤ ÁN</b><small>Soi manh mối hiện trường • Thưởng +25 xu 🪙</small></span>' +
+        '<span class="dsa-go">Phá án ▶</span></button>' +
+        '<div class="case-file-grid">';
+      for (var ci = 0; ci < cases.length; ci++) {
+        var cq = cases[ci];
+        var isSolved = !!(state.solvedCases && cq.caseId && state.solvedCases[cq.caseId]);
+        var shortTitle = String(cq.lesson || ("Vụ án " + (ci + 1))).replace(/^Vụ án \d+:\s*/i, "");
+        var sceneIc = cq.sceneTitle ? String(cq.sceneTitle).split(" ")[0] : "🔍";
+        dHtml += '<button type="button" class="case-file-card' + (isSolved ? " solved" : "") + '" data-case-idx="' + ci + '">' +
+          '<div class="cfc-top"><span class="cfc-num">Hồ sơ #' + (ci + 1) + '</span>' +
+          '<span class="cfc-status">' + (isSolved ? "✅ Đã phá" : "🔍 Điều tra") + '</span></div>' +
+          '<div class="cfc-main"><span class="cfc-ic">' + esc(sceneIc) + '</span>' +
+          '<div class="cfc-info"><div class="cfc-title">' + esc(shortTitle) + '</div>' +
+          '<div class="cfc-clue">' + esc(cq.sceneTitle || "") + '</div></div></div></button>';
+      }
+      dHtml += '</div>';
+      mcEl.innerHTML = dHtml;
+      if ($("btnStartAllCases")) {
+        onTap($("btnStartAllCases"), function () {
+          Sound.click();
+          curMode = "quiz";
+          closeOverlay("modeOverlay");
+          startGame(-1);
+        });
+      }
+      var caseCards = mcEl.querySelectorAll(".case-file-card");
+      for (var cci = 0; cci < caseCards.length; cci++) {
+        onTap(caseCards[cci], function () {
+          Sound.click();
+          curMode = "quiz";
+          var cIdx = parseInt(this.getAttribute("data-case-idx"), 10) || 0;
+          closeOverlay("modeOverlay");
+          startGame(cIdx);
+        });
+      }
+      openOverlay("modeOverlay");
+      return;
+    }
+
+    removeClass(mcEl, "detective-board");
     $("modeTitle").innerHTML = "Bài " + (curUnitIdx + 1) + ": " + u.icon + " " + u.title +
       '<div style="font-size:12px;font-weight:700;color:#b45309;margin-top:2px">⭐ ' + stInfo.stars + '/3 sao • Đúng ' + stInfo.correct + '/' + stInfo.total + ' câu (' + Math.round(stInfo.ratio * 100) + '%)</div>' +
       '<div class="mode-story-intro">' + esc(unitStoryIntro(curSubj, u)) + '</div>';
@@ -1865,8 +1934,8 @@
         '<div class="mc-body"><div class="mc-icon">' + m.icon + '</div><div class="mc-reward">x' + m.reward + ' <i class="coin sm"></i></div>' +
         '<div class="mc-desc">' + m.desc + "</div></div></div>";
     }
-    $("modeCards").innerHTML = html;
-    var cards = $("modeCards").querySelectorAll(".mode-card");
+    mcEl.innerHTML = html;
+    var cards = mcEl.querySelectorAll(".mode-card");
     for (var k = 0; k < cards.length; k++) {
       onTap(cards[k], function () {
         Sound.click();
@@ -2217,18 +2286,33 @@
     renderPassageScreen();
   }
 
-  function startGame() {
+  function startGame(startCaseIdx) {
     clearTimers();
     Sound.stopSpeak();
     var u = UNITS[curSubj][curUnitIdx];
-    var qs = shuffle(unitQuestions(curSubj, u.topic).slice());
-    // Điều chỉnh thứ tự câu hỏi thích ứng (ZPD): nếu bé đang gặp khó, xếp câu ngắn/dễ lên đầu; nếu quá dễ, ưu tiên câu dài hơn
-    if (typeof analyzeSubjectZPD === "function" && qs.length > 3) {
-      var zpd = analyzeSubjectZPD(curSubj);
-      if (zpd.status === "hard") {
-        qs.sort(function (a, b) { return String(a.prompt || "").length - String(b.prompt || "").length; });
-      } else if (zpd.status === "easy") {
-        qs.sort(function (a, b) { return String(b.prompt || "").length - String(a.prompt || "").length; });
+    var rawQs = unitQuestions(curSubj, u.topic).slice();
+    var qs;
+    if (curSubj === "logic") {
+      if (typeof startCaseIdx === "number" && startCaseIdx >= 0 && startCaseIdx < rawQs.length) {
+        qs = rawQs.slice(startCaseIdx).concat(rawQs.slice(0, startCaseIdx));
+      } else {
+        var unsolved = [], solved = [];
+        for (var li = 0; li < rawQs.length; li++) {
+          if (state.solvedCases && rawQs[li].caseId && state.solvedCases[rawQs[li].caseId]) solved.push(rawQs[li]);
+          else unsolved.push(rawQs[li]);
+        }
+        qs = unsolved.concat(solved);
+      }
+    } else {
+      qs = shuffle(rawQs);
+      // Điều chỉnh thứ tự câu hỏi thích ứng (ZPD): nếu bé đang gặp khó, xếp câu ngắn/dễ lên đầu; nếu quá dễ, ưu tiên câu dài hơn
+      if (typeof analyzeSubjectZPD === "function" && qs.length > 3) {
+        var zpd = analyzeSubjectZPD(curSubj);
+        if (zpd.status === "hard") {
+          qs.sort(function (a, b) { return String(a.prompt || "").length - String(b.prompt || "").length; });
+        } else if (zpd.status === "easy") {
+          qs.sort(function (a, b) { return String(b.prompt || "").length - String(a.prompt || "").length; });
+        }
       }
     }
     game = {
@@ -2254,7 +2338,8 @@
       showScreen("screenGame");
       if (curMode === "match") renderMatch(); else renderMemory();
     } else {
-      game.list = qs.slice(0, curMode === "balloon" ? 6 : 8);
+      var sliceCount = (curSubj === "logic") ? qs.length : (curMode === "balloon" ? 6 : 8);
+      game.list = qs.slice(0, sliceCount);
       game.max = game.list.length * 10;
       state.lastSubj = curSubj;
       state.lastUnitIdx = curUnitIdx;
@@ -2331,6 +2416,18 @@
     if (q.visualType === "word") return '<div class="v-icons">' + esc(q.visual) + '</div><div class="v-word">' + esc(q.word) + "</div>";
     if (q.visualType === "eng") return '<div class="v-icons">' + esc(q.visual) + '</div><div class="v-word v-eng">' + esc(q.word) + "</div>";
     if (q.visualType === "poem") return '<div class="v-poem">' + esc(q.visual) + "</div>";
+    if (q.visualType === "detective") {
+      var dh = '<div class="detective-scene"><div class="detective-head">' + esc(q.sceneTitle || "🕵️ Hiện trường vụ án") + '</div>';
+      if (Array.isArray(q.clues)) {
+        dh += '<div class="detective-clues">';
+        for (var di = 0; di < q.clues.length; di++) {
+          dh += '<div class="detective-clue-item">' + esc(q.clues[di]) + '</div>';
+        }
+        dh += '</div>';
+      }
+      dh += '</div>';
+      return dh;
+    }
     return "";
   }
 
@@ -2338,13 +2435,103 @@
     clearTimers();
     if (game.idx >= game.list.length) { finishGame(); return; }
     var q = game.list[game.idx];
+    q._retried = false;
     game.tries = 0;
     game.locked = false;
     game.qStartTs = Date.now();
+    if (q.visualType === "detective") {
+      $("boardHead").innerHTML = "🕵️ Vụ án " + (game.idx + 1) + "/" + game.list.length;
+      $("boardPrompt").innerHTML = esc(q.prompt);
+      renderDetectiveCase(q);
+      readPrompt(q);
+      return;
+    }
     $("boardHead").innerHTML = "Câu " + (game.idx + 1) + "/" + game.list.length;
     $("boardPrompt").innerHTML = esc(q.prompt);
     if (game.mode === "balloon") renderBalloon(q); else renderQuiz(q);
     readPrompt(q);
+  }
+
+  // ===== CHẾ ĐỘ ĐẶC BIỆT: SỔ TAY THÁM TỬ PHÁ ÁN 3 BƯỚC =====
+  function renderDetectiveCase(q) {
+    say(game.idx === 0
+      ? "🕵️ Bước 1: Nghe câu hỏi • Bước 2: Chạm kính lúp 🔍 soi manh mối • Bước 3: Chạm chọn Thủ Phạm nhé!"
+      : pick(["🕵️ Vụ án mới! Bé chạm kính lúp 🔍 để soi kỹ manh mối nhé!", "🔍 Đối chiếu bằng chứng trên hiện trường với 4 nghi phạm bên dưới nào!"]));
+
+    var itemsHtml = "";
+    if (Array.isArray(q.sceneItems) && q.sceneItems.length) {
+      itemsHtml += '<div class="det-scene-objects">';
+      for (var si = 0; si < q.sceneItems.length; si++) {
+        var it = q.sceneItems[si];
+        itemsHtml += '<div class="det-scene-obj">' +
+          '<div class="dso-ic">' + esc(it.icon) + '</div>' +
+          '<div class="dso-lbl">' + esc(it.label) + '</div></div>';
+      }
+      itemsHtml += '</div>';
+    }
+
+    var cluesHtml = "";
+    var cluesArr = Array.isArray(q.clues) ? q.clues : [];
+    for (var ci = 0; ci < cluesArr.length; ci++) {
+      cluesHtml += '<button type="button" class="det-clue-btn" data-clue-idx="' + ci + '">' +
+        '<span class="dcb-badge">🔍 Manh mối ' + (ci + 1) + '</span>' +
+        '<span class="dcb-text">' + esc(cluesArr[ci]) + '</span>' +
+        '<span class="dcb-audio" title="Nghe đọc manh mối">🔊</span></button>';
+    }
+
+    var rawSuspects = Array.isArray(q.suspects) ? q.suspects.slice() : [];
+    var suspects = shuffle(rawSuspects);
+    var suspHtml = "";
+    for (var k = 0; k < suspects.length; k++) {
+      var sp = suspects[k];
+      suspHtml += '<button type="button" class="suspect-card" style="-webkit-animation-delay:' + (k * 0.06) + 's;animation-delay:' + (k * 0.06) + 's" data-val="' + esc(sp.val) + '">' +
+        '<div class="sc-top"><span class="sc-tag">Nghi phạm #' + (k + 1) + '</span></div>' +
+        '<div class="sc-avatar">' + esc(sp.avatar) + '</div>' +
+        '<div class="sc-name">' + esc(sp.name) + '</div>' +
+        '<div class="sc-trait">' + esc(sp.trait) + '</div>' +
+        '<div class="sc-stamp"></div></button>';
+    }
+
+    var html =
+      '<div class="detective-casebook">' +
+        '<div class="det-page-scene">' +
+          '<div class="det-banner">' +
+            '<span class="det-case-name">🕵️ ' + esc(q.lesson || ("Vụ án " + (game.idx + 1))) + '</span>' +
+            '<span class="det-scene-badge">' + esc(q.sceneTitle || "Hiện trường") + '</span>' +
+          '</div>' +
+          itemsHtml +
+          '<div class="det-clues-head">' +
+            '<span>🔍 BƯỚC 2: CHẠM KÍNH LÚP SOI &amp; NGHE MANH MỐI</span>' +
+            (q.clueShort ? '<span class="det-evidence-pill">📌 Bằng chứng: ' + esc(q.clueShort) + '</span>' : '') +
+          '</div>' +
+          '<div class="det-clues-list">' + cluesHtml + '</div>' +
+        '</div>' +
+        '<div class="det-page-suspects">' +
+          '<div class="det-suspects-head">🚨 BƯỚC 3: ĐỐI CHIẾU &amp; CHỈ RA AI LÀ "THỦ PHẠM"?</div>' +
+          '<div class="suspect-grid">' + suspHtml + '</div>' +
+        '</div>' +
+      '</div>';
+
+    $("gameStage").innerHTML = html;
+
+    var clueBtns = $("gameStage").querySelectorAll(".det-clue-btn");
+    for (var cbi = 0; cbi < clueBtns.length; cbi++) {
+      onTap(clueBtns[cbi], function () {
+        var idx = parseInt(this.getAttribute("data-clue-idx"), 10) || 0;
+        addClass(this, "inspected");
+        var bEl = this.querySelector(".dcb-badge");
+        if (bEl) bEl.innerHTML = "✅ Manh mối " + (idx + 1);
+        Sound.sparkle();
+        if (cluesArr[idx]) Sound.speak(cluesArr[idx], "vi-VN");
+      });
+    }
+
+    var sCards = $("gameStage").querySelectorAll(".suspect-card");
+    for (var sci = 0; sci < sCards.length; sci++) {
+      onTap(sCards[sci], function () {
+        answerQuiz(this, q);
+      });
+    }
   }
 
   // ===== CHẾ ĐỘ 1: PHIẾN ĐÁ BÍ ẨN (trắc nghiệm) =====
@@ -2433,6 +2620,13 @@
       game.correctCount = (game.correctCount || 0) + 1;
       game.streak = (game.streak || 0) + 1;
       addClass(btn, "correct");
+      var stOk = btn.querySelector(".sc-stamp");
+      if (stOk) stOk.innerHTML = "✅ THỦ PHẠM!";
+      if (q.caseId) {
+        if (!state.solvedCases) state.solvedCases = {};
+        state.solvedCases[q.caseId] = true;
+        saveState();
+      }
       flashFeedback(true);
       var pts = q._retried ? 5 : 10;
       game.score += pts;
@@ -2449,38 +2643,49 @@
       }
       var toSpeak = q.speakText || (game.lang === "en-US" ? q.answer : null);
       if (toSpeak) later(function () { Sound.speak(toSpeak, game.lang); }, 450);
-      if (q.explain) praiseTxt = "💡 " + q.explain;
+      if (q.explain) {
+        praiseTxt = "💡 " + q.explain;
+        if (state.autoRead) later(function () { Sound.speak(q.explain, "vi-VN"); }, 450);
+      }
       say(praiseTxt, "good");
       if (Math.random() < 0.35) confetti(8);
-      later(function () { game.idx++; nextQuestion(); }, q.explain ? 2600 : 1500);
+      later(function () { game.idx++; nextQuestion(); }, q.explain ? 3200 : 1500);
     } else {
       game.streak = 0;
       if (rt < 1200) game.fastGuessCount = (game.fastGuessCount || 0) + 1;
       addClass(btn, "wrong");
       addClass(btn, "disabled");
+      var stBad = btn.querySelector(".sc-stamp");
+      if (stBad) stBad.innerHTML = "❌ OAN RỒI!";
       flashFeedback(false);
       Sound.bad();
       if (!q._retried) {
         q._retried = true;
         game.locked = false;
-        say(pick(RETRY) + " Bé thử chọn lại nhé!", "bad");
+        if (q.visualType === "detective") {
+          say("🔍 Chưa khớp manh mối rồi! Bé chạm kính lúp xem lại bằng chứng và chọn lại 1 lần nữa nhé!", "bad");
+        } else {
+          say(pick(RETRY) + " Bé thử chọn lại nhé!", "bad");
+        }
         return;
       }
-      var all = $("gameStage").querySelectorAll(".stone");
+      var all = $("gameStage").querySelectorAll(".stone, .suspect-card");
       for (var i = 0; i < all.length; i++) {
         if (all[i].getAttribute("data-val") === q.answer) {
           addClass(all[i], "correct");
+          var stTrue = all[i].querySelector(".sc-stamp");
+          if (stTrue) stTrue.innerHTML = "✅ THỦ PHẠM!";
         } else {
           addClass(all[i], "disabled");
         }
       }
       var wrongMsg = q.explain ? ("💡 " + esc(q.explain)) : (pick(RETRY) + " Đáp án đúng là: <b>" + esc(q.answer) + "</b>");
       say(wrongMsg, "bad");
-      var toSpeakWrong = q.speakText || (game.lang === "en-US" ? q.answer : q.answer);
+      var toSpeakWrong = q.explain || q.speakText || (game.lang === "en-US" ? q.answer : ("Đáp án đúng là " + q.answer));
       if (toSpeakWrong) {
-        later(function () { Sound.speak("Đáp án đúng là " + toSpeakWrong, game.lang); }, 500);
+        later(function () { Sound.speak(toSpeakWrong, game.lang); }, 500);
       }
-      later(function () { game.idx++; nextQuestion(); }, 2800);
+      later(function () { game.idx++; nextQuestion(); }, 3200);
     }
   }
 
@@ -2834,7 +3039,8 @@
     var stars = ratioToHalfStars(ratio);
     var mode = null;
     for (var i = 0; i < MODES.length; i++) if (MODES[i].id === game.mode) mode = MODES[i];
-    var coins = stars > 0 ? Math.max(2, Math.round(mode.reward * stars / 3)) : 2;
+    var baseReward = (game.subj === "logic") ? 25 : (mode ? mode.reward : 10);
+    var coins = stars > 0 ? Math.max(2, Math.round(baseReward * stars / 3)) : 2;
 
     var key = unitKey(game.subj, game.topic);
     if (!state.progress[key]) state.progress[key] = {};
@@ -2922,10 +3128,12 @@
     if (nextBtn) {
       var nextModeObj = null;
       var uProg = state.progress[key] || {};
-      for (var mi = 0; mi < MODES.length; mi++) {
-        if (MODES[mi].id !== game.mode && (uProg[MODES[mi].id] || 0) < 3) {
-          nextModeObj = MODES[mi];
-          break;
+      if (game.subj !== "logic") {
+        for (var mi = 0; mi < MODES.length; mi++) {
+          if (MODES[mi].id !== game.mode && (uProg[MODES[mi].id] || 0) < 3) {
+            nextModeObj = MODES[mi];
+            break;
+          }
         }
       }
       var nextUIdx = curUnitIdx + 1;
@@ -2945,6 +3153,13 @@
         nextBtn.onclick = function () {
           Sound.click(); closeOverlay("resultOverlay"); Sound.stopSpeak();
           curUnitIdx = nextUIdx;
+          renderMap(); showScreen("screenMap"); openModePicker();
+        };
+      } else if (game.subj === "logic") {
+        nextBtn.style.display = "block";
+        nextBtn.innerHTML = "🕵️ Xem Bảng Hồ Sơ Vụ Án";
+        nextBtn.onclick = function () {
+          Sound.click(); closeOverlay("resultOverlay"); Sound.stopSpeak();
           renderMap(); showScreen("screenMap"); openModePicker();
         };
       } else {
