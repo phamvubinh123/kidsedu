@@ -1618,6 +1618,11 @@
         if (u && u.topic === "passages") {
           readReturnScreen = "screenHome";
           openPassageReader();
+        } else if (curSubj === "logic") {
+          curMode = "quiz";
+          renderMap();
+          showScreen("screenMap");
+          startGame();
         } else {
           renderMap();
           showScreen("screenMap");
@@ -1800,6 +1805,9 @@
         if (u && u.topic === "passages") {
           readReturnScreen = "screenMap";
           openPassageReader();
+        } else if (curSubj === "logic") {
+          curMode = "quiz";
+          startGame();
         } else {
           openModePicker();
         }
@@ -1875,49 +1883,8 @@
     var mcEl = $("modeCards");
 
     if (curSubj === "logic") {
-      $("modeTitle").innerHTML = "🕵️ Chặng " + (curUnitIdx + 1) + ": " + u.icon + " " + u.title +
-        '<div style="font-size:12px;font-weight:700;color:#b45309;margin-top:2px">⭐ ' + stInfo.stars + '/3 sao • Đã phá ' + stInfo.correct + '/' + stInfo.total + ' vụ án (' + Math.round(stInfo.ratio * 100) + '%)</div>' +
-        '<div class="mode-story-intro">' + esc(unitStoryIntro(curSubj, u)) + '</div>';
-      addClass(mcEl, "detective-board");
-      var cases = unitQuestions("logic", u.topic);
-      var dHtml = '<button type="button" class="det-start-all-btn" id="btnStartAllCases">' +
-        '<span class="dsa-ic">🔍</span>' +
-        '<span class="dsa-txt"><b>ĐIỀU TRA LIÊN HOÀN ' + cases.length + ' VỤ ÁN</b><small>Soi manh mối hiện trường • Thưởng +25 xu 🪙</small></span>' +
-        '<span class="dsa-go">Phá án ▶</span></button>' +
-        '<div class="case-file-grid">';
-      for (var ci = 0; ci < cases.length; ci++) {
-        var cq = cases[ci];
-        var isSolved = !!(state.solvedCases && cq.caseId && state.solvedCases[cq.caseId]);
-        var shortTitle = String(cq.lesson || ("Vụ án " + (ci + 1))).replace(/^Vụ án \d+:\s*/i, "");
-        var sceneIc = cq.sceneTitle ? String(cq.sceneTitle).split(" ")[0] : "🔍";
-        dHtml += '<button type="button" class="case-file-card' + (isSolved ? " solved" : "") + '" data-case-idx="' + ci + '">' +
-          '<div class="cfc-top"><span class="cfc-num">Hồ sơ #' + (ci + 1) + '</span>' +
-          '<span class="cfc-status">' + (isSolved ? "✅ Đã phá" : "🔍 Điều tra") + '</span></div>' +
-          '<div class="cfc-main"><span class="cfc-ic">' + esc(sceneIc) + '</span>' +
-          '<div class="cfc-info"><div class="cfc-title">' + esc(shortTitle) + '</div>' +
-          '<div class="cfc-clue">' + esc(cq.sceneTitle || "") + '</div></div></div></button>';
-      }
-      dHtml += '</div>';
-      mcEl.innerHTML = dHtml;
-      if ($("btnStartAllCases")) {
-        onTap($("btnStartAllCases"), function () {
-          Sound.click();
-          curMode = "quiz";
-          closeOverlay("modeOverlay");
-          startGame(-1);
-        });
-      }
-      var caseCards = mcEl.querySelectorAll(".case-file-card");
-      for (var cci = 0; cci < caseCards.length; cci++) {
-        onTap(caseCards[cci], function () {
-          Sound.click();
-          curMode = "quiz";
-          var cIdx = parseInt(this.getAttribute("data-case-idx"), 10) || 0;
-          closeOverlay("modeOverlay");
-          startGame(cIdx);
-        });
-      }
-      openOverlay("modeOverlay");
+      curMode = "quiz";
+      startGame();
       return;
     }
 
@@ -2452,81 +2419,184 @@
     readPrompt(q);
   }
 
-  // ===== CHẾ ĐỘ ĐẶC BIỆT: SỔ TAY THÁM TỬ PHÁ ÁN 3 BƯỚC =====
+  // ===== CHẾ ĐỘ ĐẶC BIỆT: SÁCH TRANH THÁM TỬ 100% HÌNH ẢNH =====
+  var FRIDGE_SVG =
+    '<div class="det-fridge-wrap">' +
+      '<svg viewBox="0 0 180 150" class="det-fridge-svg" aria-hidden="true">' +
+        '<line x1="12" y1="125" x2="34" y2="125" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>' +
+        '<circle cx="10" cy="120" r="6" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>' +
+        '<rect x="34" y="16" width="66" height="122" rx="10" fill="#7dd3fc" stroke="#1e3a8a" stroke-width="3"/>' +
+        '<rect x="40" y="24" width="54" height="66" rx="6" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2"/>' +
+        '<line x1="40" y1="47" x2="94" y2="47" stroke="#38bdf8" stroke-width="2.5"/>' +
+        '<line x1="40" y1="68" x2="94" y2="68" stroke="#38bdf8" stroke-width="2.5"/>' +
+        '<text x="53" y="42" font-size="16">🍉</text>' +
+        '<text x="74" y="42" font-size="13">🥛</text>' +
+        '<text x="46" y="64" font-size="14">🍎</text>' +
+        '<text x="68" y="64" font-size="14">🍎</text>' +
+        '<text x="54" y="85" font-size="15">🍰</text>' +
+        '<text x="75" y="86" font-size="12">🍅</text>' +
+        '<line x1="34" y1="96" x2="100" y2="96" stroke="#1e3a8a" stroke-width="2.5"/>' +
+        '<rect x="44" y="106" width="12" height="10" rx="2" fill="#bef264" stroke="#3f6212" stroke-width="1.5"/>' +
+        '<rect x="76" y="114" width="11" height="10" rx="2" fill="#93c5fd" stroke="#1e40af" stroke-width="1.5"/>' +
+        '<polygon points="34,16 6,6 6,96 34,96" fill="#38bdf8" stroke="#1e3a8a" stroke-width="3" stroke-linejoin="round"/>' +
+        '<line x1="8" y1="35" x2="32" y2="41" stroke="#bae6fd" stroke-width="2.5"/>' +
+        '<line x1="8" y1="64" x2="32" y2="69" stroke="#bae6fd" stroke-width="2.5"/>' +
+        '<text x="11" y="34" font-size="11">🧃</text>' +
+        '<text x="12" y="62" font-size="11">🍼</text>' +
+        '<rect x="110" y="68" width="44" height="70" rx="6" fill="#fed7aa" stroke="#9a3412" stroke-width="2.5"/>' +
+        '<line x1="110" y1="94" x2="154" y2="94" stroke="#9a3412" stroke-width="2.5"/>' +
+        '<line x1="110" y1="116" x2="154" y2="116" stroke="#9a3412" stroke-width="2.5"/>' +
+        '<text x="113" y="65" font-size="14">🍲</text>' +
+        '<text x="132" y="65" font-size="14">🫖</text>' +
+        '<text x="116" y="110" font-size="14">🥣</text>' +
+        '<text x="136" y="110" font-size="14">🍯</text>' +
+        '<text x="155" y="138" font-size="18">🍎</text>' +
+      '</svg>' +
+    '</div>';
+
+  var GHOST_SVG =
+    '<div class="det-ghost-wrap">' +
+      '<svg viewBox="0 0 110 110" class="det-ghost-svg" aria-hidden="true">' +
+        '<path d="M52,14 C30,14 18,38 14,92 C24,98 38,94 50,98 C64,102 80,96 92,90 C84,48 76,14 52,14 Z" fill="#fff7ed" stroke="#9a3412" stroke-width="3" stroke-linejoin="round"/>' +
+        '<path d="M50,24 C45,48 42,74 40,94" fill="none" stroke="#fed7aa" stroke-width="2.5" stroke-linecap="round"/>' +
+        '<path d="M62,28 C64,54 67,78 72,94" fill="none" stroke="#fed7aa" stroke-width="2.5" stroke-linecap="round"/>' +
+        '<ellipse cx="64" cy="40" rx="6.5" ry="8" fill="#ffffff" stroke="#9a3412" stroke-width="2.2"/>' +
+        '<circle cx="65" cy="41" r="3" fill="#1e293b"/>' +
+        '<ellipse cx="52" cy="99" rx="7" ry="4" fill="#ef4444" stroke="#7f1d1d" stroke-width="1.8"/>' +
+        '<ellipse cx="78" cy="96" rx="7" ry="4" fill="#ef4444" stroke="#7f1d1d" stroke-width="1.8"/>' +
+      '</svg>' +
+      '<div class="det-ghost-held"><span class="dgh-ic">🧣</span><span class="dgh-ic">🍭</span></div>' +
+    '</div>';
+
   function renderDetectiveCase(q) {
     say(game.idx === 0
-      ? "🕵️ Bước 1: Nghe câu hỏi • Bước 2: Chạm kính lúp 🔍 soi manh mối • Bước 3: Chạm chọn Thủ Phạm nhé!"
-      : pick(["🕵️ Vụ án mới! Bé chạm kính lúp 🔍 để soi kỹ manh mối nhé!", "🔍 Đối chiếu bằng chứng trên hiện trường với 4 nghi phạm bên dưới nào!"]));
+      ? "🔍 Bé nhìn hình trang trên rồi chạm vào bạn giống nhất ở trang dưới nhé!"
+      : "🔍 Tìm bạn có món đồ giống trong kính lúp nào!");
 
-    var itemsHtml = "";
-    if (Array.isArray(q.sceneItems) && q.sceneItems.length) {
-      itemsHtml += '<div class="det-scene-objects">';
-      for (var si = 0; si < q.sceneItems.length; si++) {
-        var it = q.sceneItems[si];
-        itemsHtml += '<div class="det-scene-obj">' +
-          '<div class="dso-ic">' + esc(it.icon) + '</div>' +
-          '<div class="dso-lbl">' + esc(it.label) + '</div></div>';
+    // Dải số trang 1..10 để bé chạm lật trang nhanh
+    var tabsHtml = '<div class="det-page-tabs">';
+    for (var ti = 0; ti < game.list.length; ti++) {
+      var itemQ = game.list[ti];
+      var tCls = "det-page-tab";
+      if (ti === game.idx) tCls += " active";
+      else if (state.solvedCases && itemQ.caseId && state.solvedCases[itemQ.caseId]) tCls += " solved";
+      tabsHtml += '<button type="button" class="' + tCls + '" data-pidx="' + ti + '">' + (ti + 1) + '</button>';
+    }
+    tabsHtml += '</div>';
+
+    // Trang trên: Hiện trường tranh vẽ (0 chữ)
+    var leftSceneHtml = "";
+    if (q.sceneKind === "fridge") {
+      leftSceneHtml = FRIDGE_SVG;
+    } else {
+      var slHtml = "";
+      var sLeft = Array.isArray(q.sceneLeft) ? q.sceneLeft : [];
+      for (var li = 0; li < sLeft.length; li++) {
+        slHtml += '<span class="dsp-mini">' + esc(sLeft[li]) + '</span>';
       }
-      itemsHtml += '</div>';
+      leftSceneHtml =
+        '<div class="det-scene-prop-box">' +
+          '<div class="dsp-main">' + esc(q.sceneMainIcon || "🔍") + '</div>' +
+          '<div class="dsp-minis">' + slHtml + '</div>' +
+        '</div>';
     }
 
-    var cluesHtml = "";
-    var cluesArr = Array.isArray(q.clues) ? q.clues : [];
-    for (var ci = 0; ci < cluesArr.length; ci++) {
-      cluesHtml += '<button type="button" class="det-clue-btn" data-clue-idx="' + ci + '">' +
-        '<span class="dcb-badge">🔍 Manh mối ' + (ci + 1) + '</span>' +
-        '<span class="dcb-text">' + esc(cluesArr[ci]) + '</span>' +
-        '<span class="dcb-audio" title="Nghe đọc manh mối">🔊</span></button>';
+    var clueIcons = Array.isArray(q.clueIcons) ? q.clueIcons : [];
+    var clueIcHtml = "";
+    for (var ci = 0; ci < clueIcons.length; ci++) {
+      clueIcHtml += '<span class="dzc-ic">' + esc(clueIcons[ci]) + '</span>';
     }
 
+    var rightCulpritHtml = "";
+    if (q.culpritPose === "👻") {
+      rightCulpritHtml = GHOST_SVG;
+    } else {
+      rightCulpritHtml =
+        '<div class="det-zoom-clue">' +
+          '<div class="dzc-ring">' +
+            '<span class="dzc-loupe">🔍</span>' +
+            '<div class="dzc-icons">' + clueIcHtml + '</div>' +
+          '</div>' +
+          '<div class="dzc-handle"></div>' +
+        '</div>';
+    }
+
+    // Trang dưới: Dàn 4 nhân vật đứng hàng ngang trên bóng bầu dục (0 chữ)
     var rawSuspects = Array.isArray(q.suspects) ? q.suspects.slice() : [];
     var suspects = shuffle(rawSuspects);
     var suspHtml = "";
     for (var k = 0; k < suspects.length; k++) {
       var sp = suspects[k];
-      suspHtml += '<button type="button" class="suspect-card" style="-webkit-animation-delay:' + (k * 0.06) + 's;animation-delay:' + (k * 0.06) + 's" data-val="' + esc(sp.val) + '">' +
-        '<div class="sc-top"><span class="sc-tag">Nghi phạm #' + (k + 1) + '</span></div>' +
-        '<div class="sc-avatar">' + esc(sp.avatar) + '</div>' +
-        '<div class="sc-name">' + esc(sp.name) + '</div>' +
-        '<div class="sc-trait">' + esc(sp.trait) + '</div>' +
-        '<div class="sc-stamp"></div></button>';
+      var itemsArr = Array.isArray(sp.items) ? sp.items : [];
+      var itemBadges = "";
+      for (var ii = 0; ii < itemsArr.length; ii++) {
+        itemBadges += '<span class="sci-badge">' + esc(itemsArr[ii]) + '</span>';
+      }
+      suspHtml +=
+        '<button type="button" class="suspect-char-btn" style="-webkit-animation-delay:' + (k * 0.06) + 's;animation-delay:' + (k * 0.06) + 's" data-val="' + esc(sp.val) + '">' +
+          '<div class="sc-char-stage">' +
+            '<div class="sc-char-figure">' + esc(sp.avatar) + '</div>' +
+            '<div class="sc-char-items">' + itemBadges + '</div>' +
+          '</div>' +
+          '<div class="sc-floor-oval"></div>' +
+          '<div class="sc-stamp"></div>' +
+        '</button>';
     }
 
+    var pageTopNum = (game.idx * 2 + 12);
+    var pageBotNum = (game.idx * 2 + 13);
+
     var html =
-      '<div class="detective-casebook">' +
-        '<div class="det-page-scene">' +
-          '<div class="det-banner">' +
-            '<span class="det-case-name">🕵️ ' + esc(q.lesson || ("Vụ án " + (game.idx + 1))) + '</span>' +
-            '<span class="det-scene-badge">' + esc(q.sceneTitle || "Hiện trường") + '</span>' +
+      '<div class="det-book-wrap">' +
+        tabsHtml +
+        '<div class="det-book-spread">' +
+          '<button type="button" class="det-book-page top-page" id="detTopSceneBtn" style="background-color:' + esc(q.roomBg || "#eef8d8") + '" title="Chạm để nghe gợi ý">' +
+            '<div class="det-room-hill"></div>' +
+            (q.wallArt ? '<div class="det-wall-frame">' + esc(q.wallArt) + '</div>' : '') +
+            '<span class="det-top-audio">🔊</span>' +
+            '<div class="det-scene-row">' +
+              '<div class="det-scene-left">' + leftSceneHtml + '</div>' +
+              '<div class="det-scene-right">' + rightCulpritHtml +
+                (q.culpritPose === "👻" ? '<div class="det-mini-loupe">🔍 ' + clueIcHtml + '</div>' : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="det-room-floor"></div>' +
+            '<span class="det-page-num">' + pageTopNum + '</span>' +
+          '</button>' +
+          '<div class="det-book-fold"></div>' +
+          '<div class="det-book-page bottom-page">' +
+            '<div class="suspect-lineup-row">' + suspHtml + '</div>' +
+            '<span class="det-page-num">' + pageBotNum + '</span>' +
           '</div>' +
-          itemsHtml +
-          '<div class="det-clues-head">' +
-            '<span>🔍 BƯỚC 2: CHẠM KÍNH LÚP SOI &amp; NGHE MANH MỐI</span>' +
-            (q.clueShort ? '<span class="det-evidence-pill">📌 Bằng chứng: ' + esc(q.clueShort) + '</span>' : '') +
-          '</div>' +
-          '<div class="det-clues-list">' + cluesHtml + '</div>' +
-        '</div>' +
-        '<div class="det-page-suspects">' +
-          '<div class="det-suspects-head">🚨 BƯỚC 3: ĐỐI CHIẾU &amp; CHỈ RA AI LÀ "THỦ PHẠM"?</div>' +
-          '<div class="suspect-grid">' + suspHtml + '</div>' +
         '</div>' +
       '</div>';
 
     $("gameStage").innerHTML = html;
 
-    var clueBtns = $("gameStage").querySelectorAll(".det-clue-btn");
-    for (var cbi = 0; cbi < clueBtns.length; cbi++) {
-      onTap(clueBtns[cbi], function () {
-        var idx = parseInt(this.getAttribute("data-clue-idx"), 10) || 0;
-        addClass(this, "inspected");
-        var bEl = this.querySelector(".dcb-badge");
-        if (bEl) bEl.innerHTML = "✅ Manh mối " + (idx + 1);
-        Sound.sparkle();
-        if (cluesArr[idx]) Sound.speak(cluesArr[idx], "vi-VN");
+    var tabBtns = $("gameStage").querySelectorAll(".det-page-tab");
+    for (var tbi = 0; tbi < tabBtns.length; tbi++) {
+      onTap(tabBtns[tbi], function () {
+        var pidx = parseInt(this.getAttribute("data-pidx"), 10);
+        if (!isNaN(pidx) && pidx >= 0 && pidx < game.list.length) {
+          Sound.click();
+          game.idx = pidx;
+          nextQuestion();
+        }
       });
     }
 
-    var sCards = $("gameStage").querySelectorAll(".suspect-card");
+    if ($("detTopSceneBtn")) {
+      onTap($("detTopSceneBtn"), function () {
+        Sound.sparkle();
+        addClass(this, "clue-pulse");
+        var selfBtn = this;
+        setTimeout(function () { removeClass(selfBtn, "clue-pulse"); }, 450);
+        var hintTxt = (Array.isArray(q.clues) && q.clues.length) ? q.clues[0] : (q.readPrompt || q.prompt);
+        if (hintTxt) Sound.speak(hintTxt, "vi-VN");
+      });
+    }
+
+    var sCards = $("gameStage").querySelectorAll(".suspect-char-btn");
     for (var sci = 0; sci < sCards.length; sci++) {
       onTap(sCards[sci], function () {
         answerQuiz(this, q);
@@ -2621,7 +2691,7 @@
       game.streak = (game.streak || 0) + 1;
       addClass(btn, "correct");
       var stOk = btn.querySelector(".sc-stamp");
-      if (stOk) stOk.innerHTML = "✅ THỦ PHẠM!";
+      if (stOk) stOk.innerHTML = q.visualType === "detective" ? "✅" : "✅ THỦ PHẠM!";
       if (q.caseId) {
         if (!state.solvedCases) state.solvedCases = {};
         state.solvedCases[q.caseId] = true;
@@ -2656,25 +2726,25 @@
       addClass(btn, "wrong");
       addClass(btn, "disabled");
       var stBad = btn.querySelector(".sc-stamp");
-      if (stBad) stBad.innerHTML = "❌ OAN RỒI!";
+      if (stBad) stBad.innerHTML = q.visualType === "detective" ? "❌" : "❌ OAN RỒI!";
       flashFeedback(false);
       Sound.bad();
       if (!q._retried) {
         q._retried = true;
         game.locked = false;
         if (q.visualType === "detective") {
-          say("🔍 Chưa khớp manh mối rồi! Bé chạm kính lúp xem lại bằng chứng và chọn lại 1 lần nữa nhé!", "bad");
+          say("🔍 Chưa đúng rồi! Bé nhìn kỹ lại tranh và chạm loa 🔊 nghe gợi ý nhé!", "bad");
         } else {
           say(pick(RETRY) + " Bé thử chọn lại nhé!", "bad");
         }
         return;
       }
-      var all = $("gameStage").querySelectorAll(".stone, .suspect-card");
+      var all = $("gameStage").querySelectorAll(".stone, .suspect-card, .suspect-char-btn");
       for (var i = 0; i < all.length; i++) {
         if (all[i].getAttribute("data-val") === q.answer) {
           addClass(all[i], "correct");
           var stTrue = all[i].querySelector(".sc-stamp");
-          if (stTrue) stTrue.innerHTML = "✅ THỦ PHẠM!";
+          if (stTrue) stTrue.innerHTML = q.visualType === "detective" ? "✅" : "✅ THỦ PHẠM!";
         } else {
           addClass(all[i], "disabled");
         }
@@ -3157,10 +3227,11 @@
         };
       } else if (game.subj === "logic") {
         nextBtn.style.display = "block";
-        nextBtn.innerHTML = "🕵️ Xem Bảng Hồ Sơ Vụ Án";
+        nextBtn.innerHTML = "📖 Chơi lại từ trang đầu";
         nextBtn.onclick = function () {
           Sound.click(); closeOverlay("resultOverlay"); Sound.stopSpeak();
-          renderMap(); showScreen("screenMap"); openModePicker();
+          curMode = "quiz";
+          startGame(0);
         };
       } else {
         nextBtn.style.display = "none";
