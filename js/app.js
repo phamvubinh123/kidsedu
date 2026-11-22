@@ -628,7 +628,8 @@
     { id: "rw_icecream", icon: "🍦", img: "assets/rw-icecream.jpg", name: "Kem / Bánh kẹo", cost: 150 },
     { id: "rw_swim", icon: "🏊", name: "Đi bơi / Chơi nhà banh", cost: 450 },
     { id: "rw_car", icon: "🏎️", img: "assets/rw-car.jpg", name: "Xe đồ chơi", cost: 600 },
-    { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng hồ trẻ em", cost: 1000 }
+    { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng hồ trẻ em", cost: 1000 },
+    { id: "rw_watergun", icon: "🔫", img: "assets/rw-watergun.jpg", name: "Súng bắn nước", cost: 1200 }
   ];
   var STREAK_MILESTONES = CFG.streakMilestones || [
     { days: 3, coins: 15, label: "3 ngày liên tiếp" },
@@ -700,10 +701,20 @@
       for (var ri = 0; ri < state.realRewards.length; ri++) {
         var rw = state.realRewards[ri];
         if (rw && rw.id && oldLegacy[rw.id]) hasOldLegacy = true;
-        else if (rw && rw.id && rw.id !== "rw_icecream" && rw.id !== "rw_swim" && rw.id !== "rw_car" && rw.id !== "rw_watch") customRewards.push(rw);
+        else if (rw && rw.id && rw.id !== "rw_icecream" && rw.id !== "rw_swim" && rw.id !== "rw_car" && rw.id !== "rw_watch" && rw.id !== "rw_watergun") customRewards.push(rw);
       }
       if (hasOldLegacy) {
         state.realRewards = cloneDefaultRewards().concat(customRewards);
+      }
+    }
+    if (Array.isArray(state.realRewards) && !state.v75WatergunAdded) {
+      state.v75WatergunAdded = true;
+      var hasWatergun = false;
+      for (var wi = 0; wi < state.realRewards.length; wi++) {
+        if (state.realRewards[wi] && state.realRewards[wi].id === "rw_watergun") { hasWatergun = true; break; }
+      }
+      if (!hasWatergun) {
+        state.realRewards.push({ id: "rw_watergun", icon: "🔫", img: "assets/rw-watergun.jpg", name: "Súng bắn nước", cost: 1200 });
       }
     }
     var pinnedExists = false;

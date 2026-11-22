@@ -6,7 +6,7 @@
 var PROJECT_CONFIG = {
   // 1. Định danh dự án & Bộ nhớ lưu trữ (Đổi storagePrefix khi tạo dự án mới để không trùng dữ liệu)
   appTitle: "Đảo Tri Thức",
-  appVersion: "v74 (22/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Thám Tử: Sửa lỗi cắt ảnh 24 nghi phạm Chặng 1.",
+  appVersion: "v75 (22/11/2026) · SGK: Kết Nối Tri Thức 2026 — Đảo Tri Thức: Thêm quà Súng bắn nước (1200 xu).",
   storagePrefix: "vqtt",
   firebaseRoot: "kidsedu_vqtt",
 
@@ -59,7 +59,8 @@ var PROJECT_CONFIG = {
     { id: "rw_icecream", icon: "🍦", img: "assets/rw-icecream.jpg", name: "Kem / Bánh kẹo", cost: 150 },
     { id: "rw_swim", icon: "🏊", name: "Đi bơi / Chơi nhà banh", cost: 450 },
     { id: "rw_car", icon: "🏎️", img: "assets/rw-car.jpg", name: "Xe đồ chơi", cost: 600 },
-    { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng hồ trẻ em", cost: 1000 }
+    { id: "rw_watch", icon: "⌚", img: "assets/rw-watch.jpg", name: "Đồng hồ trẻ em", cost: 1000 },
+    { id: "rw_watergun", icon: "🔫", img: "assets/rw-watergun.jpg", name: "Súng bắn nước", cost: 1200 }
   ],
 
   // 7. Mốc thưởng Chuỗi ngày học liên tiếp (Streak)
