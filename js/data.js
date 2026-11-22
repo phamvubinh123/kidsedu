@@ -1885,298 +1885,146 @@ var QUESTION_BANK = {
         { topic: "numbers_talk", lesson: "Colors & Objects", prompt: "What color is the apple? 🍎 'It's ...'", visualType: "eng", visual: "🍎 🔴", word: "It's ...", speakText: "It is red", options: ["red", "blue", "green", "black"], answer: "red" }
       ],
 
-      // ---------------- ĐẢO THÁM TỬ (TƯ DUY LOGIC & SUY LUẬN BẰNG HÌNH ẢNH) ----------------
+      // ---------------- ĐẢO THÁM TỬ (SÁCH TRANH MỞ ĐÔI - VẼ MÀU NƯỚC TỰ NHIÊN) ----------------
       logic: [
-        // Chặng 1: Ở Nhà - Ai Đã Đến Nhà? (10 vụ án - 100% hình ảnh trực quan)
+        // Chặng 1: Ở Nhà - Ai Đã Đến Nhà? (6 vụ án tranh vẽ tự nhiên kích thích quan sát & suy luận)
         {
           caseId: "home_1",
           topic: "detective_home",
           lesson: "Tủ lạnh mở cửa",
           prompt: "Trong nhà bếp, ai đã quên đóng cửa tủ lạnh?",
-          readPrompt: "Trong nhà bếp, ai đã quên đóng cửa tủ lạnh? Bé hãy nhìn vào hình bóng và tìm đúng bạn ấy ở trang dưới nhé!",
+          readPrompt: "Trong nhà bếp, ai đã quên đóng cửa tủ lạnh? Bé hãy quan sát thật kỹ bức tranh và tìm đúng bạn ấy nhé!",
           visualType: "detective",
-          roomBg: "#edf7d5",
-          wallArt: "🌲",
-          sceneKind: "fridge",
-          sceneMainIcon: "🧊",
-          sceneLeft: ["🍉", "🍎", "🍰"],
-          culpritPose: "👻",
-          clueIcons: ["🍭", "🧣"],
+          sceneImg: "assets/det-home-1-scene.jpg",
           clues: [
-            "Gợi ý: Bạn ấy trùm khăn, tay cầm kẹo mút và quàng khăn đỏ!"
+            "Gợi ý: Hãy nhìn kỹ bàn tay màu xanh và chiếc kẹo mút thò ra dưới tấm khăn trắng nhé!"
           ],
           suspects: [
-            { avatar: "🐧", items: ["🩰"], val: "🐧 Cánh Cụt" },
-            { avatar: "👦", items: ["👕"], val: "👦 Bé Trai" },
-            { avatar: "🦉", items: ["🪶"], val: "🦉 Cú Mèo" },
-            { avatar: "🐊", items: ["🍭", "🧣"], val: "🐊 Cá Sấu" }
+            { avatar: "🐧", img: "assets/det-home-1-s1.jpg", val: "🐧 Cánh Cụt" },
+            { avatar: "👦", img: "assets/det-home-1-s2.jpg", val: "👦 Bé Trai" },
+            { avatar: "🦉", img: "assets/det-home-1-s3.jpg", val: "🦉 Cú Mèo" },
+            { avatar: "🐊", img: "assets/det-home-1-s4.jpg", val: "🐊 Cá Sấu" }
           ],
-          clueShort: "🍭 🧣",
+          clueShort: "Tủ lạnh",
           pairAnswer: "🐊 Cá Sấu",
           options: ["🐧 Cánh Cụt", "👦 Bé Trai", "🦉 Cú Mèo", "🐊 Cá Sấu"],
           answer: "🐊 Cá Sấu",
-          explain: "Bạn Cá Sấu cầm kẹo mút và quàng khăn đỏ giống hệt bóng người ở tủ lạnh!"
+          explain: "Tuyệt vời! Bạn Cá Sấu có bàn tay xanh và đang cầm cây kẹo mút hồng giống hệt bóng người trùm khăn!"
         },
         {
           caseId: "home_2",
           topic: "detective_home",
           lesson: "Bánh kem biến mất",
           prompt: "Trên bàn ăn, ai đã ăn vụng miếng bánh kem dâu?",
-          readPrompt: "Trên bàn ăn, ai đã ăn vụng miếng bánh kem dâu? Bé nhìn vết chân và quả dâu trong kính lúp nhé!",
+          readPrompt: "Trên bàn ăn, ai đã ăn vụng miếng bánh kem dâu? Bé nhìn kỹ dưới gầm bàn và trên ghế nhé!",
           visualType: "detective",
-          roomBg: "#fff1e6",
-          wallArt: "🍓",
-          sceneKind: "room",
-          sceneMainIcon: "🍰",
-          sceneLeft: ["🍽️", "🍰", "🍓"],
-          culpritPose: "❓",
-          clueIcons: ["🐾", "🍓"],
+          sceneImg: "assets/det-home-2-scene.jpg",
           clues: [
-            "Gợi ý: Thủ phạm để lại dấu chân tròn nhỏ và vẫn còn dính dâu tây!"
+            "Gợi ý: Trên ghế có dấu chân nhỏ, dưới khăn trải bàn còn thò ra cái đuôi vằn nữa kìa!"
           ],
           suspects: [
-            { avatar: "🐶", items: ["🎀"], val: "🐶 Cún Con" },
-            { avatar: "🐱", items: ["🐾", "🍓"], val: "🐱 Mèo Mướp" },
-            { avatar: "🐰", items: ["🥕"], val: "🐰 Thỏ Trắng" },
-            { avatar: "🐸", items: ["🪷"], val: "🐸 Ếch Xanh" }
+            { avatar: "🐶", img: "assets/det-home-2-s1.jpg", val: "🐶 Cún Con" },
+            { avatar: "🐱", img: "assets/det-home-2-s2.jpg", val: "🐱 Mèo Mướp" },
+            { avatar: "🐰", img: "assets/det-home-2-s3.jpg", val: "🐰 Thỏ Trắng" },
+            { avatar: "🐸", img: "assets/det-home-2-s4.jpg", val: "🐸 Ếch Xanh" }
           ],
-          clueShort: "🐾 🍓",
+          clueShort: "Bánh kem",
           pairAnswer: "🐱 Mèo Mướp",
           options: ["🐶 Cún Con", "🐱 Mèo Mướp", "🐰 Thỏ Trắng", "🐸 Ếch Xanh"],
           answer: "🐱 Mèo Mướp",
-          explain: "Bạn Mèo Mướp có dấu chân và đang dính dâu tây hồng nè!"
+          explain: "Chính là Mèo Mướp! Dưới gầm bàn có đuôi mèo vằn và trên má bạn Mèo còn dính kem dâu hồng nữa!"
         },
         {
           caseId: "home_3",
           topic: "detective_home",
           lesson: "Bức tranh trên tường",
           prompt: "Ai đã vẽ bông hoa đỏ lên tường phòng khách?",
-          readPrompt: "Ai đã vẽ bông hoa đỏ lên tường phòng khách? Bé tìm bạn có cả kính tròn và bút sáp đỏ nhé!",
+          readPrompt: "Ai đã vẽ bông hoa đỏ lên tường phòng khách? Bé tìm bạn có cả hai manh mối trên bàn và dưới sàn nhé!",
           visualType: "detective",
-          roomBg: "#e8f4fd",
-          wallArt: "🌺",
-          sceneKind: "room",
-          sceneMainIcon: "🎨",
-          sceneLeft: ["🖼️", "🌺", "🖍️"],
-          culpritPose: "❓",
-          clueIcons: ["👓", "🖍️"],
+          sceneImg: "assets/det-home-3-scene.jpg",
           clues: [
-            "Gợi ý: Họa sĩ nhí vừa đeo kính tròn lại vừa cầm bút sáp đỏ!"
+            "Gợi ý: Thủ phạm vừa đeo kính tròn giống chiếc kính trên bàn, lại vừa cầm bút sáp đỏ!"
           ],
           suspects: [
-            { avatar: "🐻", items: ["👓", "🖍️"], val: "🐻 Gấu Bông" },
-            { avatar: "🐢", items: ["👓", "📖"], val: "🐢 Rùa Con" },
-            { avatar: "🐥", items: ["👒", "🖍️"], val: "🐥 Gà Con" },
-            { avatar: "🐑", items: ["🎀", "🥛"], val: "🐑 Cừu Non" }
+            { avatar: "🐻", img: "assets/det-home-3-s1.jpg", val: "🐻 Gấu Bông" },
+            { avatar: "🐢", img: "assets/det-home-3-s2.jpg", val: "🐢 Rùa Con" },
+            { avatar: "🐥", img: "assets/det-home-3-s3.jpg", val: "🐥 Gà Con" },
+            { avatar: "🐑", img: "assets/det-home-3-s4.jpg", val: "🐑 Cừu Non" }
           ],
-          clueShort: "👓 🖍️",
+          clueShort: "Hoa đỏ",
           pairAnswer: "🐻 Gấu Bông",
           options: ["🐻 Gấu Bông", "🐢 Rùa Con", "🐥 Gà Con", "🐑 Cừu Non"],
           answer: "🐻 Gấu Bông",
-          explain: "Chỉ có Gấu Bông vừa đeo kính vừa cầm bút sáp màu đỏ!"
+          explain: "Chuẩn luôn! Rùa có kính nhưng cầm sách, Gà cầm sáp nhưng không đeo kính. Chỉ Gấu Bông có cả hai!"
         },
         {
           caseId: "home_4",
           topic: "detective_home",
           lesson: "Hũ kẹo trên nóc tủ",
-          prompt: "Hũ kẹo ở trên tủ rất cao. Ai đã bay lên lấy kẹo?",
-          readPrompt: "Hũ kẹo ở trên tủ rất cao. Ai đã bay lên lấy kẹo? Bé nhìn chiếc cánh và lông vũ nhé!",
+          prompt: "Hũ kẹo ở trên tủ rất cao mà không có ghế. Ai đã lấy được kẹo?",
+          readPrompt: "Hũ kẹo ở trên tủ rất cao mà không có ghế. Ai đã lấy được kẹo? Bé nhìn chiếc lông rơi từ trên cao nhé!",
           visualType: "detective",
-          roomBg: "#fef3c7",
-          wallArt: "⭐",
-          sceneKind: "room",
-          sceneMainIcon: "🗄️",
-          sceneLeft: ["🗄️", "⬆️", "🍬"],
-          culpritPose: "❓",
-          clueIcons: ["🪽", "🪶"],
+          sceneImg: "assets/det-home-4-scene.jpg",
           clues: [
-            "Gợi ý: Chỉ có bạn nào có đôi cánh và lông vũ mới bay lên nóc tủ được!"
+            "Gợi ý: Không có ghế hay thang, chỉ có bạn nào biết bay và có lông vũ nâu mới lên tới nóc tủ!"
           ],
           suspects: [
-            { avatar: "🦉", items: ["🪽", "🪶"], val: "🦉 Cú Mèo" },
-            { avatar: "🐢", items: ["🥬"], val: "🐢 Rùa Nhỏ" },
-            { avatar: "🐶", items: ["🦴"], val: "🐶 Cún Đốm" },
-            { avatar: "🐷", items: ["🍎"], val: "🐷 Heo Hồng" }
+            { avatar: "🦉", img: "assets/det-home-4-s1.jpg", val: "🦉 Cú Mèo" },
+            { avatar: "🐢", img: "assets/det-home-4-s2.jpg", val: "🐢 Rùa Nhỏ" },
+            { avatar: "🐶", img: "assets/det-home-4-s3.jpg", val: "🐶 Cún Đốm" },
+            { avatar: "🐷", img: "assets/det-home-4-s4.jpg", val: "🐷 Heo Hồng" }
           ],
-          clueShort: "🪽 🪶",
+          clueShort: "Nóc tủ",
           pairAnswer: "🦉 Cú Mèo",
           options: ["🦉 Cú Mèo", "🐢 Rùa Nhỏ", "🐶 Cún Đốm", "🐷 Heo Hồng"],
           answer: "🦉 Cú Mèo",
-          explain: "Bạn Cú Mèo có đôi cánh để bay lên nóc tủ cao!"
+          explain: "Đúng rồi! Chỉ có bạn Cú Mèo biết bay mới lên được nóc tủ cao và đang giấu viên kẹo dưới cánh kìa!"
         },
         {
           caseId: "home_5",
           topic: "detective_home",
           lesson: "Lén ra sân tắm mưa",
           prompt: "Ai đã lén chạy ra sân tắm mưa làm ướt thảm?",
-          readPrompt: "Ai đã lén chạy ra sân tắm mưa làm ướt thảm? Bé tìm bạn có ô mưa và chiếc ủng vàng nhé!",
+          readPrompt: "Ai đã lén chạy ra sân tắm mưa làm ướt thảm? Bé nhìn dấu chân và chiếc ủng trước cửa nhé!",
           visualType: "detective",
-          roomBg: "#e0f2fe",
-          wallArt: "🌧️",
-          sceneKind: "room",
-          sceneMainIcon: "☔",
-          sceneLeft: ["🚪", "💦", "🥾"],
-          culpritPose: "❓",
-          clueIcons: ["☔", "🥾"],
+          sceneImg: "assets/det-home-5-scene.jpg",
           clues: [
-            "Gợi ý: Bạn ấy vẫn còn cầm chiếc ô ướt nước và đi ủng đi mưa!"
+            "Gợi ý: Trên thảm có dấu chân màng bơi và một chiếc ủng vàng bị tuột lại!"
           ],
           suspects: [
-            { avatar: "🦆", items: ["☔", "🥾"], val: "🦆 Vịt Vàng" },
-            { avatar: "🦁", items: ["☀️", "📖"], val: "🦁 Sư Tử" },
-            { avatar: "🐼", items: ["🎋"], val: "🐼 Gấu Trúc" },
-            { avatar: "🐭", items: ["🧀"], val: "🐭 Chuột Nhắt" }
+            { avatar: "🦆", img: "assets/det-home-5-s1.jpg", val: "🦆 Vịt Vàng" },
+            { avatar: "🦁", img: "assets/det-home-5-s2.jpg", val: "🦁 Sư Tử" },
+            { avatar: "🐼", img: "assets/det-home-5-s3.jpg", val: "🐼 Gấu Trúc" },
+            { avatar: "🐭", img: "assets/det-home-5-s4.jpg", val: "🐭 Chuột Nhắt" }
           ],
-          clueShort: "☔ 🥾",
+          clueShort: "Dấu chân ướt",
           pairAnswer: "🦆 Vịt Vàng",
           options: ["🦆 Vịt Vàng", "🦁 Sư Tử", "🐼 Gấu Trúc", "🐭 Chuột Nhắt"],
           answer: "🦆 Vịt Vàng",
-          explain: "Bạn Vịt Vàng đang cầm ô mưa ướt nước và đi ủng vàng nè!"
+          explain: "Giỏi quá! Bạn Vịt Vàng người ướt sũng, cầm ô mưa và chân chỉ còn một chiếc ủng vàng thôi!"
         },
         {
           caseId: "home_6",
           topic: "detective_home",
           lesson: "Chiếc giày múa thất lạc",
           prompt: "Chiếc giày múa hồng rơi ở cầu thang là của bạn nào?",
-          readPrompt: "Chiếc giày múa màu hồng rơi ở cầu thang là của bạn nào? Bé nhìn chiếc váy múa và giày nhé!",
+          readPrompt: "Chiếc giày múa màu hồng rơi ở cầu thang là của bạn nào? Bé nhìn kỹ chân của cả 4 bạn nhé!",
           visualType: "detective",
-          roomBg: "#fce7f3",
-          wallArt: "🎶",
-          sceneKind: "room",
-          sceneMainIcon: "🩰",
-          sceneLeft: ["🪜", "🩰", "🎀"],
-          culpritPose: "❓",
-          clueIcons: ["👗", "🩰"],
+          sceneImg: "assets/det-home-6-scene.jpg",
           clues: [
-            "Gợi ý: Chủ nhân đang mặc váy múa và thiếu mất một chiếc giày hồng!"
+            "Gợi ý: Chủ nhân của chiếc giày chắc chắn đang bị thiếu mất một bên giày ở chân!"
           ],
           suspects: [
-            { avatar: "🐧", items: ["👗", "🩰"], val: "🐧 Cánh Cụt" },
-            { avatar: "🦊", items: ["👟", "👟"], val: "🦊 Cáo Nhỏ" },
-            { avatar: "🐻", items: ["🧦", "🧦"], val: "🐻 Gấu Nâu" },
-            { avatar: "🐸", items: ["🎺"], val: "🐸 Ếch Xanh" }
+            { avatar: "🐧", img: "assets/det-home-6-s1.jpg", val: "🐧 Cánh Cụt" },
+            { avatar: "🦊", img: "assets/det-home-6-s2.jpg", val: "🦊 Cáo Nhỏ" },
+            { avatar: "🐻", img: "assets/det-home-6-s3.jpg", val: "🐻 Gấu Nâu" },
+            { avatar: "🐸", img: "assets/det-home-6-s4.jpg", val: "🐸 Ếch Xanh" }
           ],
-          clueShort: "👗 🩰",
+          clueShort: "Giày múa",
           pairAnswer: "🐧 Cánh Cụt",
           options: ["🐧 Cánh Cụt", "🦊 Cáo Nhỏ", "🐻 Gấu Nâu", "🐸 Ếch Xanh"],
           answer: "🐧 Cánh Cụt",
-          explain: "Bạn Cánh Cụt mặc váy múa hồng và bị rơi mất một chiếc giày múa!"
-        },
-        {
-          caseId: "home_7",
-          topic: "detective_home",
-          lesson: "Điều khiển biến mất",
-          prompt: "Ai đang trốn sau ghế sofa cùng điều khiển tivi?",
-          readPrompt: "Ai đang trốn sau ghế sofa cùng điều khiển tivi? Bé nhìn đôi tai dài và củ cà rốt nhé!",
-          visualType: "detective",
-          roomBg: "#ede9fe",
-          wallArt: "📺",
-          sceneKind: "room",
-          sceneMainIcon: "🛋️",
-          sceneLeft: ["📺", "🛋️", "📱"],
-          culpritPose: "❓",
-          clueIcons: ["👂", "🥕"],
-          clues: [
-            "Gợi ý: Dưới ghế có mẩu cà rốt và lộ ra đôi tai dài trắng muốt!"
-          ],
-          suspects: [
-            { avatar: "🐰", items: ["👂", "🥕"], val: "🐰 Thỏ Trắng" },
-            { avatar: "🐒", items: ["🍌"], val: "🐒 Khỉ Con" },
-            { avatar: "🐘", items: ["🥜"], val: "🐘 Voi Con" },
-            { avatar: "🐱", items: ["🐟"], val: "🐱 Mèo Vàng" }
-          ],
-          clueShort: "👂 🥕",
-          pairAnswer: "🐰 Thỏ Trắng",
-          options: ["🐰 Thỏ Trắng", "🐒 Khỉ Con", "🐘 Voi Con", "🐱 Mèo Vàng"],
-          answer: "🐰 Thỏ Trắng",
-          explain: "Củ cà rốt và đôi tai dài là của bạn Thỏ Trắng!"
-        },
-        {
-          caseId: "home_8",
-          topic: "detective_home",
-          lesson: "Đĩa chuối trên kệ",
-          prompt: "Ai đã ăn hết 3 quả chuối chín trên kệ bếp?",
-          readPrompt: "Ai đã ăn hết 3 quả chuối chín trên kệ bếp? Bé nhìn quả chuối và chiếc mũ xanh rơi nhé!",
-          visualType: "detective",
-          roomBg: "#fef9c3",
-          wallArt: "🌴",
-          sceneKind: "room",
-          sceneMainIcon: "🍌",
-          sceneLeft: ["🍌", "🍌", "🍌"],
-          culpritPose: "❓",
-          clueIcons: ["🍌", "🧢"],
-          clues: [
-            "Gợi ý: Bạn ấy rất mê chuối vàng và làm rơi chiếc mũ xanh dương!"
-          ],
-          suspects: [
-            { avatar: "🐒", items: ["🍌", "🧢"], val: "🐒 Khỉ Con" },
-            { avatar: "🐷", items: ["🍎", "👒"], val: "🐷 Heo Hồng" },
-            { avatar: "🐮", items: ["🔔", "🌿"], val: "🐮 Bò Sữa" },
-            { avatar: "🐰", items: ["🥕", "👒"], val: "🐰 Thỏ Nâu" }
-          ],
-          clueShort: "🍌 🧢",
-          pairAnswer: "🐒 Khỉ Con",
-          options: ["🐒 Khỉ Con", "🐷 Heo Hồng", "🐮 Bò Sữa", "🐰 Thỏ Nâu"],
-          answer: "🐒 Khỉ Con",
-          explain: "Bạn Khỉ Con thích chuối và đội chiếc mũ lưỡi trai xanh!"
-        },
-        {
-          caseId: "home_9",
-          topic: "detective_home",
-          lesson: "Chậu cây bị đào bới",
-          prompt: "Ai đã đào đất trong chậu cây để giấu khúc xương?",
-          readPrompt: "Ai đã đào đất trong chậu cây để giấu khúc xương? Bé nhìn khúc xương và dấu chân nhé!",
-          visualType: "detective",
-          roomBg: "#dcfce7",
-          wallArt: "🌱",
-          sceneKind: "room",
-          sceneMainIcon: "🪴",
-          sceneLeft: ["🪴", "🕳️", "🦴"],
-          culpritPose: "❓",
-          clueIcons: ["🦴", "🐾"],
-          clues: [
-            "Gợi ý: Trong chậu cây có khúc xương đồ chơi và dấu chân dính đất!"
-          ],
-          suspects: [
-            { avatar: "🐶", items: ["🦴", "🐾"], val: "🐶 Cún Con" },
-            { avatar: "🐱", items: ["🐟"], val: "🐱 Mèo Trắng" },
-            { avatar: "🐦", items: ["🪱"], val: "🐦 Chim Sâu" },
-            { avatar: "🐢", items: ["🥬"], val: "🐢 Rùa Con" }
-          ],
-          clueShort: "🦴 🐾",
-          pairAnswer: "🐶 Cún Con",
-          options: ["🐶 Cún Con", "🐱 Mèo Trắng", "🐦 Chim Sâu", "🐢 Rùa Con"],
-          answer: "🐶 Cún Con",
-          explain: "Bạn Cún Con thích giấu xương vào chậu cây lắm nè!"
-        },
-        {
-          caseId: "home_10",
-          topic: "detective_home",
-          lesson: "Lọ hoa bị đổ",
-          prompt: "Ai đã đá quả bóng số 10 làm đổ lọ hoa?",
-          readPrompt: "Ai đã đá quả bóng số 10 làm đổ lọ hoa? Bé tìm bạn có cả bóng đá và số 10 nhé!",
-          visualType: "detective",
-          roomBg: "#fee2e2",
-          wallArt: "⚽",
-          sceneKind: "room",
-          sceneMainIcon: "🏺",
-          sceneLeft: ["🏺", "💦", "💐"],
-          culpritPose: "❓",
-          clueIcons: ["⚽", "🔟"],
-          clues: [
-            "Gợi ý: Thủ phạm đi đá quả bóng tròn và mặc áo mang số 10!"
-          ],
-          suspects: [
-            { avatar: "🦊", items: ["⚽", "🔟"], val: "🦊 Cáo Nhỏ" },
-            { avatar: "🐻", items: ["🏀", "7️⃣"], val: "🐻 Gấu Xám" },
-            { avatar: "🦉", items: ["📖"], val: "🦉 Cú Mèo" },
-            { avatar: "🐸", items: ["🎺"], val: "🐸 Ếch Xanh" }
-          ],
-          clueShort: "⚽ 🔟",
-          pairAnswer: "🦊 Cáo Nhỏ",
-          options: ["🦊 Cáo Nhỏ", "🐻 Gấu Xám", "🦉 Cú Mèo", "🐸 Ếch Xanh"],
-          answer: "🦊 Cáo Nhỏ",
-          explain: "Gấu Xám mang số 7 và bóng rổ, còn Cáo Nhỏ cầm bóng đá và số 10!"
+          explain: "Chính xác! Bạn Cánh Cụt mặc váy múa hồng và một bên chân đang đi chân trần vì rơi mất giày!"
         }
       ]
     };

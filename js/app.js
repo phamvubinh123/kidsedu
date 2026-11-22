@@ -2419,61 +2419,13 @@
     readPrompt(q);
   }
 
-  // ===== CHẾ ĐỘ ĐẶC BIỆT: SÁCH TRANH THÁM TỬ 100% HÌNH ẢNH =====
-  var FRIDGE_SVG =
-    '<div class="det-fridge-wrap">' +
-      '<svg viewBox="0 0 180 150" class="det-fridge-svg" aria-hidden="true">' +
-        '<line x1="12" y1="125" x2="34" y2="125" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>' +
-        '<circle cx="10" cy="120" r="6" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>' +
-        '<rect x="34" y="16" width="66" height="122" rx="10" fill="#7dd3fc" stroke="#1e3a8a" stroke-width="3"/>' +
-        '<rect x="40" y="24" width="54" height="66" rx="6" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2"/>' +
-        '<line x1="40" y1="47" x2="94" y2="47" stroke="#38bdf8" stroke-width="2.5"/>' +
-        '<line x1="40" y1="68" x2="94" y2="68" stroke="#38bdf8" stroke-width="2.5"/>' +
-        '<text x="53" y="42" font-size="16">🍉</text>' +
-        '<text x="74" y="42" font-size="13">🥛</text>' +
-        '<text x="46" y="64" font-size="14">🍎</text>' +
-        '<text x="68" y="64" font-size="14">🍎</text>' +
-        '<text x="54" y="85" font-size="15">🍰</text>' +
-        '<text x="75" y="86" font-size="12">🍅</text>' +
-        '<line x1="34" y1="96" x2="100" y2="96" stroke="#1e3a8a" stroke-width="2.5"/>' +
-        '<rect x="44" y="106" width="12" height="10" rx="2" fill="#bef264" stroke="#3f6212" stroke-width="1.5"/>' +
-        '<rect x="76" y="114" width="11" height="10" rx="2" fill="#93c5fd" stroke="#1e40af" stroke-width="1.5"/>' +
-        '<polygon points="34,16 6,6 6,96 34,96" fill="#38bdf8" stroke="#1e3a8a" stroke-width="3" stroke-linejoin="round"/>' +
-        '<line x1="8" y1="35" x2="32" y2="41" stroke="#bae6fd" stroke-width="2.5"/>' +
-        '<line x1="8" y1="64" x2="32" y2="69" stroke="#bae6fd" stroke-width="2.5"/>' +
-        '<text x="11" y="34" font-size="11">🧃</text>' +
-        '<text x="12" y="62" font-size="11">🍼</text>' +
-        '<rect x="110" y="68" width="44" height="70" rx="6" fill="#fed7aa" stroke="#9a3412" stroke-width="2.5"/>' +
-        '<line x1="110" y1="94" x2="154" y2="94" stroke="#9a3412" stroke-width="2.5"/>' +
-        '<line x1="110" y1="116" x2="154" y2="116" stroke="#9a3412" stroke-width="2.5"/>' +
-        '<text x="113" y="65" font-size="14">🍲</text>' +
-        '<text x="132" y="65" font-size="14">🫖</text>' +
-        '<text x="116" y="110" font-size="14">🥣</text>' +
-        '<text x="136" y="110" font-size="14">🍯</text>' +
-        '<text x="155" y="138" font-size="18">🍎</text>' +
-      '</svg>' +
-    '</div>';
-
-  var GHOST_SVG =
-    '<div class="det-ghost-wrap">' +
-      '<svg viewBox="0 0 110 110" class="det-ghost-svg" aria-hidden="true">' +
-        '<path d="M52,14 C30,14 18,38 14,92 C24,98 38,94 50,98 C64,102 80,96 92,90 C84,48 76,14 52,14 Z" fill="#fff7ed" stroke="#9a3412" stroke-width="3" stroke-linejoin="round"/>' +
-        '<path d="M50,24 C45,48 42,74 40,94" fill="none" stroke="#fed7aa" stroke-width="2.5" stroke-linecap="round"/>' +
-        '<path d="M62,28 C64,54 67,78 72,94" fill="none" stroke="#fed7aa" stroke-width="2.5" stroke-linecap="round"/>' +
-        '<ellipse cx="64" cy="40" rx="6.5" ry="8" fill="#ffffff" stroke="#9a3412" stroke-width="2.2"/>' +
-        '<circle cx="65" cy="41" r="3" fill="#1e293b"/>' +
-        '<ellipse cx="52" cy="99" rx="7" ry="4" fill="#ef4444" stroke="#7f1d1d" stroke-width="1.8"/>' +
-        '<ellipse cx="78" cy="96" rx="7" ry="4" fill="#ef4444" stroke="#7f1d1d" stroke-width="1.8"/>' +
-      '</svg>' +
-      '<div class="det-ghost-held"><span class="dgh-ic">🧣</span><span class="dgh-ic">🍭</span></div>' +
-    '</div>';
-
+  // ===== CHẾ ĐỘ ĐẶC BIỆT: SÁCH TRANH THÁM TỬ MÀU NƯỚC =====
   function renderDetectiveCase(q) {
     say(game.idx === 0
-      ? "🔍 Bé nhìn hình trang trên rồi chạm vào bạn giống nhất ở trang dưới nhé!"
-      : "🔍 Tìm bạn có món đồ giống trong kính lúp nào!");
+      ? "🔍 Bé quan sát kỹ bức tranh ở trang trên rồi chạm vào bạn thủ phạm ở trang dưới nhé!"
+      : "🔍 Quan sát thật kỹ chi tiết trong tranh nào!");
 
-    // Dải số trang 1..10 để bé chạm lật trang nhanh
+    // Dải số trang 1..N để bé chạm lật trang nhanh
     var tabsHtml = '<div class="det-page-tabs">';
     for (var ti = 0; ti < game.list.length; ti++) {
       var itemQ = game.list[ti];
@@ -2484,60 +2436,23 @@
     }
     tabsHtml += '</div>';
 
-    // Trang trên: Hiện trường tranh vẽ (0 chữ)
-    var leftSceneHtml = "";
-    if (q.sceneKind === "fridge") {
-      leftSceneHtml = FRIDGE_SVG;
-    } else {
-      var slHtml = "";
-      var sLeft = Array.isArray(q.sceneLeft) ? q.sceneLeft : [];
-      for (var li = 0; li < sLeft.length; li++) {
-        slHtml += '<span class="dsp-mini">' + esc(sLeft[li]) + '</span>';
-      }
-      leftSceneHtml =
-        '<div class="det-scene-prop-box">' +
-          '<div class="dsp-main">' + esc(q.sceneMainIcon || "🔍") + '</div>' +
-          '<div class="dsp-minis">' + slHtml + '</div>' +
-        '</div>';
-    }
+    // Trang trên: Tranh minh họa hiện trường tự nhiên (0 chữ, 0 badge gợi ý lộ liễu)
+    var topPageBody = q.sceneImg
+      ? '<img class="det-scene-img" src="' + esc(q.sceneImg) + '" alt="">'
+      : '<div class="det-scene-prop-box"><div class="dsp-main">' + esc(q.sceneMainIcon || "🔍") + '</div></div>';
 
-    var clueIcons = Array.isArray(q.clueIcons) ? q.clueIcons : [];
-    var clueIcHtml = "";
-    for (var ci = 0; ci < clueIcons.length; ci++) {
-      clueIcHtml += '<span class="dzc-ic">' + esc(clueIcons[ci]) + '</span>';
-    }
-
-    var rightCulpritHtml = "";
-    if (q.culpritPose === "👻") {
-      rightCulpritHtml = GHOST_SVG;
-    } else {
-      rightCulpritHtml =
-        '<div class="det-zoom-clue">' +
-          '<div class="dzc-ring">' +
-            '<span class="dzc-loupe">🔍</span>' +
-            '<div class="dzc-icons">' + clueIcHtml + '</div>' +
-          '</div>' +
-          '<div class="dzc-handle"></div>' +
-        '</div>';
-    }
-
-    // Trang dưới: Dàn 4 nhân vật đứng hàng ngang trên bóng bầu dục (0 chữ)
+    // Trang dưới: Dàn 4 nhân vật vẽ màu nước đứng hàng ngang trên bóng bầu dục
     var rawSuspects = Array.isArray(q.suspects) ? q.suspects.slice() : [];
     var suspects = shuffle(rawSuspects);
     var suspHtml = "";
     for (var k = 0; k < suspects.length; k++) {
       var sp = suspects[k];
-      var itemsArr = Array.isArray(sp.items) ? sp.items : [];
-      var itemBadges = "";
-      for (var ii = 0; ii < itemsArr.length; ii++) {
-        itemBadges += '<span class="sci-badge">' + esc(itemsArr[ii]) + '</span>';
-      }
+      var charVisual = sp.img
+        ? '<img class="sc-char-img" src="' + esc(sp.img) + '" alt="">'
+        : '<div class="sc-char-figure">' + esc(sp.avatar || "🧒") + '</div>';
       suspHtml +=
         '<button type="button" class="suspect-char-btn" style="-webkit-animation-delay:' + (k * 0.06) + 's;animation-delay:' + (k * 0.06) + 's" data-val="' + esc(sp.val) + '">' +
-          '<div class="sc-char-stage">' +
-            '<div class="sc-char-figure">' + esc(sp.avatar) + '</div>' +
-            '<div class="sc-char-items">' + itemBadges + '</div>' +
-          '</div>' +
+          '<div class="sc-char-stage">' + charVisual + '</div>' +
           '<div class="sc-floor-oval"></div>' +
           '<div class="sc-stamp"></div>' +
         '</button>';
@@ -2550,17 +2465,9 @@
       '<div class="det-book-wrap">' +
         tabsHtml +
         '<div class="det-book-spread">' +
-          '<button type="button" class="det-book-page top-page" id="detTopSceneBtn" style="background-color:' + esc(q.roomBg || "#eef8d8") + '" title="Chạm để nghe gợi ý">' +
-            '<div class="det-room-hill"></div>' +
-            (q.wallArt ? '<div class="det-wall-frame">' + esc(q.wallArt) + '</div>' : '') +
+          '<button type="button" class="det-book-page top-page is-picture" id="detTopSceneBtn" title="Chạm vào tranh để nghe gợi ý">' +
+            topPageBody +
             '<span class="det-top-audio">🔊</span>' +
-            '<div class="det-scene-row">' +
-              '<div class="det-scene-left">' + leftSceneHtml + '</div>' +
-              '<div class="det-scene-right">' + rightCulpritHtml +
-                (q.culpritPose === "👻" ? '<div class="det-mini-loupe">🔍 ' + clueIcHtml + '</div>' : '') +
-              '</div>' +
-            '</div>' +
-            '<div class="det-room-floor"></div>' +
             '<span class="det-page-num">' + pageTopNum + '</span>' +
           '</button>' +
           '<div class="det-book-fold"></div>' +
